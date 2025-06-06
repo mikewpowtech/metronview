@@ -25,7 +25,10 @@ const rootReducer = combineReducers({
   auth: persistReducer(authPersistConfig, authReducer),
 });
 
-export const selectAuth = (state: RootState) => state.auth;
+export const selectAuth = (state: RootState) => {
+    console.log("Redux state:", state);
+    return state.auth;
+};
 
 export const store = configureStore({
     reducer: rootReducer,

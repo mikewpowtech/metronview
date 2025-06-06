@@ -14,6 +14,7 @@ import UsersList from "./pages/UsersList";
 import EditProfile from "./pages/EditProfile";
 import UnitList from "./pages/UnitList";
 import SystemStatus from "./pages/SystemStatus";
+import { CompanyList } from "./pages/CompanyList";
 
 export const App = () => {
     const auth = useAppSelector(selectAuth);
@@ -41,6 +42,7 @@ export const App = () => {
                             <Route path="/units" element={<UnitList />} />
                             <Route path="/system-status" element={<SystemStatus />} />
                             <Route path="/edit-profile" element={<EditProfile />} />
+                            <Route path="/companies" element={<CompanyList />} />
                             <Route path="*" element={<NotFoundPage />} />
                         </Route>
                     </Routes>

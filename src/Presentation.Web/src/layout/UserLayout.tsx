@@ -81,12 +81,20 @@ export const UserLayout = ({ UserName }: iUser) => {
                                 },
                             },
                             {
+                                key: "/companies",
+                                label: "Companies",
+                                onClick: (e) => {
+                                    handleClick(e.key);
+                                },
+                            },
+                            {
                                 key: "/system-status",
                                 label: "System Status",
                                 onClick: (e) => {
                                     handleClick(e.key);
                                 },
                             },
+
                         ]}
                     />
                     <div style={{ marginLeft: "auto", display: "flex", alignItems: "center" }}>
