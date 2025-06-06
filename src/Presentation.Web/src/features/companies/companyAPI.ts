@@ -18,7 +18,7 @@ export async function addCompany(
     token?: string
 ): Promise<Company> {
     const response = await axios.post<Company>(
-        "/api/companies",
+        `${BASE_URL}/api/companies`,
         { name, parentCompanyId: parentCompanyId || null },
         {
             headers: {
