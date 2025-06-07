@@ -1,5 +1,10 @@
+using Application.Companies;
 using Application.Identity;
+using Application.Units;
+using Application.Sensors;
 using Infrastructure.Identity;
+using Infrastructure.Mapping;
+using Infrastructure.Repositories;
 using Mapster;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +15,7 @@ namespace Infrastructure
 {
     public static class InfrastructureDependencyInjection
     {
-        public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddInfrastructureDependencyInjection(this IServiceCollection services, IConfiguration configuration)
         {
             // Register DbContext
             var connectionStr = configuration.GetConnectionString("DefaultConnection");
@@ -27,10 +32,13 @@ namespace Infrastructure
             services.AddMapster();
 
             // Register your mapping configuration
-            Infrastructure.Identity.Mapping.MapsterUserMappingConfig.RegisterMappings();
+            MapsterMappingConfig.RegisterMappings();
 
             // Register repositories
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<ICompanyRepository, CompanyRepository>();
+            services.AddScoped<IUnitRepository, UnitRepository>();
+            services.AddScoped<ISensorRepository, SensorRepository>();
 
             // Register DbContext Initializer
             services.AddScoped<ApplicationDbContextInitialiser>();

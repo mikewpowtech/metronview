@@ -1,4 +1,4 @@
-namespace Infrastructure;
+namespace Infrastructure.DbClasses;
 
 public class CompanyDb
 {

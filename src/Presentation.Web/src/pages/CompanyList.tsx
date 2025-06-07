@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { Table, Button, Dropdown, Checkbox, Modal, Input, Form } from "antd";
 import { DownOutlined } from "@ant-design/icons";
-import { Resizable } from "react-resizable";
 import "react-resizable/css/styles.css";
 import { fetchCompanies, addCompany } from "../features/companies/companyAPI";
 import { useAppSelector } from "../app/hooks";
 import { selectAuth } from "../app/store";
+import ResizableTitle from "../components/ResizableTitle";
 
 export interface Company {
     id: string;
@@ -19,44 +19,7 @@ const allColumnDefs = [
     { title: "Parent Company Id", dataIndex: "parentCompanyId", key: "parentCompanyId", width: 300, render: (val: string | null) => val ?? "-" },
 ];
 
-const ResizableTitle = (props: any) => {
-    const { onResize, width, ...restProps } = props;
-    if (!width) {
-        return <th {...restProps} />;
-    }
-    return (
-        <Resizable
-            width={width}
-            height={0}
-            handle={
-                <span
-                    className="react-resizable-handle"
-                    style={{
-                        position: "absolute",
-                        right: 0,
-                        top: 0,
-                        height: "100%",
-                        width: 2,
-                        cursor: "ew-resize",
-                        zIndex: 2,
-                        userSelect: "none",
-                        background: "rgba(0,0,0,0.08)",
-                        transition: "background 0.2s",
-                    }}
-                    onMouseOver={e => (e.currentTarget.style.background = "rgba(0,0,0,0.18)")}
-                    onMouseOut={e => (e.currentTarget.style.background = "rgba(0,0,0,0.08)")}
-                    onClick={e => e.stopPropagation()}
-                />
-            }
-            onResize={onResize}
-            draggableOpts={{ enableUserSelectHack: false }}
-        >
-            <th {...restProps} style={{ position: "relative", ...restProps.style }} />
-        </Resizable>
-    );
-};
-
-export const CompanyList = () => {
+const CompanyList: React.FC = () => {
     const auth = useAppSelector(selectAuth);
     const token = auth["accessToken"];
     const [companies, setCompanies] = useState<Company[]>([]);
@@ -204,3 +167,5 @@ export const CompanyList = () => {
         </div>
     );
 };
+
+export default CompanyList;

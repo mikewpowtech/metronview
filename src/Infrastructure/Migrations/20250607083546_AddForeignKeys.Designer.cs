@@ -4,6 +4,7 @@ using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250607083546_AddForeignKeys")]
+    partial class AddForeignKeys
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -37,45 +40,6 @@ namespace Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Companies");
-                });
-
-            modelBuilder.Entity("Infrastructure.DbClasses.SensorDb", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<byte>("Channel")
-                        .HasColumnType("tinyint");
-
-                    b.Property<byte?>("ChannelType")
-                        .HasColumnType("tinyint");
-
-                    b.Property<string>("CompanyID")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("EngineeringUnits")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("HighValue")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("LowValue")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UnitId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CompanyID");
-
-                    b.HasIndex("UnitId");
-
-                    b.ToTable("Sensors");
                 });
 
             modelBuilder.Entity("Infrastructure.DbClasses.UnitDb", b =>
@@ -332,30 +296,11 @@ namespace Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Infrastructure.DbClasses.SensorDb", b =>
-                {
-                    b.HasOne("Infrastructure.DbClasses.CompanyDb", "Company")
-                        .WithMany()
-                        .HasForeignKey("CompanyID")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("Infrastructure.DbClasses.UnitDb", "Unit")
-                        .WithMany()
-                        .HasForeignKey("UnitId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Company");
-
-                    b.Navigation("Unit");
-                });
-
             modelBuilder.Entity("Infrastructure.DbClasses.UnitDb", b =>
                 {
                     b.HasOne("Infrastructure.DbClasses.CompanyDb", "Company")
                         .WithMany()
-                        .HasForeignKey("CompanyID")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("CompanyID");
 
                     b.Navigation("Company");
                 });

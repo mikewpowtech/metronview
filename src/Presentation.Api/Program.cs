@@ -70,7 +70,7 @@ namespace Api
             builder.Services.AddSingleton(tokenSettings);
 
             //adds the database and identity setup
-            builder.Services.AddInfrastructure(builder.Configuration);
+            builder.Services.AddInfrastructureDependencyInjection(builder.Configuration);
 
             builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
             {
@@ -99,7 +99,7 @@ namespace Api
                 });
 
             builder.Services.AddScoped<ApplicationDbContextInitialiser>();
-            builder.Services.AddApplication(builder.Configuration);
+            builder.Services.AddApplicationDependencyInjection(builder.Configuration);
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
 

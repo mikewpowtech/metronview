@@ -5,7 +5,7 @@ const BASE_URL = import.meta.env.REACT_APP_API_URL as string;
 
 // Fetch all companies
 export async function fetchCompanies(token?: string): Promise<Company[]> {
-    const response = await axios.get<Company[]>(`${BASE_URL}/api/companies`, {
+    const response = await axios.get<Company[]>(`${BASE_URL}/api/company`, {
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     });
     return response.data;
@@ -18,7 +18,7 @@ export async function addCompany(
     token?: string
 ): Promise<Company> {
     const response = await axios.post<Company>(
-        `${BASE_URL}/api/companies`,
+        `${BASE_URL}/api/company`,
         { name, parentCompanyId: parentCompanyId || null },
         {
             headers: {

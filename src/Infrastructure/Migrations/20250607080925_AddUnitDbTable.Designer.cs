@@ -4,6 +4,7 @@ using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250607080925_AddUnitDbTable")]
+    partial class AddUnitDbTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,7 +25,7 @@ namespace Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Infrastructure.DbClasses.CompanyDb", b =>
+            modelBuilder.Entity("Domain.Company", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -39,88 +42,21 @@ namespace Infrastructure.Migrations
                     b.ToTable("Companies");
                 });
 
-            modelBuilder.Entity("Infrastructure.DbClasses.SensorDb", b =>
+            modelBuilder.Entity("Infrastructure.CompanyDb", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<byte>("Channel")
-                        .HasColumnType("tinyint");
-
-                    b.Property<byte?>("ChannelType")
-                        .HasColumnType("tinyint");
-
-                    b.Property<string>("CompanyID")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("EngineeringUnits")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("HighValue")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("LowValue")
-                        .HasColumnType("int");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UnitId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CompanyID");
-
-                    b.HasIndex("UnitId");
-
-                    b.ToTable("Sensors");
-                });
-
-            modelBuilder.Entity("Infrastructure.DbClasses.UnitDb", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("CompanyID")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("CustomFieldValues")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("DaysBeforeNotReported")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ManufacturerCode")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PIN")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Secret")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UnitCode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UnitStatusID")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UnitTypeId")
-                        .IsRequired()
+                    b.Property<string>("ParentCompanyId")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CompanyID");
-
-                    b.ToTable("Units");
+                    b.ToTable("CompanyDb");
                 });
 
             modelBuilder.Entity("Infrastructure.Identity.ApplicationUserDb", b =>
@@ -197,6 +133,49 @@ namespace Infrastructure.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("Infrastructure.UnitDb", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("CompanyID")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CustomFieldValues")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("DaysBeforeNotReported")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ManufacturerCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PIN")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Secret")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UnitCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UnitStatusID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UnitTypeId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Units");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -332,37 +311,9 @@ namespace Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Infrastructure.DbClasses.SensorDb", b =>
-                {
-                    b.HasOne("Infrastructure.DbClasses.CompanyDb", "Company")
-                        .WithMany()
-                        .HasForeignKey("CompanyID")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("Infrastructure.DbClasses.UnitDb", "Unit")
-                        .WithMany()
-                        .HasForeignKey("UnitId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Company");
-
-                    b.Navigation("Unit");
-                });
-
-            modelBuilder.Entity("Infrastructure.DbClasses.UnitDb", b =>
-                {
-                    b.HasOne("Infrastructure.DbClasses.CompanyDb", "Company")
-                        .WithMany()
-                        .HasForeignKey("CompanyID")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Company");
-                });
-
             modelBuilder.Entity("Infrastructure.Identity.ApplicationUserDb", b =>
                 {
-                    b.HasOne("Infrastructure.DbClasses.CompanyDb", "Company")
+                    b.HasOne("Infrastructure.CompanyDb", "Company")
                         .WithMany()
                         .HasForeignKey("CompanyId");
 

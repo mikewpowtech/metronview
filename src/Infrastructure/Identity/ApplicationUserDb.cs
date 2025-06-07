@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Infrastructure.DbClasses;
+using Microsoft.AspNetCore.Identity;
 
 namespace Infrastructure.Identity;
 

@@ -2,9 +2,9 @@
 import React, { useEffect, useState } from "react";
 import { Table, Checkbox, Dropdown, Button } from "antd";
 import { DownOutlined } from "@ant-design/icons";
-import { Resizable } from "react-resizable";
 import "react-resizable/css/styles.css";
 import { usersApi } from "../features/user/authAPI";
+import ResizableTitle from "../components/ResizableTitle";
 
 // ...existing ApplicationUser interface...
 export interface ApplicationUser {
@@ -23,43 +23,6 @@ const allColumnDefs = [
   { title: "UserName", dataIndex: "userName", key: "userName", width: 100 },
   { title: "Email", dataIndex: "email", key: "email", width: 300 },
 ];
-
-const ResizableTitle = (props: any) => {
-  const { onResize, width, ...restProps } = props;
-  if (!width) {
-    return <th {...restProps} />;
-  }
-  return (
-    <Resizable
-      width={width}
-      height={0}
-      handle={
-        <span
-          className="react-resizable-handle"
-          style={{
-            position: "absolute",
-            right: 0,
-            top: 0,
-            height: "100%",
-            width: 2,
-            cursor: "ew-resize",
-            zIndex: 2,
-            userSelect: "none",
-            background: "rgba(0,0,0,0.08)",
-            transition: "background 0.2s",
-          }}
-          onMouseOver={e => (e.currentTarget.style.background = "rgba(0,0,0,0.18)")}
-          onMouseOut={e => (e.currentTarget.style.background = "rgba(0,0,0,0.08)")}
-          onClick={e => e.stopPropagation()}
-        />
-      }
-      onResize={onResize}
-      draggableOpts={{ enableUserSelectHack: false }}
-    >
-      <th {...restProps} style={{ position: "relative", ...restProps.style }} />
-    </Resizable>
-  );
-};
 
 const UsersList: React.FC = () => {
   const [users, setUsers] = useState<ApplicationUser[]>([]);
@@ -123,7 +86,7 @@ const UsersList: React.FC = () => {
     );
   }, [visibleKeys, editingKey, editingUserName]);
 
-    const handleResize = (index: number) => (_: any, { size }: any) => {
+  const handleResize = (index: number) => (_: any, { size }: any) => {
         const nextColumns = [...columns];
         nextColumns[index] = {
             ...nextColumns[index],
@@ -156,8 +119,7 @@ const UsersList: React.FC = () => {
     // Optionally, call an API to persist the change here
   };
 
-
-const columnMenuItems = allColumnDefs.map(col => ({
+  const columnMenuItems = allColumnDefs.map(col => ({
   key: col.key,
   label: (
     <Checkbox

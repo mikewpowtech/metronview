@@ -67,6 +67,13 @@ export const UserLayout = ({ UserName }: iUser) => {
                                 },
                             },
                             {
+                                key: "/companies",
+                                label: "Companies",
+                                onClick: (e) => {
+                                    handleClick(e.key);
+                                },
+                            },
+                            {
                                 key: "/users",
                                 label: "Users",
                                 onClick: (e) => {
@@ -81,8 +88,8 @@ export const UserLayout = ({ UserName }: iUser) => {
                                 },
                             },
                             {
-                                key: "/companies",
-                                label: "Companies",
+                                key: "/sensors",
+                                label: "Sensors",
                                 onClick: (e) => {
                                     handleClick(e.key);
                                 },
@@ -94,7 +101,6 @@ export const UserLayout = ({ UserName }: iUser) => {
                                     handleClick(e.key);
                                 },
                             },
-
                         ]}
                     />
                     <div style={{ marginLeft: "auto", display: "flex", alignItems: "center" }}>
