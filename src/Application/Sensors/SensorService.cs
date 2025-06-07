@@ -11,7 +11,7 @@ public class SensorService : ISensorService
         _sensorRepository = sensorRepository;
     }
 
-    public Task<Sensor?> GetByIdAsync(string id) => _sensorRepository.GetByIdAsync(id);
+    public Task<Sensor?> GetByIdAsync(int id) => _sensorRepository.GetByIdAsync(id);
 
     public Task<List<Sensor>> GetAllAsync() => _sensorRepository.GetAllAsync();
 
@@ -19,5 +19,5 @@ public class SensorService : ISensorService
 
     public Task<bool> UpdateAsync(Sensor sensor) => _sensorRepository.UpdateAsync(sensor);
 
-    public Task<bool> DeleteAsync(string id) => _sensorRepository.DeleteAsync(id);
+    public Task<bool> DeleteAsync(int id) => _sensorRepository.DeleteAsync(id);
 }

@@ -11,7 +11,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<CompanyDb> Companies { get; set; } = default!;
     public DbSet<UnitDb> Units { get; set; } = default!;
     public DbSet<SensorDb> Sensors { get; set; } = default!;
-
+    public DbSet<ReadingDb> Readings { get; set; } = default!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -24,18 +24,20 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasForeignKey(s => s.UnitId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // SensorDb -> CompanyDb (many-to-one)
-        modelBuilder.Entity<SensorDb>()
-            .HasOne(s => s.Company)
-            .WithMany() // or .WithMany(c => c.Sensors) if you add a collection navigation property
-            .HasForeignKey(s => s.CompanyID)
-            .OnDelete(DeleteBehavior.Restrict);
-
         // UnitDb -> CompanyDb (many-to-one)
         modelBuilder.Entity<UnitDb>()
             .HasOne(u => u.Company)
             .WithMany() // or .WithMany(c => c.Units) if you add a collection navigation property
             .HasForeignKey(u => u.CompanyID)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<ReadingDb>()
+            .HasKey(r => new { r.DateRecordedUtc, r.SensorId });
+
+        modelBuilder.Entity<ReadingDb>()
+            .HasOne(r => r.Sensor)
+            .WithMany()
+            .HasForeignKey(r => r.SensorId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

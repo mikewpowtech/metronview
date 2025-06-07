@@ -8,26 +8,19 @@ namespace Presentation.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class SensorController : ControllerBase
+public class SensorController(ISensorService sensorService) : ControllerBase
 {
-    private readonly ISensorService _sensorService;
-
-    public SensorController(ISensorService sensorService)
-    {
-        _sensorService = sensorService;
-    }
-
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Sensor>>> GetSensors()
     {
-        var sensors = await _sensorService.GetAllAsync();
+        var sensors = await sensorService.GetAllAsync();
         return Ok(sensors);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Sensor>> GetSensor(string id)
+    public async Task<ActionResult<Sensor>> GetSensor(int id)
     {
-        var sensor = await _sensorService.GetByIdAsync(id);
+        var sensor = await sensorService.GetByIdAsync(id);
         if (sensor == null)
             return NotFound();
         return Ok(sensor);
@@ -37,17 +30,17 @@ public class SensorController : ControllerBase
     public async Task<ActionResult<Sensor>> AddSensor([FromBody] Sensor sensor)
     {
         // Add any required validation here if needed
-        var createdSensor = await _sensorService.AddAsync(sensor);
+        var createdSensor = await sensorService.AddAsync(sensor);
         return CreatedAtAction(nameof(GetSensor), new { id = createdSensor.Id }, createdSensor);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateSensor(string id, [FromBody] Sensor sensor)
+    public async Task<IActionResult> UpdateSensor(int id, [FromBody] Sensor sensor)
     {
         if (id != sensor.Id)
             return BadRequest("ID mismatch.");
 
-        var success = await _sensorService.UpdateAsync(sensor);
+        var success = await sensorService.UpdateAsync(sensor);
         if (!success)
             return NotFound();
 
@@ -55,9 +48,9 @@ public class SensorController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteSensor(string id)
+    public async Task<IActionResult> DeleteSensor(int id)
     {
-        var success = await _sensorService.DeleteAsync(id);
+        var success = await sensorService.DeleteAsync(id);
         if (!success)
             return NotFound();
 

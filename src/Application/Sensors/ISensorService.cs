@@ -4,9 +4,9 @@ namespace Application.Sensors;
 
 public interface ISensorService
 {
-    Task<Sensor?> GetByIdAsync(string id);
+    Task<Sensor?> GetByIdAsync(int id);
     Task<List<Sensor>> GetAllAsync();
     Task<Sensor> AddAsync(Sensor sensor);
     Task<bool> UpdateAsync(Sensor sensor);
-    Task<bool> DeleteAsync(string id);
+    Task<bool> DeleteAsync(int id);
 }
