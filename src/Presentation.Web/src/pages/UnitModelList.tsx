@@ -82,6 +82,7 @@ const UnitModelList: React.FC = () => {
             setModalLoading(true);
             const values = await form.validateFields();
             if (isEdit && editingId !== null) {
+                values.Id = editingId;
                 await updateUnitModel(editingId, values, token);
                 setUnitModels(prev =>
                     prev.map(u =>

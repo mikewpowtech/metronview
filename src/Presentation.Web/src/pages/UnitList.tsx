@@ -15,10 +15,10 @@ import { useAppSelector } from "../app/hooks";
 import { selectAuth } from "../app/store";
 
 const unitStatusOptions = [
-  { value: "Active", label: "Active" },
-  { value: "Inactive", label: "Inactive" },
-  { value: "Maintenance", label: "Maintenance" },
-  { value: "Decommissioned", label: "Decommissioned" },
+  { value: 0, label: "Active" },
+  { value: 1, label: "Inactive" },
+  { value: 2, label: "Maintenance" },
+  { value: 3, label: "Decommissioned" },
   // Add more statuses as defined in your backend enum
 ];
 
@@ -30,7 +30,7 @@ const allColumnDefs = [
   { title: "Manufacturer Code", dataIndex: "manufacturerCode", key: "manufacturerCode", width: 150 },
   { title: "Unit Code", dataIndex: "unitCode", key: "unitCode", width: 120 },
   { title: "Secret", dataIndex: "secret", key: "secret", width: 120 },
-  { title: "Unit Status ID", dataIndex: "unitStatusID", key: "unitStatusID", width: 120 },
+  { title: "Status", dataIndex: "status", key: "status", width: 120 },
   { title: "Company", dataIndex: "companyID", key: "companyID", width: 180,
     render: (companyID: string | null, record: Unit, index: number, companies?: Company[]) => companyID
   },
@@ -89,11 +89,11 @@ const UnitList: React.FC = () => {
               ...col,
               render: (unitTypeId: string) => {
                 const model = unitModels.find(m => m.id.toString() === unitTypeId);
-                return model ? `${model.code} - ${model.name}` : unitTypeId;
+                return model ? model.name : unitTypeId;
               }
             };
           }
-          if (col.key === "unitStatusID") {
+          if (col.key === "status") {
             return {
               ...col,
               render: (status: string) => {
@@ -144,7 +144,7 @@ const UnitList: React.FC = () => {
       manufacturerCode: record.manufacturerCode,
       unitCode: record.unitCode ?? "",
       secret: record.secret ?? "",
-      unitStatusID: record.unitStatusID,
+      status: record.status,
       companyID: record.companyID ?? undefined,
       daysBeforeNotReported: record.daysBeforeNotReported,
       customFieldValues: record.customFieldValues ?? "",
@@ -166,6 +166,7 @@ const UnitList: React.FC = () => {
     try {
       setModalLoading(true);
       const values = await form.validateFields();
+      values.Id = editingId ?? ""; // Ensure Id is set for updates
       if (isEdit && editingId !== null) {
         await updateUnit(editingId, values, token);
         setUnits(prev =>
@@ -380,7 +381,7 @@ const UnitList: React.FC = () => {
           </Form.Item>
           <Form.Item
             label="Unit Status"
-            name="unitStatusID"
+            name="status"
             rules={[{ required: true, message: "Please select a unit status" }]}
           >
             <Select

@@ -10,7 +10,7 @@ export interface Unit {
     manufacturerCode: string;
     unitCode?: string | null;
     secret?: string | null;
-    unitStatusID: string;
+    status: number;
     companyID?: string | null;
     daysBeforeNotReported?: number | null;
     customFieldValues?: string | null;
@@ -45,7 +45,7 @@ export async function addUnit(
 // Update an existing unit
 export async function updateUnit(
     id: string,
-    unit: Omit<Unit, "id">,
+    unit: Unit,//Omit<Unit, "id">,
     token?: string
 ): Promise<void> {
     await axios.put(
