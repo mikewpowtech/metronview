@@ -17,6 +17,7 @@ namespace Application
             services.AddScoped<ICompanyService, CompanyService>();
             services.AddScoped<IUnitService, UnitService>();
             services.AddScoped<ISensorService, SensorService>();
+            services.AddScoped<IUnitModelService, UnitModelService>();
 
             // Register Mapster for mapping
             services.AddMapster();

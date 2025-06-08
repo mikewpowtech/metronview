@@ -88,19 +88,26 @@ export const UserLayout = ({ UserName }: iUser) => {
                                 },
                             },
                             {
-                                key: "/sensors",
-                                label: "Sensors",
+                                key: "/unitmodels",
+                                label: "UnitModels",
                                 onClick: (e) => {
                                     handleClick(e.key);
                                 },
                             },
-                            {
-                                key: "/system-status",
-                                label: "System Status",
-                                onClick: (e) => {
-                                    handleClick(e.key);
-                                },
-                            },
+                            //{
+                            //    key: "/sensors",
+                            //    label: "Sensors",
+                            //    onClick: (e) => {
+                            //        handleClick(e.key);
+                            //    },
+                            //},
+                            //{
+                            //    key: "/system-status",
+                            //    label: "System Status",
+                            //    onClick: (e) => {
+                            //        handleClick(e.key);
+                            //    },
+                            //},
                         ]}
                     />
                     <div style={{ marginLeft: "auto", display: "flex", alignItems: "center" }}>

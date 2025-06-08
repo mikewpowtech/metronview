@@ -9,9 +9,9 @@ public class UnitDb
     public string ManufacturerCode { get; set; } = string.Empty; // char(20), NOT NULL
     public string? UnitCode { get; set; } // varchar(100), NULL
     public string? Secret { get; set; } // varchar(100), NULL
-    public string UnitStatusID { get; set; } = string.Empty; // char(1), NOT NULL
-    public string? CompanyID { get; set; } // string, NULL
-
+    public UnitStatus Status { get; set; }
+    public string CompanyID { get; set; } = string.Empty; // Now required (non-nullable)
+    
     // Foreign key navigation property
     public CompanyDb? Company { get; set; }
 

@@ -39,6 +39,7 @@ namespace Infrastructure
             services.AddScoped<ICompanyRepository, CompanyRepository>();
             services.AddScoped<IUnitRepository, UnitRepository>();
             services.AddScoped<ISensorRepository, SensorRepository>();
+            services.AddScoped<IUnitModelRepository, UnitModelRepository>();
 
             // Register DbContext Initializer
             services.AddScoped<ApplicationDbContextInitialiser>();

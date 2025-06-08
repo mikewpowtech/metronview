@@ -1,4 +1,5 @@
-﻿using Infrastructure.DbClasses;
+﻿using Domain;
+using Infrastructure.DbClasses;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<UnitDb> Units { get; set; } = default!;
     public DbSet<SensorDb> Sensors { get; set; } = default!;
     public DbSet<ReadingDb> Readings { get; set; } = default!;
+    public DbSet<UnitModelDb> UnitModels { get; set; } = default!; // Added for UnitModel support
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -20,16 +22,24 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         // SensorDb -> UnitDb (many-to-one)
         modelBuilder.Entity<SensorDb>()
             .HasOne(s => s.Unit)
-            .WithMany() // or .WithMany(u => u.Sensors) if you add a collection navigation property
+            .WithMany()
             .HasForeignKey(s => s.UnitId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // UnitDb -> CompanyDb (many-to-one)
-        modelBuilder.Entity<UnitDb>()
-            .HasOne(u => u.Company)
-            .WithMany() // or .WithMany(c => c.Units) if you add a collection navigation property
+        modelBuilder.Entity<UnitDb>(entity =>
+        {
+            entity.Property(e => e.Id)
+                .HasDefaultValueSql("NEWID()");
+
+            entity.Property(e => e.Status)
+                .HasConversion<string>();
+
+            entity.HasOne(u => u.Company)
+            .WithMany()
             .HasForeignKey(u => u.CompanyID)
             .OnDelete(DeleteBehavior.Restrict);
+        });
+
 
         modelBuilder.Entity<ReadingDb>()
             .HasKey(r => new { r.DateRecordedUtc, r.SensorId });
@@ -39,5 +49,20 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .WithMany()
             .HasForeignKey(r => r.SensorId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // UnitModelDb configuration (optional: add constraints if needed)
+        modelBuilder.Entity<UnitModelDb>()
+            .Property(u => u.Code)
+            .HasMaxLength(255)
+            .IsRequired();
+
+        modelBuilder.Entity<UnitModelDb>()
+            .Property(u => u.Name)
+            .HasMaxLength(255)
+            .IsRequired();
+
+        modelBuilder.Entity<UnitModelDb>()
+            .Property(u => u.Description)
+            .HasMaxLength(255);
     }
 }

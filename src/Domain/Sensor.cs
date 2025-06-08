@@ -3,7 +3,8 @@ namespace Domain;
 public class Sensor
 {
     public int Id { get; set; }
-    public Unit Unit { get; set; } = new Unit(); // Fixed: Initialize with a new Unit object
+    public string UnitId { get; set; } = string.Empty; // Fixed: Initialize with a new Unit object
+    public Unit? Unit { get; set; } // Fixed: Initialize with a new Unit object
     public byte Channel { get; set; } // [Channel] [tinyint] NOT NULL
     public byte? ChannelType { get; set; } // [ChannelType] [tinyint] NULL
     public int? LowValue { get; set; } // [LowValue] [int] NULL

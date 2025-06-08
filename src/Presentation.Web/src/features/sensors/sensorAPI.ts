@@ -23,6 +23,17 @@ export async function fetchSensors(token?: string): Promise<Sensor[]> {
   return response.data;
 }
 
+// Fetch sensors by unit ID
+export async function fetchSensorsByUnit(unitId: string, token?: string): Promise<Sensor[]> {
+  const response = await axios.get<Sensor[]>(
+    `${BASE_URL}/api/sensor/by-unit/${unitId}`,
+    {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    }
+  );
+  return response.data;
+}
+
 // Add a new sensor
 export async function addSensor(
   sensor: Omit<Sensor, "id">,
@@ -39,4 +50,35 @@ export async function addSensor(
     }
   );
   return response.data;
+}
+
+// Update an existing sensor
+export async function updateSensor(
+  id: string,
+  sensor: Omit<Sensor, "id">,
+  token?: string
+): Promise<void> {
+  await axios.put(
+    `${BASE_URL}/api/sensor/${id}`,
+    sensor,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    }
+  );
+}
+
+// Delete a sensor
+export async function deleteSensor(
+  id: string,
+  token?: string
+): Promise<void> {
+  await axios.delete(
+    `${BASE_URL}/api/sensor/${id}`,
+    {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    }
+  );
 }

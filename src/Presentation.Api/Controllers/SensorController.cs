@@ -26,6 +26,13 @@ public class SensorController(ISensorService sensorService) : ControllerBase
         return Ok(sensor);
     }
 
+    [HttpGet("by-unit/{unitId}")]
+    public async Task<IActionResult> GetSensorsByUnit(string unitId)
+    {
+        var sensors = await sensorService.GetByUnitIdAsync(unitId);
+        return Ok(sensors);
+    }
+
     [HttpPost]
     public async Task<ActionResult<Sensor>> AddSensor([FromBody] Sensor sensor)
     {
