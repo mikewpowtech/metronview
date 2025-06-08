@@ -207,12 +207,14 @@ const UnitList: React.FC = () => {
     try {
       setSensorModalLoading(true);
       const values = await sensorForm.validateFields();
-      if (sensorModal.sensor) {
-        await updateSensor(sensorModal.sensor.id, values, token);
-        message.success("Sensor updated");
-      } else {
-        await addSensor({ ...values, unitId: sensorModal.unitId }, token);
-        message.success("Sensor added");
+        if (sensorModal.sensor) {
+            values.Id = sensorModal.sensor.id;
+            values.UnitId = editingId;
+            await updateSensor(sensorModal.sensor.id, values, token);
+            message.success("Sensor updated");
+        } else {
+            await addSensor({ ...values, unitId: sensorModal.unitId }, token);
+            message.success("Sensor added");
       }
       setSensorModal({ open: false });
       sensorForm.resetFields();
@@ -434,7 +436,8 @@ const UnitList: React.FC = () => {
         scroll={{ x: "max-content" }}
         expandable={{
           expandedRowRender: (unit: Unit) => {
-            const sensors = sensorsByUnit[unit.id] || [];
+                const sensors = sensorsByUnit[unit.id] || [];
+                setEditingId(unit.id);
             return (
               <div>
                 <Button

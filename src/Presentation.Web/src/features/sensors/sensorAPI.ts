@@ -55,7 +55,7 @@ export async function addSensor(
 // Update an existing sensor
 export async function updateSensor(
   id: string,
-  sensor: Omit<Sensor, "id">,
+  sensor: Sensor,//Omit<Sensor, "id">,
   token?: string
 ): Promise<void> {
   await axios.put(

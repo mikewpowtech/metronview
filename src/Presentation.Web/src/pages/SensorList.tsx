@@ -108,12 +108,13 @@ const SensorList: React.FC = () => {
     try {
       setModalLoading(true);
       const values = await form.validateFields();
-      if (isEdit && editingId !== null) {
-        await updateSensor(editingId, values, token);
-        setSensors(prev =>
-          prev.map(s =>
-            s.id === editingId ? { ...s, ...values } : s
-          )
+        if (isEdit && editingId !== null) {
+            values.UnitId = editingId;
+            await updateSensor(editingId, values, token);
+            setSensors(prev =>
+            prev.map(s =>
+                s.id === editingId ? { ...s, ...values } : s
+            )
         );
         message.success("Sensor updated");
       } else {
