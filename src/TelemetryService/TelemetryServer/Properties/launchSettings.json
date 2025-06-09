@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "TelemetryServer": {
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      },
+      "commandName": "Project"
+    }
+  }
+}

@@ -1,0 +1,48 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Platforms>AnyCPU;ARM64;x64</Platforms>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <AssemblyName>TelemetryServer</AssemblyName>
+    <AssemblyTitle>A cross-platform telemetry service for Metron 2 and Metron ATEX</AssemblyTitle>
+    <MinVerTagPrefix>telemetry-server/v</MinVerTagPrefix>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SentryVersion>4.9.0</SentryVersion>
+    <OpenTelemetryVersion>1.9.0</OpenTelemetryVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Antlr4BuildTasks" Version="12.10.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.1" />
+    <PackageReference Include="MinVer" Version="6.0.0" IncludeAssets="All" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.4" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="9.0.4" />
+    <PackageReference Include="MSBuild.Microsoft.VisualStudio.Web.targets" Version="14.0.0.3" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.11.1" />
+    <PackageReference Include="Sentry" Version="5.0.1" />
+    <PackageReference Include="Sentry.Extensions.Logging" Version="5.0.1" />
+    <PackageReference Include="Sentry.OpenTelemetry" Version="5.0.1" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="9.0.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Metron2Client\Metron2Client.csproj" />
+    <ProjectReference Include="..\Metron2Configuration\Metron2Configuration.csproj" />
+    <ProjectReference Include="..\Metron2Parser\Metron2Parser.csproj" />
+    <ProjectReference Include="..\Utilities\Utilities.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Remove="app.config" />
+    <None Include="app.config">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Settings.job">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>
