@@ -10,6 +10,7 @@ public static class DependencyInjection
     public static IServiceCollection AddTelemetryProcessor<T>(this IServiceCollection services, string configurationSectionPath = null)
         where T : ITelemetryProcessor
     {
+        // comment here
         services.AddSingleton<IListener, Listener<T>>();
         services.AddOptions<ListenerOptions<T>>().BindConfiguration(configurationSectionPath ?? T.ConfigurationSection)
             .Validate(o =>
