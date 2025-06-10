@@ -12,6 +12,7 @@ using TelemetryServer.Infrastructure;
 using TelemetryServer.Options;
 using TelemetryServer.Telemetry;
 
+//oh look a comment, how nice
 var host = Host.CreateDefaultBuilder(args)
     .UseSystemd() // Does nothing unless Linux and ppid is systemd;
     .UseWindowsService() // Does nothing unless Windows and ppid is services;

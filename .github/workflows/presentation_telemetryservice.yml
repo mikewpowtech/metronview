@@ -1,4 +1,4 @@
-name: presentation_telemetryservice.yml
+name: presentation_telemetryserver.yml
 # This workflow builds a .NET API project and deploys it to Azure WebApp.
 # For more information see: https://unifiedapp-fecwfcdefwe9ewee.uksouth-01.azurewebsites.net/
 
@@ -9,7 +9,7 @@ on:
 permissions:
   id-token: write
 env:
-  AZURE_WEBAPP_NAME: web-telemetryservice
+  AZURE_WEBAPP_NAME: web-telemetryserver
   AZURE_WEBAPP_PACKAGE_PATH: src/TelemetryService/TelemetryServer/publish
   CONFIGURATION: Development
   DOTNET_CORE_VERSION: 9.0.x
