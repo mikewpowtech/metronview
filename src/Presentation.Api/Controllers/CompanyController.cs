@@ -25,7 +25,7 @@ public class CompanyController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Company>> GetCompany(string id)
+    public async Task<ActionResult<Company>> GetCompany(int id)
     {
         var company = await _companyService.GetByIdAsync(id);
         if (company == null)
@@ -46,7 +46,7 @@ public class CompanyController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateCompany(string id, [FromBody] Company company)
+    public async Task<IActionResult> UpdateCompany(int id, [FromBody] Company company)
     {
         if (id != company.Id)
             return BadRequest("ID mismatch.");
@@ -59,7 +59,7 @@ public class CompanyController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteCompany(string id)
+    public async Task<IActionResult> DeleteCompany(int id)
     {
         var success = await _companyService.DeleteAsync(id);
         if (!success)

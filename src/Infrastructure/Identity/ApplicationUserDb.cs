@@ -9,6 +9,6 @@ public class ApplicationUserDb : IdentityUser
     public string? LastName { get; set; }
     // Add other custom properties here
 
-    public string? CompanyId { get; set; }
+    public int? CompanyId { get; set; }
     public CompanyDb? Company { get; set; }
 }

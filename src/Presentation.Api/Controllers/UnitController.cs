@@ -25,7 +25,7 @@ public class UnitController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Unit>> GetUnit(string id)
+    public async Task<ActionResult<Unit>> GetUnit(int id)
     {
         var unit = await _unitService.GetByIdAsync(id);
         if (unit == null)
@@ -46,7 +46,7 @@ public class UnitController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateUnit(string id, [FromBody] Unit unit)
+    public async Task<IActionResult> UpdateUnit(int id, [FromBody] Unit unit)
     {
         if (id != unit.Id)
             return BadRequest("ID mismatch.");
@@ -59,7 +59,7 @@ public class UnitController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteUnit(string id)
+    public async Task<IActionResult> DeleteUnit(int id)
     {
         var success = await _unitService.DeleteAsync(id);
         if (!success)

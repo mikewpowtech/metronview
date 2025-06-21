@@ -19,7 +19,7 @@ public class UnitRepository : IUnitRepository
 
     public UnitRepository() { }
 
-    public async Task<Unit?> GetByIdAsync(string id)
+    public async Task<Unit?> GetByIdAsync(int id)
     {
         var entity = await _context.Units
             .AsNoTracking()
@@ -38,8 +38,7 @@ public class UnitRepository : IUnitRepository
     public async Task<Unit> AddAsync(Unit unit)
     {
         var entity = _mapper.Map<UnitDb>(unit);
-        if (string.IsNullOrEmpty(entity.Id))
-            entity.Id = Guid.NewGuid().ToString();
+
         _context.Units.Add(entity);
         await _context.SaveChangesAsync();
         return _mapper.Map<Unit>(entity);
@@ -55,7 +54,7 @@ public class UnitRepository : IUnitRepository
         return true;
     }
 
-    public async Task<bool> DeleteAsync(string id)
+    public async Task<bool> DeleteAsync(int id)
     {
         var entity = await _context.Units.FindAsync(id);
         if (entity == null) return false;

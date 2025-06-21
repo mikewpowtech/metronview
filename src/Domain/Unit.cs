@@ -2,7 +2,7 @@ namespace Domain;
 
 public class Unit
 {
-    public string Id { get; set; } = string.Empty;
+    public int Id { get; set; }
     public string UnitTypeId { get; set; } = string.Empty; // char(4), NOT NULL
     public string? PhoneNumber { get; set; } // char(20), NULL
     public string? PIN { get; set; } // char(4), NULL

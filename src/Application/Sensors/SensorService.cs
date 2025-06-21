@@ -13,7 +13,7 @@ public class SensorService : ISensorService
 
     public Task<Sensor?> GetByIdAsync(int id) => _sensorRepository.GetByIdAsync(id);
 
-    public Task<List<Sensor>> GetByUnitIdAsync(string unitId) => _sensorRepository.GetByUnitIdAsync(unitId);
+    public Task<List<Sensor>> GetByUnitIdAsync(int unitId) => _sensorRepository.GetByUnitIdAsync(unitId);
 
     public Task<List<Sensor>> GetAllAsync() => _sensorRepository.GetAllAsync();
 

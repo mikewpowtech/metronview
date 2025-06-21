@@ -11,7 +11,7 @@ public class CompanyService : ICompanyService
         _repository = repository;
     }
 
-    public Task<Company?> GetByIdAsync(string id) => _repository.GetByIdAsync(id);
+    public Task<Company?> GetByIdAsync(int id) => _repository.GetByIdAsync(id);
 
     public Task<List<Company>> GetAllAsync() => _repository.GetAllAsync();
 
@@ -19,5 +19,5 @@ public class CompanyService : ICompanyService
 
     public Task<bool> UpdateAsync(Company company) => _repository.UpdateAsync(company);
 
-    public Task<bool> DeleteAsync(string id) => _repository.DeleteAsync(id);
+    public Task<bool> DeleteAsync(int id) => _repository.DeleteAsync(id);
 }

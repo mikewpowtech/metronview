@@ -4,9 +4,9 @@ namespace Application.Units;
 
 public interface IUnitService
 {
-    Task<Unit?> GetByIdAsync(string id);
+    Task<Unit?> GetByIdAsync(int id);
     Task<List<Unit>> GetAllAsync();
     Task<Unit> AddAsync(Unit unit);
     Task<bool> UpdateAsync(Unit unit);
-    Task<bool> DeleteAsync(string id);
+    Task<bool> DeleteAsync(int id);
 }

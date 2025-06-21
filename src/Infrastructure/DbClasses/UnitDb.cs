@@ -2,7 +2,7 @@ namespace Infrastructure.DbClasses;
 
 public class UnitDb
 {
-    public string Id { get; set; } = Guid.NewGuid().ToString();
+    public int Id { get; set; } // int, auto-increment primary key
     public string UnitTypeId { get; set; } = string.Empty; // char(4), NOT NULL
     public string? PhoneNumber { get; set; } // char(20), NULL
     public string? PIN { get; set; } // char(4), NULL
@@ -10,7 +10,7 @@ public class UnitDb
     public string? UnitCode { get; set; } // varchar(100), NULL
     public string? Secret { get; set; } // varchar(100), NULL
     public UnitStatus Status { get; set; }
-    public string CompanyID { get; set; } = string.Empty; // Now required (non-nullable)
+    public int CompanyID { get; set; }// Now required (non-nullable)
     
     // Foreign key navigation property
     public CompanyDb? Company { get; set; }

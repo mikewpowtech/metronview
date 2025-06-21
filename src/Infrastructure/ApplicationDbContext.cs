@@ -19,17 +19,23 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     {
         base.OnModelCreating(modelBuilder);
 
-        // SensorDb -> UnitDb (many-to-one)
-        modelBuilder.Entity<SensorDb>()
-            .HasOne(s => s.Unit)
-            .WithMany()
-            .HasForeignKey(s => s.UnitId)
-            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<SensorDb>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            // Configure the foreign key relationship
+            entity.HasOne(e => e.Unit)
+                  .WithMany() // or .WithMany(u => u.Sensors) if you have a collection navigation property in UnitDb
+                  .HasForeignKey(e => e.UnitId)
+                  .OnDelete(DeleteBehavior.Cascade); // or your preferred delete behavior
+        });
 
         modelBuilder.Entity<UnitDb>(entity =>
         {
-            entity.Property(e => e.Id)
-                .HasDefaultValueSql("NEWID()");
+            entity.HasKey(u => u.Id);
+
+            entity.Property(u => u.Id)
+                .ValueGeneratedOnAdd(); // Auto-increment primary key
 
             entity.Property(e => e.Status)
                 .HasConversion<string>();
@@ -39,7 +45,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasForeignKey(u => u.CompanyID)
             .OnDelete(DeleteBehavior.Restrict);
         });
-
 
         modelBuilder.Entity<ReadingDb>()
             .HasKey(r => new { r.DateRecordedUtc, r.SensorId });

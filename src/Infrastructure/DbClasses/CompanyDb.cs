@@ -2,7 +2,7 @@ namespace Infrastructure.DbClasses;
 
 public class CompanyDb
 {
-    public string Id { get; set; } = Guid.NewGuid().ToString();
+    public int Id { get; set; } // Changed from string to int
     public string Name { get; set; } = string.Empty;
     public string? ParentCompanyId { get; set; }
 }

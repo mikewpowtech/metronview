@@ -5,7 +5,7 @@ public class SensorDb
     public int Id { get; set; }
 
     // Foreign key to UnitDb
-    public string UnitId { get; set; } = string.Empty;
+    public int UnitId { get; set; } // Changed from string to int
     public UnitDb? Unit { get; set; }
 
     public byte Channel { get; set; }

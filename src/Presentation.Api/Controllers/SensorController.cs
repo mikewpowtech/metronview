@@ -27,7 +27,7 @@ public class SensorController(ISensorService sensorService) : ControllerBase
     }
 
     [HttpGet("by-unit/{unitId}")]
-    public async Task<IActionResult> GetSensorsByUnit(string unitId)
+    public async Task<IActionResult> GetSensorsByUnit(int unitId)
     {
         var sensors = await sensorService.GetByUnitIdAsync(unitId);
         return Ok(sensors);

@@ -11,7 +11,7 @@ public class UnitService : IUnitService
         _unitRepository = unitRepository;
     }
 
-    public Task<Unit?> GetByIdAsync(string id) => _unitRepository.GetByIdAsync(id);
+    public Task<Unit?> GetByIdAsync(int id) => _unitRepository.GetByIdAsync(id);
 
     public Task<List<Unit>> GetAllAsync() => _unitRepository.GetAllAsync();
 
@@ -19,5 +19,5 @@ public class UnitService : IUnitService
 
     public Task<bool> UpdateAsync(Unit unit) => _unitRepository.UpdateAsync(unit);
 
-    public Task<bool> DeleteAsync(string id) => _unitRepository.DeleteAsync(id);
+    public Task<bool> DeleteAsync(int id) => _unitRepository.DeleteAsync(id);
 }

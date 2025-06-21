@@ -8,7 +8,7 @@ namespace Infrastructure.Repositories;
 
 public class CompanyRepository(ApplicationDbContext context, IMapper mapper) : ICompanyRepository
 {
-    public async Task<Company?> GetByIdAsync(string id)
+    public async Task<Company?> GetByIdAsync(int id)
     {
         var entity = await context.Companies
             .AsNoTracking()
@@ -27,8 +27,6 @@ public class CompanyRepository(ApplicationDbContext context, IMapper mapper) : I
     public async Task<Company> AddAsync(Company company)
     {
         var entity = mapper.Map<CompanyDb>(company);
-        if (string.IsNullOrEmpty(entity.Id))
-            entity.Id = Guid.NewGuid().ToString();
         context.Companies.Add(entity);
         await context.SaveChangesAsync();
         return mapper.Map<Company>(entity);
@@ -44,7 +42,7 @@ public class CompanyRepository(ApplicationDbContext context, IMapper mapper) : I
         return true;
     }
 
-    public async Task<bool> DeleteAsync(string id)
+    public async Task<bool> DeleteAsync(int id)
     {
         var company = await context.Companies.FindAsync(id);
         if (company == null) return false;

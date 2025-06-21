@@ -4,10 +4,10 @@ namespace Application.Companies
 {
     public interface ICompanyRepository
     {
-        Task<Company?> GetByIdAsync(string id);
+        Task<Company?> GetByIdAsync(int id);
         Task<List<Company>> GetAllAsync();
         Task<Company> AddAsync(Company company);
         Task<bool> UpdateAsync(Company company);
-        Task<bool> DeleteAsync(string id);
+        Task<bool> DeleteAsync(int id);
     }
 }
