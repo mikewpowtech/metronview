@@ -13,7 +13,7 @@ import { selectAuth } from "../app/store";
 
 const allColumnDefs = [
   { title: "ID", dataIndex: "id", key: "id", width: 100 },
-  { title: "Name", dataIndex: "name", key: "name", width: 200 },
+  { title: "Company Name", dataIndex: "name", key: "name", width: 200 },
   { title: "Parent Company", dataIndex: "parentCompanyId", key: "parentCompanyId", width: 200 },
 ];
 
