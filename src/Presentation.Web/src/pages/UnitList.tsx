@@ -1,13 +1,7 @@
 import { useEffect, useState } from "react";
 import { Table, Button, Modal, Input, Form, InputNumber, Space, Popconfirm, message, Dropdown, Checkbox, Select } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined, DownOutlined } from "@ant-design/icons";
-import {
-  fetchUnits,
-  addUnit,
-  updateUnit,
-  deleteUnit,
-  type Unit
-} from "../features/units/unitsAPI";
+import { fetchUnits,addUnit,updateUnit,deleteUnit,type Unit } from "../features/units/unitsAPI";
 import { fetchCompanies, type Company } from "../features/companies/companyAPI";
 import { fetchUnitModels, type UnitModel } from "../features/unitmodels/unitModelAPI";
 import { fetchSensorsByUnit, addSensor, updateSensor, deleteSensor, type Sensor } from "../features/sensors/sensorAPI";
@@ -24,16 +18,14 @@ const unitStatusOptions = [
 
 const allColumnDefs = [
   { title: "ID", dataIndex: "id", key: "id", width: 100 },
-  { title: "Unit Type ID", dataIndex: "unitTypeId", key: "unitTypeId", width: 120 },
+  { title: "Unit Type", dataIndex: "unitTypeId", key: "unitTypeId", width: 120 },
   { title: "Phone Number", dataIndex: "phoneNumber", key: "phoneNumber", width: 140 },
   { title: "PIN", dataIndex: "pin", key: "pin", width: 80 },
   { title: "Manufacturer Code", dataIndex: "manufacturerCode", key: "manufacturerCode", width: 150 },
   { title: "Unit Code", dataIndex: "unitCode", key: "unitCode", width: 120 },
   { title: "Secret", dataIndex: "secret", key: "secret", width: 120 },
   { title: "Status", dataIndex: "status", key: "status", width: 120 },
-  { title: "Company", dataIndex: "companyID", key: "companyID", width: 180,
-    render: (companyID: string | null, record: Unit, index: number, companies?: Company[]) => companyID
-  },
+  { title: "Company", dataIndex: "companyID", key: "companyID", width: 180 },
   { title: "Days Before Not Reported", dataIndex: "daysBeforeNotReported", key: "daysBeforeNotReported", width: 180 },
   { title: "Custom Field Values", dataIndex: "customFieldValues", key: "customFieldValues", width: 180 },
 ];
@@ -48,7 +40,7 @@ const UnitList: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [form] = Form.useForm();
   const [modalLoading, setModalLoading] = useState(false);
 
@@ -57,10 +49,10 @@ const UnitList: React.FC = () => {
   const [columns, setColumns] = useState(allColumnDefs);
 
   // Sensor-related states
-  const [sensorModal, setSensorModal] = useState<{ open: boolean, unitId?: string, sensor?: Sensor }>({ open: false });
+  const [sensorModal, setSensorModal] = useState<{ open: boolean, unitId?: number, sensor?: Sensor }>({ open: false });
   const [sensorForm] = Form.useForm();
   const [sensorModalLoading, setSensorModalLoading] = useState(false);
-  const [sensorsByUnit, setSensorsByUnit] = useState<Record<string, Sensor[]>>({});
+  const [sensorsByUnit, setSensorsByUnit] = useState<Record<number, Sensor[]>>({});
 
   useEffect(() => {
     loadUnits();
@@ -77,28 +69,28 @@ const UnitList: React.FC = () => {
           if (col.key === "companyID") {
             return {
               ...col,
-              render: (companyID: string | null) => {
-                if (!companyID) return "";
-                const company = companies.find(c => c.id === companyID);
-                return company ? company.name : companyID;
+                render: (_: never, record: Unit) => {
+                if (!record.companyID) return "";
+                const company = companies.find(c => c.id === record.companyID);
+                    return company?.name ?? "";
               }
             };
           }
           if (col.key === "unitTypeId") {
             return {
               ...col,
-              render: (unitTypeId: string) => {
-                const model = unitModels.find(m => m.id.toString() === unitTypeId);
-                return model ? model.name : unitTypeId;
+                render: (_: never, record: Unit) => {
+                const model = unitModels.find(m => m.id === record.unitTypeId);
+                return model?.name??"not specified";
               }
             };
           }
           if (col.key === "status") {
             return {
               ...col,
-              render: (status: string) => {
-                const found = unitStatusOptions.find(opt => opt.value === status);
-                return found ? found.label : status;
+                render: (_: never, record: Unit) => {
+                const status = unitStatusOptions.find(opt => opt.value === record.status);
+                return status?.label??"Unknown";
               }
             };
           }
@@ -152,7 +144,7 @@ const UnitList: React.FC = () => {
     setShowModal(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     try {
       await deleteUnit(id, token);
       setUnits(prev => prev.filter(u => u.id !== id));
@@ -166,7 +158,7 @@ const UnitList: React.FC = () => {
     try {
       setModalLoading(true);
       const values = await form.validateFields();
-      values.Id = editingId ?? ""; // Ensure Id is set for updates
+      values.Id = editingId ?? 0; // Ensure Id is set for updates
       if (isEdit && editingId !== null) {
         await updateUnit(editingId, values, token);
         setUnits(prev =>
@@ -198,7 +190,7 @@ const UnitList: React.FC = () => {
   };
 
   // Sensor modal handlers
-  const openSensorModal = (unitId: string, sensor?: Sensor) => {
+  const openSensorModal = (unitId: number, sensor?: Sensor) => {
     setSensorModal({ open: true, unitId, sensor });
     sensorForm.setFieldsValue(sensor ? { ...sensor } : { name: "", channel: 0, channelType: undefined, lowValue: undefined, highValue: undefined, engineeringUnits: "", unitId });
   };
@@ -232,7 +224,7 @@ const UnitList: React.FC = () => {
     sensorForm.resetFields();
   };
 
-  const handleDeleteSensor = async (sensorId: string, unitId: string) => {
+  const handleDeleteSensor = async (sensorId: number) => {
     try {
       await deleteSensor(sensorId, token);
       message.success("Sensor deleted");
@@ -323,7 +315,7 @@ const UnitList: React.FC = () => {
         onOk={handleModalOk}
         okText="Save"
         confirmLoading={modalLoading}
-        destroyOnClose
+        destroyOnHidden={true}
       >
         <Form
           layout="vertical"
@@ -352,7 +344,8 @@ const UnitList: React.FC = () => {
               placeholder="Select a unit type"
               optionFilterProp="children"
               filterOption={(input, option) =>
-                (option?.children ?? "").toLowerCase().includes(input.toLowerCase())
+                  typeof option?.children === "string" &&
+                  (option.children as string).toLowerCase().includes(input.toLowerCase())
               }
             >
               {unitModels.map(model => (
@@ -392,7 +385,8 @@ const UnitList: React.FC = () => {
               placeholder="Select a unit status"
               optionFilterProp="children"
               filterOption={(input, option) =>
-                (option?.children ?? "").toLowerCase().includes(input.toLowerCase())
+                typeof option?.children === "string" &&
+                (option.children as string).toLowerCase().includes(input.toLowerCase())
               }
             >
               {unitStatusOptions.map(status => (
@@ -409,7 +403,8 @@ const UnitList: React.FC = () => {
               placeholder="Select a company"
               optionFilterProp="children"
               filterOption={(input, option) =>
-                (option?.children ?? "").toLowerCase().includes(input.toLowerCase())
+                typeof option?.children === "string" &&
+                (option.children as string).toLowerCase().includes(input.toLowerCase())
               }
             >
               {companies.map(company => (
@@ -465,7 +460,7 @@ const UnitList: React.FC = () => {
                           <Button size="small" onClick={() => openSensorModal(unit.id, record)}>Edit</Button>
                           <Popconfirm
                             title="Delete this sensor?"
-                            onConfirm={() => handleDeleteSensor(record.id, unit.id)}
+                            onConfirm={() => handleDeleteSensor(record.id)}
                             okText="Yes"
                             cancelText="No"
                           >

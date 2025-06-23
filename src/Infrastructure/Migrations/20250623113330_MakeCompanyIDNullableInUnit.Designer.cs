@@ -4,6 +4,7 @@ using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250623113330_MakeCompanyIDNullableInUnit")]
+    partial class MakeCompanyIDNullableInUnit
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -34,8 +37,8 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ParentCompanyId")
-                        .HasColumnType("int");
+                    b.Property<string>("ParentCompanyId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -139,14 +142,13 @@ namespace Infrastructure.Migrations
                     b.Property<string>("UnitCode")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UnitTypeId")
-                        .HasColumnType("int");
+                    b.Property<string>("UnitTypeId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CompanyID");
-
-                    b.HasIndex("UnitTypeId");
 
                     b.ToTable("Units");
                 });
@@ -416,15 +418,7 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("CompanyID")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("Infrastructure.DbClasses.UnitModelDb", "UnitType")
-                        .WithMany()
-                        .HasForeignKey("UnitTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Company");
-
-                    b.Navigation("UnitType");
                 });
 
             modelBuilder.Entity("Infrastructure.Identity.ApplicationUserDb", b =>

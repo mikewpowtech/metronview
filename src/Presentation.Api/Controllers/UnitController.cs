@@ -36,7 +36,7 @@ public class UnitController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Unit>> AddUnit([FromBody] Unit unit)
     {
-        if (string.IsNullOrWhiteSpace(unit.UnitTypeId) || string.IsNullOrWhiteSpace(unit.ManufacturerCode))
+        if (unit.UnitTypeId < 1 || string.IsNullOrWhiteSpace(unit.ManufacturerCode))
         {
             return BadRequest("Required fields are missing.");
         }

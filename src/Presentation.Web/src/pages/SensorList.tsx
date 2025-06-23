@@ -32,7 +32,7 @@ const SensorList: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<number|null>(null);
   const [form] = Form.useForm();
   const [modalLoading, setModalLoading] = useState(false);
 
@@ -94,7 +94,7 @@ const SensorList: React.FC = () => {
     setShowModal(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     try {
       await deleteSensor(id, token);
       setSensors(prev => prev.filter(s => s.id !== id));
@@ -272,7 +272,8 @@ const SensorList: React.FC = () => {
               placeholder="Select a company"
               optionFilterProp="children"
               filterOption={(input, option) =>
-                (option?.children ?? "").toLowerCase().includes(input.toLowerCase())
+                typeof option?.children === "string" &&
+                (option.children as string).toLowerCase().includes(input.toLowerCase())
               }
             >
               {companies.map(company => (

@@ -14,13 +14,10 @@ import { selectAuth } from "../app/store";
 const allColumnDefs = [
   { title: "ID", dataIndex: "id", key: "id", width: 100 },
   { title: "Name", dataIndex: "name", key: "name", width: 200 },
-  { title: "Parent Company", dataIndex: "parentCompanyId", key: "parentCompanyId", width: 200,
-    render: (parentCompanyId: string | null, record: Company, index: number, companies?: Company[]) => {
-      // This render function will be replaced in the columns mapping below to access companies state
-      return parentCompanyId
-    }
-  },
+  { title: "Parent Company", dataIndex: "parentCompanyId", key: "parentCompanyId", width: 200 },
 ];
+
+//record: Company, index: number, companies?: Company[]
 
 const CompanyList: React.FC = () => {
   const auth = useAppSelector(selectAuth);
@@ -30,7 +27,7 @@ const CompanyList: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [form] = Form.useForm();
   const [modalLoading, setModalLoading] = useState(false);
 
@@ -52,7 +49,7 @@ const CompanyList: React.FC = () => {
           col.key === "parentCompanyId"
             ? {
                 ...col,
-                render: (parentCompanyId: string | null) => {
+                render: (parentCompanyId: number | null) => {
                   if (!parentCompanyId) return "";
                   const parent = companies.find(c => c.id === parentCompanyId);
                   return parent ? parent.name : parentCompanyId;
@@ -94,7 +91,7 @@ const CompanyList: React.FC = () => {
     setShowModal(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     try {
       await deleteCompany(id, token);
       setCompanies(prev => prev.filter(c => c.id !== id));
@@ -108,7 +105,7 @@ const CompanyList: React.FC = () => {
     try {
       setModalLoading(true);
         const values = await form.validateFields();
-        values.Id = editingId ?? ""; // Ensure Id is set for updates
+        values.Id = editingId ?? 0; // Ensure Id is set for updates
       if (isEdit && editingId !== null) {
         await updateCompany(editingId, values, token);
         setCompanies(prev =>
@@ -220,7 +217,7 @@ const CompanyList: React.FC = () => {
         onOk={handleModalOk}
         okText="Save"
         confirmLoading={modalLoading}
-        destroyOnClose
+        destroyOnHidden={true}
       >
         <Form
           layout="vertical"
@@ -244,7 +241,8 @@ const CompanyList: React.FC = () => {
               placeholder="Select a parent company"
               optionFilterProp="children"
               filterOption={(input, option) =>
-                (option?.children ?? "").toLowerCase().includes(input.toLowerCase())
+                typeof option?.children === "string" &&
+                (option.children as string).toLowerCase().includes(input.toLowerCase())
               }
             >
               {companies

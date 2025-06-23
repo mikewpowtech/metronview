@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export interface Sensor {
-  id: string;
+  id: number;
   name?: string | null;
   channel: number;
   channelType?: number | null;
@@ -9,7 +9,7 @@ export interface Sensor {
   highValue?: number | null;
   engineeringUnits?: string | null;
   unitId?: string;
-  companyID?: string | null;
+  companyID?: number | null;
   // Add other properties as needed
 }
 
@@ -24,7 +24,7 @@ export async function fetchSensors(token?: string): Promise<Sensor[]> {
 }
 
 // Fetch sensors by unit ID
-export async function fetchSensorsByUnit(unitId: string, token?: string): Promise<Sensor[]> {
+export async function fetchSensorsByUnit(unitId: number, token?: string): Promise<Sensor[]> {
   const response = await axios.get<Sensor[]>(
     `${BASE_URL}/api/sensor/by-unit/${unitId}`,
     {
@@ -54,7 +54,7 @@ export async function addSensor(
 
 // Update an existing sensor
 export async function updateSensor(
-  id: string,
+  id: number,
   sensor: Sensor,//Omit<Sensor, "id">,
   token?: string
 ): Promise<void> {
@@ -72,7 +72,7 @@ export async function updateSensor(
 
 // Delete a sensor
 export async function deleteSensor(
-  id: string,
+  id: number,
   token?: string
 ): Promise<void> {
   await axios.delete(

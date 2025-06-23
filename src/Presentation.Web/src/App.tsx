@@ -1,6 +1,7 @@
 import "bootstrap/dist/css/bootstrap-reboot.min.css";
 import "bootstrap/dist/css/bootstrap-utilities.min.css";
 import { Route, Routes } from "react-router";
+import '@ant-design/v5-patch-for-react-19';
 import { DefaultLayout } from "./layout/DefaultLayout";
 import { HomePage } from "./pages/HomePage";
 import { RegisterPage } from "./pages/RegisterPage";

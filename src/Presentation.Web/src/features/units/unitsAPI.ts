@@ -3,15 +3,15 @@ import axios from "axios";
 const BASE_URL = import.meta.env.REACT_APP_API_URL as string;
 
 export interface Unit {
-    id: string;
-    unitTypeId: string;
+    id: number;
+    unitTypeId: number;
     phoneNumber?: string | null;
     pin?: string | null;
     manufacturerCode: string;
     unitCode?: string | null;
     secret?: string | null;
     status: number;
-    companyID?: string | null;
+    companyID?: number | null;
     daysBeforeNotReported?: number | null;
     customFieldValues?: string | null;
 }
@@ -26,12 +26,12 @@ export async function fetchUnits(token?: string): Promise<Unit[]> {
 
 // Add a new unit
 export async function addUnit(
-    unit: Omit<Unit, "id">,
+    payload: Unit,
     token?: string
 ): Promise<Unit> {
     const response = await axios.post<Unit>(
         `${BASE_URL}/api/unit`,
-        unit,
+        payload,
         {
             headers: {
                 "Content-Type": "application/json",
@@ -44,7 +44,7 @@ export async function addUnit(
 
 // Update an existing unit
 export async function updateUnit(
-    id: string,
+    id: number,
     unit: Unit,//Omit<Unit, "id">,
     token?: string
 ): Promise<void> {
@@ -62,7 +62,7 @@ export async function updateUnit(
 
 // Delete a unit
 export async function deleteUnit(
-    id: string,
+    id: number,
     token?: string
 ): Promise<void> {
     await axios.delete(
