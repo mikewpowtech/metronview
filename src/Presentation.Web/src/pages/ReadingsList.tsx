@@ -28,8 +28,10 @@ const ReadingsList: React.FC = () => {
   const [form] = Form.useForm();
   const [modalLoading, setModalLoading] = useState(false);
 
-  // Column visibility state
-  const [visibleKeys, setVisibleKeys] = useState<string[]>(allColumnDefs.map(col => col.key as string));
+    // Column visibility state
+    const [visibleKeys, setVisibleKeys] = useState<string[]>(
+        allColumnDefs.filter(col => col.key !== "id").map(col => col.key as string)
+    );
   const [columns, setColumns] = useState(allColumnDefs);
 
   useEffect(() => {

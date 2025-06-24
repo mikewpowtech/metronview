@@ -41,7 +41,7 @@ export const App = () => {
                 <Spin spinning={auth.status == "loading"}>
                     <Routes>
                         <Route path="/" element={<UserLayout {...auth.user} />}>
-                            <Route index element={<HomePage />} />
+                            <Route index element={<ReadingsList />} />
                             <Route path="/readings" element={<ReadingsList />} />
                             <Route path="/users" element={<UsersList />} />
                             <Route path="/units" element={<UnitList />} />

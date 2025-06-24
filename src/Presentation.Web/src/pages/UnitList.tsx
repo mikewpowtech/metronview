@@ -8,6 +8,26 @@ import { fetchSensorsByUnit, addSensor, updateSensor, deleteSensor, type Sensor 
 import { useAppSelector } from "../app/hooks";
 import { selectAuth } from "../app/store";
 
+// Utility for persistent column keys
+const COLUMN_VISIBILITY_KEY = "unitList.visibleColumns";
+function getPersistedVisibleKeys(defaultKeys: string[]) {
+    if (typeof window === "undefined") return defaultKeys;
+    const stored = localStorage.getItem(COLUMN_VISIBILITY_KEY);
+    if (!stored) return defaultKeys;
+    try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) return parsed;
+        return defaultKeys;
+    } catch {
+        return defaultKeys;
+    }
+}
+function setPersistedVisibleKeys(keys: string[]) {
+    if (typeof window !== "undefined") {
+        localStorage.setItem(COLUMN_VISIBILITY_KEY, JSON.stringify(keys));
+    }
+}
+
 const unitStatusOptions = [
   { value: 0, label: "Active" },
   { value: 1, label: "Inactive" },
@@ -44,9 +64,10 @@ const UnitList: React.FC = () => {
   const [form] = Form.useForm();
   const [modalLoading, setModalLoading] = useState(false);
 
-  // Column visibility state
-  const [visibleKeys, setVisibleKeys] = useState<string[]>(allColumnDefs.map(col => col.key as string));
-  const [columns, setColumns] = useState(allColumnDefs);
+    // Column visibility state (persistent)
+    const defaultVisibleKeys = allColumnDefs.filter(col => col.key !== "id").map(col => col.key as string);
+    const [visibleKeys, setVisibleKeys] = useState<string[]>(() => getPersistedVisibleKeys(defaultVisibleKeys));
+    const [columns, setColumns] = useState(allColumnDefs);
 
   // Sensor-related states
   const [sensorModal, setSensorModal] = useState<{ open: boolean, unitId?: number, sensor?: Sensor }>({ open: false });
@@ -96,7 +117,8 @@ const UnitList: React.FC = () => {
           }
           return col;
         })
-    );
+      );
+      setPersistedVisibleKeys(visibleKeys);
   }, [visibleKeys, companies, unitModels]);
 
   const loadUnits = async () => {
@@ -449,12 +471,12 @@ const UnitList: React.FC = () => {
                 <Table<Sensor>
                   dataSource={sensors}
                   columns={[
-                    { title: "Name", dataIndex: "name", key: "name" },
-                    { title: "Channel", dataIndex: "channel", key: "channel" },
-                    { title: "Channel Type", dataIndex: "channelType", key: "channelType" },
-                    { title: "Low Value", dataIndex: "lowValue", key: "lowValue" },
-                    { title: "High Value", dataIndex: "highValue", key: "highValue" },
-                    { title: "Engineering Units", dataIndex: "engineeringUnits", key: "engineeringUnits" },
+                    { title: "Name", dataIndex: "name", key: "name", width: 200 },
+                      { title: "Channel", dataIndex: "channel", key: "channel", width: 100 },
+                      { title: "Channel Type", dataIndex: "channelType", key: "channelType", width: 200 },
+                      { title: "Low Value", dataIndex: "lowValue", key: "lowValue", width: 100 },
+                      { title: "High Value", dataIndex: "highValue", key: "highValue", width: 100 },
+                      { title: "Engineering Units", dataIndex: "engineeringUnits", key: "engineeringUnits", width: 100 },
                     {
                       title: "Actions",
                       key: "actions",

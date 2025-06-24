@@ -47,69 +47,104 @@ export const UserLayout = ({ UserName }: iUser) => {
         ],
     };
 
+    // Define dropdown menu items for each main menu
+    const menuDropdowns = [
+        {
+            key: "/readings",
+            label: "Readings",
+            items: [
+            ],
+        },
+        {
+            key: "/units",
+            label: "Units",
+            items: [
+                {
+                    key: "/sensors",
+                    label: <span onClick={() => handleClick("/sensors")}>Sensors</span>,
+                },
+                {
+                    key: "/unitmodels",
+                    label: <span onClick={() => handleClick("/unitmodels")}>Models</span>,
+                },
+                {
+                    key: "/unitmodelconfigs",
+                    label: <span onClick={() => handleClick("/unitmodels")}>Model Configurations</span>,
+                },
+                // Add more submenu items here if needed
+            ],
+        },
+        {
+            key: "/alarms",
+            label: "Alarms",
+            items: [
+                {
+                    key: "/alarmhistory",
+                    label: <span onClick={() => handleClick("/alarmhistory")}>History</span>,
+                },
+                {
+                    key: "/recipients",
+                    label: <span onClick={() => handleClick("/recipients")}>Recipients</span>,
+                },
+                {
+                    key: "/recipientgroups",
+                    label: <span onClick={() => handleClick("/recipientgroups")}>Recipient Groups</span>,
+                },
+                {
+                    key: "/senderoptions",
+                    label: <span onClick={() => handleClick("/senderoptions")}>SenderOptions</span>,
+                },
+                {
+                    key: "/alarminstructions",
+                    label: <span onClick={() => handleClick("/alarminstructions")}>Instructions</span>,
+                },
+                // Add more submenu items here if needed
+            ],
+        },
+        {
+            key: "/companies",
+            label: "Companies",
+            items: [
+            ],
+        },
+        {
+            key: "/users",
+            label: "Users",
+            items: [
+            ],
+        },
+    ];
+
     return (
         <App>
             <Layout className="layout">
                 <Header style={{ display: "flex", alignItems: "center" }}>
                     <AppLogo />
-                    <Menu
-                        theme="dark"
-                        mode="horizontal"
-                        defaultSelectedKeys={["/"]}
-                        selectedKeys={[current]}
-                        style={{ minWidth: "500px" }}
-                        items={[
-                            {
-                                key: "/readings",
-                                label: "Readings",
-                                onClick: (e) => {
-                                    handleClick(e.key);
-                                },
-                            },
-                            {
-                                key: "/companies",
-                                label: "Companies",
-                                onClick: (e) => {
-                                    handleClick(e.key);
-                                },
-                            },
-                            {
-                                key: "/units",
-                                label: "Units",
-                                onClick: (e) => {
-                                    handleClick(e.key);
-                                },
-                            },
-                            {
-                                key: "/unitmodels",
-                                label: "UnitModels",
-                                onClick: (e) => {
-                                    handleClick(e.key);
-                                },
-                            },
-                            {
-                                key: "/users",
-                                label: "Users",
-                                onClick: (e) => {
-                                    handleClick(e.key);
-                                },
-                            },
-                            //{
-                            //    key: "/sensors",
-                            //    label: "Sensors",
-                            //    onClick: (e) => {
-                            //        handleClick(e.key);
-                            //    },
-                            //},
-                            //{
-                            //    key: "/system-status",
-                            //    label: "System Status",
-                            //    onClick: (e) => {
-                            //        handleClick(e.key);
-                            //    },
-                            //},
-                        ]}
-                    />
+                    <div style={{ minWidth: "500px", display: "flex" }}>
+                        {menuDropdowns.map(menu => (
+                            <Dropdown
+                                key={menu.key}
+                                menu={{ items: menu.items }}
+                                trigger={["hover"]}
+                            >
+                                <span
+                                    style={{
+                                        color: current === menu.key ? "#1890ff" : "#fff",
+                                        fontWeight: 500,
+                                        cursor: "pointer",
+                                        marginRight: 24,
+                                        userSelect: "none",
+                                        padding: "0 12px",
+                                        lineHeight: "48px",
+                                        borderBottom: current === menu.key ? "2px solid #1890ff" : "none",
+                                    }}
+                                    onClick={() => handleClick(menu.key)}
+                                >
+                                    {menu.label}
+                                </span>
+                            </Dropdown>
+                        ))}
+                    </div>
                     <div style={{ marginLeft: "auto", display: "flex", alignItems: "center" }}>
                         <Dropdown menu={userMenu} trigger={["click"]}>
                             <span
