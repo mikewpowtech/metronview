@@ -21,6 +21,7 @@ public class ReadingRepository : IReadingRepository
     {
         var entity = await _context.Readings
             .AsNoTracking()
+            .Include(r => r.Sensor) // Ensures Sensor is loaded
             .FirstOrDefaultAsync(r => r.DateRecordedUtc == dateRecordedUtc && r.SensorId == sensorId);
         return entity == null ? null : _mapper.Map<Reading>(entity);
     }
@@ -29,6 +30,7 @@ public class ReadingRepository : IReadingRepository
     {
         var entities = await _context.Readings
             .AsNoTracking()
+            .Include(r => r.Sensor) // Ensures Sensor is loaded
             .ToListAsync();
         return _mapper.Map<List<Reading>>(entities);
     }
@@ -38,6 +40,7 @@ public class ReadingRepository : IReadingRepository
         var entity = _mapper.Map<ReadingDb>(reading);
         _context.Readings.Add(entity);
         await _context.SaveChangesAsync();
+        await _context.Entry(entity).Reference(r => r.Sensor).LoadAsync();
         return _mapper.Map<Reading>(entity);
     }
 

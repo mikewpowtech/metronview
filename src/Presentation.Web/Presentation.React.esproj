@@ -14,4 +14,7 @@
     <TypeScriptConfiguration Remove=".vite\**" />
     <TypeScriptConfiguration Remove=".vscode\**" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="src\features\NewFolder\" />
+  </ItemGroup>
 </Project>

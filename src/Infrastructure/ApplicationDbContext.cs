@@ -46,28 +46,24 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .OnDelete(DeleteBehavior.Restrict);
         });
 
-        modelBuilder.Entity<ReadingDb>()
-            .HasKey(r => new { r.DateRecordedUtc, r.SensorId });
-
-        modelBuilder.Entity<ReadingDb>()
-            .HasOne(r => r.Sensor)
-            .WithMany()
-            .HasForeignKey(r => r.SensorId)
-            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<ReadingDb>(entity =>
+        {
+            entity.HasKey(r => new { r.DateRecordedUtc, r.SensorId });
+            // Optionally, configure relationships and properties here
+        });
 
         // UnitModelDb configuration (optional: add constraints if needed)
-        modelBuilder.Entity<UnitModelDb>()
-            .Property(u => u.Code)
+        modelBuilder.Entity<UnitModelDb>(entity =>
+        {
+            entity.Property(u => u.Code)
             .HasMaxLength(255)
             .IsRequired();
 
-        modelBuilder.Entity<UnitModelDb>()
-            .Property(u => u.Name)
+                        entity.Property(u => u.Name)
             .HasMaxLength(255)
             .IsRequired();
-
-        modelBuilder.Entity<UnitModelDb>()
-            .Property(u => u.Description)
-            .HasMaxLength(255);
+            entity.Property(u => u.Description)
+           .HasMaxLength(255);
+        });
     }
 }

@@ -1,5 +1,6 @@
 using Application.Companies;
 using Application.Identity;
+using Application.Readings;
 using Application.Sensors;
 using Application.Units;
 using Mapster;
@@ -18,6 +19,7 @@ namespace Application
             services.AddScoped<IUnitService, UnitService>();
             services.AddScoped<ISensorService, SensorService>();
             services.AddScoped<IUnitModelService, UnitModelService>();
+            services.AddScoped<IReadingService, ReadingService>();
 
             // Register Mapster for mapping
             services.AddMapster();

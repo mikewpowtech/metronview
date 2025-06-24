@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Application.Readings;
 
 namespace Infrastructure
 {
@@ -40,6 +41,7 @@ namespace Infrastructure
             services.AddScoped<IUnitRepository, UnitRepository>();
             services.AddScoped<ISensorRepository, SensorRepository>();
             services.AddScoped<IUnitModelRepository, UnitModelRepository>();
+            services.AddScoped<IReadingRepository, ReadingRepository>();
 
             // Register DbContext Initializer
             services.AddScoped<ApplicationDbContextInitialiser>();

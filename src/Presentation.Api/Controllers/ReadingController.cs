@@ -37,7 +37,7 @@ public class ReadingController : ControllerBase
     public async Task<ActionResult<Reading>> AddReading([FromBody] Reading reading)
     {
         var createdReading = await _readingService.AddAsync(reading);
-        return CreatedAtAction(nameof(GetReading), new { dateRecordedUtc = createdReading.DateRecordedUtc, sensorId = createdReading.Sensor.Id }, createdReading);
+        return CreatedAtAction(nameof(GetReading), new { dateRecordedUtc = createdReading.DateRecordedUtc, sensorId = createdReading.SensorId }, createdReading);
     }
 
     [HttpPut("{dateRecordedUtc}/{sensorId:int}")]

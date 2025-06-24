@@ -17,6 +17,7 @@ import UnitList from "./pages/UnitList";
 import SystemStatus from "./pages/SystemStatus";
 import CompanyList from "./pages/CompanyList";
 import SensorList from "./pages/SensorList";
+import ReadingsList from "./pages/ReadingsList";
 import UnitModelList from "./pages/UnitModelList"; // <-- Import the page
 
 export const App = () => {
@@ -41,6 +42,7 @@ export const App = () => {
                     <Routes>
                         <Route path="/" element={<UserLayout {...auth.user} />}>
                             <Route index element={<HomePage />} />
+                            <Route path="/readings" element={<ReadingsList />} />
                             <Route path="/users" element={<UsersList />} />
                             <Route path="/units" element={<UnitList />} />
                             <Route path="/system-status" element={<SystemStatus />} />

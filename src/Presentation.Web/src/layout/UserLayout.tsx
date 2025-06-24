@@ -60,8 +60,8 @@ export const UserLayout = ({ UserName }: iUser) => {
                         style={{ minWidth: "500px" }}
                         items={[
                             {
-                                key: "/",
-                                label: "Home",
+                                key: "/readings",
+                                label: "Readings",
                                 onClick: (e) => {
                                     handleClick(e.key);
                                 },
@@ -69,13 +69,6 @@ export const UserLayout = ({ UserName }: iUser) => {
                             {
                                 key: "/companies",
                                 label: "Companies",
-                                onClick: (e) => {
-                                    handleClick(e.key);
-                                },
-                            },
-                            {
-                                key: "/users",
-                                label: "Users",
                                 onClick: (e) => {
                                     handleClick(e.key);
                                 },
@@ -90,6 +83,13 @@ export const UserLayout = ({ UserName }: iUser) => {
                             {
                                 key: "/unitmodels",
                                 label: "UnitModels",
+                                onClick: (e) => {
+                                    handleClick(e.key);
+                                },
+                            },
+                            {
+                                key: "/users",
+                                label: "Users",
                                 onClick: (e) => {
                                     handleClick(e.key);
                                 },

@@ -128,9 +128,12 @@ const UnitList: React.FC = () => {
 
   const handleEdit = (record: Unit) => {
     setIsEdit(true);
-    setEditingId(record.id);
+      setEditingId(record.id);
+      const model = unitModels.find(m => m.id === record.unitTypeId);
     form.setFieldsValue({
-      unitTypeId: record.unitTypeId,
+        unitTypeId: model
+            ? { value: model.name, label: `${model.name}` }
+            : undefined,
       phoneNumber: record.phoneNumber ?? "",
       pin: record.pin ?? "",
       manufacturerCode: record.manufacturerCode,
@@ -457,14 +460,22 @@ const UnitList: React.FC = () => {
                       key: "actions",
                       render: (_: any, record: Sensor) => (
                         <Space>
-                          <Button size="small" onClick={() => openSensorModal(unit.id, record)}>Edit</Button>
+                              <Button
+                                  icon={<EditOutlined />}
+                                  size="small"
+                                  onClick={() => openSensorModal(unit.id, record)}
+                              />
                           <Popconfirm
                             title="Delete this sensor?"
                             onConfirm={() => handleDeleteSensor(record.id)}
                             okText="Yes"
                             cancelText="No"
                           >
-                            <Button size="small" danger>Delete</Button>
+                                  <Button
+                                      icon={<DeleteOutlined />}
+                                      size="small"
+                                      danger
+                                  />
                           </Popconfirm>
                         </Space>
                       ),
