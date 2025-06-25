@@ -1,5 +1,6 @@
 using Application.Dashboard;
 using Domain;
+using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories
@@ -7,13 +8,15 @@ namespace Infrastructure.Repositories
     public class DashboardRepository : IDashboardRepository
     {
         private readonly ApplicationDbContext _context;
+        private readonly IMapper _mapper;
 
-        public DashboardRepository(ApplicationDbContext context)
+        public DashboardRepository(ApplicationDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
-        public async Task<List<Dashboard>> GetDashboardUnitsAsync()
+        public async Task<List<UnitSummary>> GetUnitSummaryAsync()
         {
             // Fetch units with related company, sensors, and readings
             var units = await _context.Units
@@ -22,7 +25,7 @@ namespace Infrastructure.Repositories
                 .Include(u => u.Readings)
                 .ToListAsync();
 
-            var dashboards = units.Select(unit => new Dashboard
+            var dashboards = units.Select(unit => new UnitSummary
             {
                 Id = unit.Id,
                 UnitType = unit.UnitTypeId.ToString(), // Adjust as needed to get the name
@@ -35,7 +38,6 @@ namespace Infrastructure.Repositories
                 Signal = null,  // Set if you have this info
                 //Latitude = unit.Readings.OrderByDescending(r => r.DateReceivedUtc).FirstOrDefault()?.Value, // Example: Value1 as latitude
                 //Longitude = unit.Readings.OrderByDescending(r => r.DateReceivedUtc).FirstOrDefault()?.Value, // Example: Value2 as longitude
-                UnitId = unit.Id.ToString(),
                 CompanyID = unit.CompanyID,
                 Company = unit.Company?.ToString()
             }).ToList();

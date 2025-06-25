@@ -122,7 +122,7 @@ export const UserLayout = ({ UserName }: iUser) => {
     return (
         <App>
             <Layout className="layout">
-                <Header style={{ display: "flex", alignItems: "center" }}>
+                <Header style={{ display: "flex", alignItems: "center", backgroundColor: "#5a6a71" }}>
                     <AppLogo />
                     <div style={{ minWidth: "500px", display: "flex" }}>
                         {menuDropdowns.map(menu => (

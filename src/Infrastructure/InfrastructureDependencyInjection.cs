@@ -2,6 +2,9 @@ using Application.Companies;
 using Application.Identity;
 using Application.Units;
 using Application.Sensors;
+using Application.Readings;
+using Application.Dashboard;
+using Application.ConfigurationUploads;
 using Infrastructure.Identity;
 using Infrastructure.Mapping;
 using Infrastructure.Repositories;
@@ -10,7 +13,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Application.Readings;
 
 namespace Infrastructure
 {
@@ -42,6 +44,8 @@ namespace Infrastructure
             services.AddScoped<ISensorRepository, SensorRepository>();
             services.AddScoped<IUnitModelRepository, UnitModelRepository>();
             services.AddScoped<IReadingRepository, ReadingRepository>();
+            services.AddScoped<IDashboardRepository, DashboardRepository>();
+            services.AddScoped<IConfigurationUploadRepository, ConfigurationUploadRepository>();
 
             // Register DbContext Initializer
             services.AddScoped<ApplicationDbContextInitialiser>();

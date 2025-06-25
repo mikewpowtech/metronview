@@ -15,6 +15,8 @@ const allColumnDefs = [
   { title: "Value", dataIndex: "value", key: "value", width: 120 },
 ];
 
+const PAGE_SIZE = 20;
+
 const ReadingsList: React.FC = () => {
   const auth = useAppSelector(selectAuth);
   const token = auth?.accessToken;
@@ -28,10 +30,15 @@ const ReadingsList: React.FC = () => {
   const [form] = Form.useForm();
   const [modalLoading, setModalLoading] = useState(false);
 
+    // Paging state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(PAGE_SIZE);
+
     // Column visibility state
     const [visibleKeys, setVisibleKeys] = useState<string[]>(
         allColumnDefs.filter(col => col.key !== "id").map(col => col.key as string)
     );
+
   const [columns, setColumns] = useState(allColumnDefs);
 
   useEffect(() => {
@@ -110,7 +117,7 @@ const ReadingsList: React.FC = () => {
         );
         message.success("Reading updated");
       } else {
-        const added = await addReading({ ...readingPayload, sensor: null}, token);
+        const added = await addReading({ ...readingPayload, sensor: null }, token);
         setReadings(prev => [...prev, added]);
         message.success("Reading added");
       }
@@ -260,7 +267,17 @@ const ReadingsList: React.FC = () => {
         dataSource={readings}
         columns={tableColumns}
         rowKey={r => `${r.dateRecordedUtc}_${r.sensor.id}`}
-        pagination={false}
+        pagination={{
+            current: currentPage,
+            pageSize: pageSize,
+            total: readings.length,
+            showSizeChanger: true,
+            pageSizeOptions: [10, 20, 50, 100],
+            onChange: (page, size) => {
+                setCurrentPage(page);
+                setPageSize(size);
+            },
+        }}
         scroll={{ x: "max-content" }}
       />
     </div>

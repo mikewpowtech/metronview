@@ -1,4 +1,6 @@
 using Application.Companies;
+using Application.ConfigurationUploads;
+using Application.Dashboard;
 using Application.Identity;
 using Application.Readings;
 using Application.Sensors;
@@ -20,6 +22,8 @@ namespace Application
             services.AddScoped<ISensorService, SensorService>();
             services.AddScoped<IUnitModelService, UnitModelService>();
             services.AddScoped<IReadingService, ReadingService>();
+            services.AddScoped<IDashboardService, DashboardService>();
+            services.AddScoped<IConfigurationUploadService, ConfigurationUploadService>();
 
             // Register Mapster for mapping
             services.AddMapster();

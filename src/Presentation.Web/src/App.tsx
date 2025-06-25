@@ -19,6 +19,7 @@ import SensorList from "./pages/SensorList";
 import ReadingsList from "./pages/ReadingsList";
 import UnitModelList from "./pages/UnitModelList"; // <-- Import the page
 import Dashboard from "./pages/Dashboard";
+import ConfigurationUploads from "./pages/ConfigurationUploads";
 
 export const App = () => {
     const auth = useAppSelector(selectAuth);
@@ -51,6 +52,7 @@ export const App = () => {
                             <Route path="/companies" element={<CompanyList />} />
                             <Route path="/sensors" element={<SensorList />} />
                             <Route path="/unitmodels" element={<UnitModelList />} />
+                            <Route path="/configurationuploads/:unitId" element={<ConfigurationUploads />} />
                             <Route path="*" element={<NotFoundPage />} />
                         </Route>
                     </Routes>

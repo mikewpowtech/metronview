@@ -1,6 +1,6 @@
 namespace Domain;
 
-public class Dashboard
+public class UnitSummary
 {
     public int Id { get; set; }
     public string? UnitType { get; set; }
@@ -13,7 +13,7 @@ public class Dashboard
     public int? Signal { get; set; }
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
-    public string? UnitId { get; set; }
+    public string? UnitCode { get; set; }
     public int? CompanyID { get; set; }
     public string? Company { get; set; }
 }
