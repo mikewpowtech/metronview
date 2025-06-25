@@ -44,6 +44,38 @@ jobs:
         name: webtelemetryservice
         path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
 
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    # - name: Download artifact from build job
+    #   uses: actions/download-artifact@v4
+    #   with:
+    #     name: webtelemetryservice
+    #     path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+
+    - name: Copy files to Azure VM via SCP
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.AZURE_VM_HOST }}
+        username: ${{ secrets.AZURE_VM_USERNAME }}
+        key: ${{ secrets.AZURE_VM_PASSWORD }}
+        source: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+        target: "/home/${{ secrets.AZURE_VM_USERNAME }}/telemetryserver"
+
+    - name: Restart TelemetryServer service on VM
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.AZURE_VM_HOST }}
+        username: ${{ secrets.AZURE_VM_USERNAME }}
+        key: ${{ secrets.AZURE_VM_PASSWORD }}
+        script: |
+          # Copy appsettings.json from config directory to telemetryserver directory
+          cp /home/${{ secrets.AZURE_VM_USERNAME }}/config/appsettings.json /home/${{ secrets.AZURE_VM_USERNAME }}/telemetryserver/appsettings.json
+          # Restart the service
+          sudo systemctl restart metronview-telemetry-server.service
+
   win-build:
     name: Windows Build  
     runs-on: windows-latest
@@ -154,31 +186,24 @@ jobs:
       #     overwrite: true
 
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-    - name: Download artifact from build job
-      uses: actions/download-artifact@v4
-      with:
-        name: webtelemetryservice
-        path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
-    - name: Azure Login
-      uses: azure/login@v2
-      with:
-        # - application(client)id of the appregistration (reg-metronview)
-        client-id:  ${{ secrets.AZURE_CLIENTID }}
-        # - subscription id
-        subscription-id:  ${{ secrets.AZURE_SUBSCRIPTIONID }}
-        # - directory/tenant id
-        tenant-id: ${{ secrets.AZURE_TENANTID }}
-    - name: Deploy to Azure WebApp
-      uses: azure/webapps-deploy@v2
-      with:
-        app-name: ${{ env.AZURE_WEBAPP_NAME }}
-        package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
-    # - name: Import API into Azure API Management
-    #   run: az apim api import --path "${{ env.AZURE_APIM_RESOURCE_PATH }}" --resource-group "${{ env.AZURE_APIM_RESOURCEGROUP }}" --service-name "${{ env.AZURE_APIM_SERVICENAME }}" --api-id "${{ env.AZURE_APIM_API_ID }}" --service-url "${{ env.AZURE_APIM_APPSERVICEURL }}" --specification-path "${{ env.API_IMPORT_SPECIFICATION_PATH }}" --specification-format OpenApi --subscription-required false
-    - name: logout
-      run: >
-        az logout
+
+
+    # - name: Azure Login
+    #   uses: azure/login@v2
+    #   with:
+    #     # - application(client)id of the appregistration (reg-metronview)
+    #     client-id:  ${{ secrets.AZURE_CLIENTID }}
+    #     # - subscription id
+    #     subscription-id:  ${{ secrets.AZURE_SUBSCRIPTIONID }}
+    #     # - directory/tenant id
+    #     tenant-id: ${{ secrets.AZURE_TENANTID }}
+    # - name: Deploy to Azure WebApp
+    #   uses: azure/webapps-deploy@v2
+    #   with:
+    #     app-name: ${{ env.AZURE_WEBAPP_NAME }}
+    #     package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+    # # - name: Import API into Azure API Management
+    # #   run: az apim api import --path "${{ env.AZURE_APIM_RESOURCE_PATH }}" --resource-group "${{ env.AZURE_APIM_RESOURCEGROUP }}" --service-name "${{ env.AZURE_APIM_SERVICENAME }}" --api-id "${{ env.AZURE_APIM_API_ID }}" --service-url "${{ env.AZURE_APIM_APPSERVICEURL }}" --specification-path "${{ env.API_IMPORT_SPECIFICATION_PATH }}" --specification-format OpenApi --subscription-required false
+    # - name: logout
+    #   run: >
+    #     az logout
