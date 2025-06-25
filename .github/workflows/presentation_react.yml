@@ -1,4 +1,4 @@
-name: Presentation.Web SWA Build and Deploy
+name: build and deploy metronview.react to static web app 
 
 on:
   push:

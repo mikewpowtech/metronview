@@ -1,4 +1,4 @@
-name: presentation_telemetryserver.yml
+name: build and deploy telemetryserver
 # This workflow builds a .NET API project and deploys it to Azure WebApp.
 # For more information see: https://unifiedapp-fecwfcdefwe9ewee.uksouth-01.azurewebsites.net/
 

@@ -1,4 +1,4 @@
-name: Presentation.API Build and deploy to Azure WebApp
+name: build and deploy metronview.API to Azure WebApp
 # This workflow builds a .NET API project and deploys it to Azure WebApp.
 # For more information see: https://unifiedapp-fecwfcdefwe9ewee.uksouth-01.azurewebsites.net/
 
