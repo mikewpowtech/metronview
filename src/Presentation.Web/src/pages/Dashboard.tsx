@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Table, Button, Space, Dropdown, Checkbox, message } from "antd";
+import { Table, Button, Dropdown, Checkbox } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import { fetchUnits, type Unit } from "../features/units/unitsAPI";
 import { fetchCompanies, type Company } from "../features/companies/companyAPI";

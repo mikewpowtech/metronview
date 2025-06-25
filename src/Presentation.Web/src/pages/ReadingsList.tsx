@@ -97,8 +97,7 @@ const ReadingsList: React.FC = () => {
           dateReceivedUtc: new Date().toISOString(),
         dateRecordedUtc: values.dateRecordedUtc.toISOString(),
           sensorId: values.sensorId,
-        value1: values.value1,
-        value2: values.value2,
+        value: values.value,
       };
       if (isEdit && editingKey) {
         await updateReading(editingKey.dateRecordedUtc, editingKey.sensorId, readingPayload, token);
@@ -111,7 +110,7 @@ const ReadingsList: React.FC = () => {
         );
         message.success("Reading updated");
       } else {
-        const added = await addReading(readingPayload, token);
+        const added = await addReading({ ...readingPayload, sensor: null}, token);
         setReadings(prev => [...prev, added]);
         message.success("Reading added");
       }
@@ -219,8 +218,7 @@ const ReadingsList: React.FC = () => {
           layout="vertical"
           form={form}
           initialValues={{
-            value1: undefined,
-            value2: undefined,
+            value: undefined,
           }}
         >
           <Form.Item
