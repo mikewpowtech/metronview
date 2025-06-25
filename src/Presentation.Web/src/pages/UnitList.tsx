@@ -154,7 +154,7 @@ const UnitList: React.FC = () => {
       const model = unitModels.find(m => m.id === record.unitTypeId);
     form.setFieldsValue({
         unitTypeId: model
-            ? { value: model.name, label: `${model.name}` }
+            ? { value: model.id, label: `${model.name}` }
             : undefined,
       phoneNumber: record.phoneNumber ?? "",
       pin: record.pin ?? "",
@@ -182,8 +182,12 @@ const UnitList: React.FC = () => {
   const handleModalOk = async () => {
     try {
       setModalLoading(true);
-      const values = await form.validateFields();
-      values.Id = editingId ?? 0; // Ensure Id is set for updates
+        const values = await form.validateFields();
+
+        //strip out the unittypeid label
+        values.unitTypeId = values.unitTypeId?.value ?? undefined;
+
+        values.Id = editingId ?? 0; // Ensure Id is set for updates
       if (isEdit && editingId !== null) {
         await updateUnit(editingId, values, token);
         setUnits(prev =>

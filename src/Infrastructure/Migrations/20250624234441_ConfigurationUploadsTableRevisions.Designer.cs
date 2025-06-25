@@ -4,6 +4,7 @@ using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250624234441_ConfigurationUploadsTableRevisions")]
+    partial class ConfigurationUploadsTableRevisions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -129,10 +132,15 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("UnitDbId")
+                        .HasColumnType("int");
+
                     b.Property<int>("UnitId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UnitDbId");
 
                     b.HasIndex("UnitId");
 
@@ -213,42 +221,6 @@ namespace Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("UnitModels");
-                });
-
-            modelBuilder.Entity("Infrastructure.DbClasses.UnitStatusDb", b =>
-                {
-                    b.Property<DateTime>("DateReceivedUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("UnitId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("AutoConfig")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("BatteryAlarm")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Carrier")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("FailedCallout")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("Mip")
-                        .HasColumnType("bit");
-
-                    b.Property<float?>("Signal")
-                        .HasColumnType("real");
-
-                    b.Property<float?>("Temperature")
-                        .HasColumnType("real");
-
-                    b.HasKey("DateReceivedUtc", "UnitId");
-
-                    b.HasIndex("UnitId");
-
-                    b.ToTable("UnitStatuses");
                 });
 
             modelBuilder.Entity("Infrastructure.Identity.ApplicationUserDb", b =>
@@ -492,8 +464,12 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Infrastructure.DbClasses.SensorDb", b =>
                 {
-                    b.HasOne("Infrastructure.DbClasses.UnitDb", "Unit")
+                    b.HasOne("Infrastructure.DbClasses.UnitDb", null)
                         .WithMany("Sensors")
+                        .HasForeignKey("UnitDbId");
+
+                    b.HasOne("Infrastructure.DbClasses.UnitDb", "Unit")
+                        .WithMany()
                         .HasForeignKey("UnitId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
@@ -517,17 +493,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("Company");
 
                     b.Navigation("UnitType");
-                });
-
-            modelBuilder.Entity("Infrastructure.DbClasses.UnitStatusDb", b =>
-                {
-                    b.HasOne("Infrastructure.DbClasses.UnitDb", "Unit")
-                        .WithMany()
-                        .HasForeignKey("UnitId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Unit");
                 });
 
             modelBuilder.Entity("Infrastructure.Identity.ApplicationUserDb", b =>

@@ -14,10 +14,32 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<SensorDb> Sensors { get; set; } = default!;
     public DbSet<ReadingDb> Readings { get; set; } = default!;
     public DbSet<UnitModelDb> UnitModels { get; set; } = default!; // Added for UnitModel support
+    public DbSet<ConfigurationUploadDb> ConfigurationUploads { get; set; } = default!;
+    public DbSet<UnitStatusDb> UnitStatuses { get; set; } = default!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<ConfigurationUploadDb>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            // Configure the foreign key relationship
+            entity.HasOne(e => e.Unit)
+                  .WithMany() // or .WithMany(u => u.Sensors) if you have a collection navigation property in UnitDb
+                  .HasForeignKey(e => e.UnitId)
+                  .OnDelete(DeleteBehavior.NoAction); // or your preferred delete behavior
+
+            entity.Property(u => u.QueueingUserName)
+                .HasMaxLength(255)
+                .IsRequired();
+
+            entity.Property(u => u.DateCreatedUtc)
+                .IsRequired();
+
+            entity.Property(u => u.UploadStatusId)
+                .IsRequired();
+        });
 
         modelBuilder.Entity<SensorDb>(entity =>
         {
@@ -25,9 +47,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
             // Configure the foreign key relationship
             entity.HasOne(e => e.Unit)
-                  .WithMany() // or .WithMany(u => u.Sensors) if you have a collection navigation property in UnitDb
+                  .WithMany(e => e.Sensors) // or .WithMany(u => u.Sensors) if you have a collection navigation property in UnitDb
                   .HasForeignKey(e => e.UnitId)
-                  .OnDelete(DeleteBehavior.Cascade); // or your preferred delete behavior
+                  .OnDelete(DeleteBehavior.NoAction); // or your preferred delete behavior
         });
 
         modelBuilder.Entity<UnitDb>(entity =>
@@ -49,6 +71,20 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<ReadingDb>(entity =>
         {
             entity.HasKey(r => new { r.DateRecordedUtc, r.SensorId });
+            entity.HasOne(r => r.Unit)
+                    .WithMany(u => u.Readings)
+                    .HasForeignKey(r => r.UnitId)
+                    .OnDelete(DeleteBehavior.NoAction);
+            // Optionally, configure relationships and properties here
+        });
+
+        modelBuilder.Entity<UnitStatusDb>(entity =>
+        {
+            entity.HasKey(r => new { r.DateReceivedUtc, r.UnitId });
+            entity.HasOne(r => r.Unit)
+                    .WithMany()
+                    .HasForeignKey(r => r.UnitId)
+                    .OnDelete(DeleteBehavior.NoAction);
             // Optionally, configure relationships and properties here
         });
 
@@ -59,9 +95,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasMaxLength(255)
             .IsRequired();
 
-                        entity.Property(u => u.Name)
-            .HasMaxLength(255)
-            .IsRequired();
+            entity.Property(u => u.Name)
+.HasMaxLength(255)
+.IsRequired();
             entity.Property(u => u.Description)
            .HasMaxLength(255);
         });

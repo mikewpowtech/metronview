@@ -1,4 +1,4 @@
-public enum UnitStatus
+public enum UnitStatusType
 {
     Inactive = 0,
     Active = 1,

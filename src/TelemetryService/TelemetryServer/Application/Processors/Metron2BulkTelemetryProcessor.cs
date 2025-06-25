@@ -696,7 +696,7 @@ partial class Metron2BulkTelemetryProcessor : ITelemetryProcessor, IReadingsDb, 
                 pendingConfigurationUploadId = r.GetInt32(1);
             }
         }
-        catch (SqlException ex)
+         catch (SqlException ex)
         {
             _logger.LogWarning(ex, "Couldn't complete AddConfigurationToTransactionIfAvailable");
         }

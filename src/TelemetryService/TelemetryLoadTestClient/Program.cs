@@ -15,7 +15,7 @@ namespace TelemetryLoadTestClient
 
         private static void DoTest()
         {
-             Metron2 rtu = new("MWTEST10000000000000", "localhost", 50200) { Secret = "secret", Pin = "1234", AutoConfig = true };
+             Metron2 rtu = new("MWTEST10", "localhost", 50200) { Secret = "secret", Pin = "1234", AutoConfig = true };
             //Metron2 rtu = new("RJCFAKEFAKEFAKEFAKE1", "localhost", 50200) { Secret = "secret", Pin = "1234", AutoConfig = true };
             //Metron2 rtu = new("AP1000000M2110097925", "localhost", 50200) { Secret = "secret", Pin = "1234", AutoConfig = true };
             rtu.AddSensor(new RandomAnalogueSensor(1, "T1", new Random()));

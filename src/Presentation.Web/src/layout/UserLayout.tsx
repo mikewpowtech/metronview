@@ -50,8 +50,8 @@ export const UserLayout = ({ UserName }: iUser) => {
     // Define dropdown menu items for each main menu
     const menuDropdowns = [
         {
-            key: "/readings",
-            label: "Readings",
+            key: "/dashboard",
+            label: "Home",
             items: [
             ],
         },
@@ -59,6 +59,10 @@ export const UserLayout = ({ UserName }: iUser) => {
             key: "/units",
             label: "Units",
             items: [
+                {
+                    key: "/readings",
+                    label: <span onClick={() => handleClick("/readings")}>Readings</span>,
+                },
                 {
                     key: "/sensors",
                     label: <span onClick={() => handleClick("/sensors")}>Sensors</span>,
@@ -109,7 +113,7 @@ export const UserLayout = ({ UserName }: iUser) => {
         },
         {
             key: "/users",
-            label: "Users",
+            label: "Logins",
             items: [
             ],
         },

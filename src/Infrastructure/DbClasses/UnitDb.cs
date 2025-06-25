@@ -11,7 +11,7 @@ public class UnitDb
     public string ManufacturerCode { get; set; } = string.Empty; // char(20), NOT NULL
     public string? UnitCode { get; set; } // varchar(100), NULL
     public string? Secret { get; set; } // varchar(100), NULL
-    public UnitStatus Status { get; set; }
+    public UnitStatusType Status { get; set; }
     public int? CompanyID { get; set; }// Now required (non-nullable)
     
     // Foreign key navigation property
@@ -19,4 +19,8 @@ public class UnitDb
 
     public int? DaysBeforeNotReported { get; set; } // int, NULL
     public string? CustomFieldValues { get; set; } // nvarchar(max), NULL
+
+    // Add this navigation property for related sensors
+    public ICollection<SensorDb> Sensors { get; set; } = new List<SensorDb>();
+    public ICollection<ReadingDb> Readings { get; set; } = new List<ReadingDb>();
 }

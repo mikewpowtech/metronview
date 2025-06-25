@@ -10,7 +10,8 @@ import { PlusOutlined, EditOutlined, DeleteOutlined, DownOutlined } from "@ant-d
 const allColumnDefs = [
   { title: "Date Received", dataIndex: "dateReceivedUtc", key: "dateReceivedUtc", width: 180 },
   { title: "Date Recorded", dataIndex: "dateRecordedUtc", key: "dateRecordedUtc", width: 180 },
-  { title: "Sensor", dataIndex: "sensor", key: "sensor", width: 200, render: (sensor: Sensor) => sensor?.name ?? sensor?.id },
+  { title: "Sensor ID", dataIndex: "sensor", key: "sensor", width: 100, render: (sensor: Sensor) => sensor?.id ?? "" },
+  { title: "Sensor Name", dataIndex: "sensor", key: "sensor", width: 200, render: (sensor: Sensor) => sensor?.name ?? "" },
   { title: "Value 1", dataIndex: "value1", key: "value1", width: 120 },
   { title: "Value 2", dataIndex: "value2", key: "value2", width: 120 },
 ];

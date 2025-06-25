@@ -19,6 +19,7 @@ import CompanyList from "./pages/CompanyList";
 import SensorList from "./pages/SensorList";
 import ReadingsList from "./pages/ReadingsList";
 import UnitModelList from "./pages/UnitModelList"; // <-- Import the page
+import Dashboard from "./pages/Dashboard";
 
 export const App = () => {
     const auth = useAppSelector(selectAuth);
@@ -41,7 +42,8 @@ export const App = () => {
                 <Spin spinning={auth.status == "loading"}>
                     <Routes>
                         <Route path="/" element={<UserLayout {...auth.user} />}>
-                            <Route index element={<ReadingsList />} />
+                            <Route index element={<Dashboard />} />
+                            <Route path="/dashboard" element={<Dashboard />} />
                             <Route path="/readings" element={<ReadingsList />} />
                             <Route path="/users" element={<UsersList />} />
                             <Route path="/units" element={<UnitList />} />

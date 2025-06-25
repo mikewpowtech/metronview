@@ -9,7 +9,7 @@ public class Unit
     public string ManufacturerCode { get; set; } = string.Empty; // char(20), NOT NULL
     public string? ClientCode { get; set; } // varchar(100), NULL
     public string? Secret { get; set; } // varchar(100), NULL
-    public UnitStatus Status { get; set; } // char(1), NOT NULL
+    public UnitStatusType Status { get; set; } // char(1), NOT NULL
     public int? CompanyID { get; set; } // Now required (non-nullable)
     public Company? Company { get; set; }
     public int? DaysBeforeNotReported { get; set; } // int, NULL
