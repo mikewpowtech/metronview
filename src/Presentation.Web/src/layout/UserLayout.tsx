@@ -121,7 +121,7 @@ export const UserLayout = ({ UserName }: iUser) => {
 
     return (
         <App>
-            <Layout className="layout">
+            <Layout className="layout" style={{ minHeight: "100vh" }}>
                 <Header style={{ display: "flex", alignItems: "center", backgroundColor: "#5a6a71" }}>
                     <AppLogo />
                     <div style={{ minWidth: "500px", display: "flex" }}>
@@ -165,7 +165,7 @@ export const UserLayout = ({ UserName }: iUser) => {
                         </Dropdown>
                     </div>
                 </Header>
-                <Content style={{ padding: "0 50px", minHeight: "400px" }}>
+                <Content style={{ padding: "0 50px", flex: 1, minHeight: 0 }}>
                     <Outlet />
                 </Content>
                 <AppFooter />

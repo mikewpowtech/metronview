@@ -23,23 +23,24 @@ namespace Infrastructure.Repositories
                 .Include(u => u.Company)
                 .Include(u => u.Sensors)
                 .Include(u => u.Readings)
+                .Include(u => u.UnitType)
                 .ToListAsync();
 
             var dashboards = units.Select(unit => new UnitSummary
             {
                 Id = unit.Id,
-                UnitType = unit.UnitTypeId.ToString(), // Adjust as needed to get the name
+                UnitType = unit.UnitType?.Name ?? "unknown", // Adjust as needed to get the name
                 LastComms = unit.Readings.OrderByDescending(r => r.DateReceivedUtc).FirstOrDefault()?.DateReceivedUtc,
                 //Alarm = unit.Sensors.Any(s => s.Name?.ToLower().Contains("alarm") == true),
                 //Readings = unit.Readings.ToList(),
                 //Sensors = unit.Sensors.ToList(),
                 //AmbientTemperature = unit.Readings.OrderByDescending(r => r.DateReceivedUtc).FirstOrDefault()?.Value, // Example: Value1 as temperature
-                Carrier = null, // Set if you have this info
-                Signal = null,  // Set if you have this info
+                Carrier = "EE", // Set if you have this info
+                Signal = 27,  // Set if you have this info
                 //Latitude = unit.Readings.OrderByDescending(r => r.DateReceivedUtc).FirstOrDefault()?.Value, // Example: Value1 as latitude
                 //Longitude = unit.Readings.OrderByDescending(r => r.DateReceivedUtc).FirstOrDefault()?.Value, // Example: Value2 as longitude
                 CompanyID = unit.CompanyID,
-                Company = unit.Company?.ToString()
+                Company = unit.Company?.Name ?? "unknown"
             }).ToList();
 
             return dashboards;

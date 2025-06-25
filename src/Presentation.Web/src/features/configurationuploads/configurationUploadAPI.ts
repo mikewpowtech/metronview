@@ -5,9 +5,9 @@ const BASE_URL = import.meta.env.REACT_APP_API_URL as string;
 export interface ConfigurationUpload {
   id: number;
   unitId: number;
-  fileName?: string;
-  uploadedAtUtc: string;
-  uploadedBy?: string;
+  configuration?: string;
+    dateCreatedUtc: string;
+    queueingUserName?: string;
   // Add other fields as needed
 }
 

@@ -131,7 +131,6 @@ const Dashboard: React.FC = () => {
                     size="small"
                     onClick={() => navigate(`/configurationuploads/${record.id}`)}
                 >
-                    Config Uploads
                 </Button>
             ),
         },
