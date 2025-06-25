@@ -12,8 +12,7 @@ const allColumnDefs = [
   { title: "Date Recorded", dataIndex: "dateRecordedUtc", key: "dateRecordedUtc", width: 180 },
   { title: "Sensor ID", dataIndex: "sensor", key: "sensor", width: 100, render: (sensor: Sensor) => sensor?.id ?? "" },
   { title: "Sensor Name", dataIndex: "sensor", key: "sensor", width: 200, render: (sensor: Sensor) => sensor?.name ?? "" },
-  { title: "Value 1", dataIndex: "value1", key: "value1", width: 120 },
-  { title: "Value 2", dataIndex: "value2", key: "value2", width: 120 },
+  { title: "Value", dataIndex: "value", key: "value", width: 120 },
 ];
 
 const ReadingsList: React.FC = () => {
@@ -75,8 +74,7 @@ const ReadingsList: React.FC = () => {
       dateReceivedUtc: dayjs(record.dateReceivedUtc),
       dateRecordedUtc: dayjs(record.dateRecordedUtc),
       sensorId: record.sensor.id,
-      value1: record.value1,
-      value2: record.value2,
+      value: record.value,
     });
     setShowModal(true);
   };
@@ -254,10 +252,7 @@ const ReadingsList: React.FC = () => {
               ))}
             </Select>
           </Form.Item>
-          <Form.Item label="Value 1" name="value1">
-            <InputNumber style={{ width: "100%" }} />
-          </Form.Item>
-          <Form.Item label="Value 2" name="value2">
+          <Form.Item label="Value" name="value">
             <InputNumber style={{ width: "100%" }} />
           </Form.Item>
         </Form>

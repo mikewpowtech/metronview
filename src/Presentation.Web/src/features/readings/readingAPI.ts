@@ -7,8 +7,7 @@ export interface Reading {
   dateReceivedUtc: string;
   dateRecordedUtc: string;
   sensor: Sensor;
-  value1?: number | null;
-  value2?: number | null;
+  value?: number | null;
 }
 
 // Fetch all readings
@@ -26,8 +25,7 @@ export async function addReading(
         dateRecordedUtc: string;
         sensorId: number;
         sensor: Sensor | null;
-        value1?: number | null;
-        value2?: number | null;
+        value?: number | null;
     },
   token?: string
 ): Promise<Reading> {
@@ -53,8 +51,7 @@ export async function updateReading(
         dateReceivedUtc: string;
         dateRecordedUtc: string;
         sensorId: number;
-        value1?: number | null;
-        value2?: number | null;
+        value?: number | null;
     },
     token?: string
 ): Promise<void> {
