@@ -9,6 +9,7 @@ import { selectAuth } from "../app/store";
 import { useNavigate } from "react-router-dom";
 import { GenericTable } from "../components/GenericTable";
 import dayjs from "dayjs"; // Add this import for date formatting
+import type { Unit } from "../features/units/unitsAPI";
 
 // Persistent column visibility utilities
 const COLUMN_VISIBILITY_KEY = "dashboard.visibleColumns";
@@ -142,23 +143,31 @@ const Dashboard: React.FC = () => {
         ...columns,
     ];
 
+    const mainTable = (
+        <GenericTable<UnitSummary>
+            data={units}
+            columns={tableColumns}
+            title={() =>
+                <>
+                    <h4>Dashboard</h4>
+                    <div>
+                        <Dropdown menu={{ items: columnMenuItems }} trigger={["click"]}>
+                            <Button size="small">
+                                Columns <SettingOutlined />
+                            </Button>
+                        </Dropdown>
+                    </div>
+                </>
+            }
+        />
+    );
+
     if (loading) return <div>Loading dashboard...</div>;
     if (error) return <div style={{ color: "red" }}>Error: {error}</div>;
 
     return (
         <div style={{ padding: "12px 0 12px 30px" }} >
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                <h2 style={{ fontSize: 20, margin: "12px 0 12px 0" }}>Home - Units & Readings Overview</h2>
-                <Dropdown menu={{ items: columnMenuItems }} trigger={["click"]}>
-                    <Button size="middle">
-                        Columns <SettingOutlined />
-                    </Button>
-                </Dropdown>
-            </div>
-            <GenericTable<UnitSummary>
-                data={units}
-                columns={tableColumns}
-            />
+            { mainTable }
         </div>
     );
 };

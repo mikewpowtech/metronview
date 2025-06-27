@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
-import { Table, Button, Modal, Input, Form, InputNumber, Space, Popconfirm, message, Dropdown, Checkbox, Select } from "antd";
-import { PlusOutlined, EditOutlined, DeleteOutlined, DownOutlined } from "@ant-design/icons";
+import { Tooltip, Table, Button, Modal, Input, Form, InputNumber, Space, Popconfirm, message, Dropdown, Checkbox, Select } from "antd";
+import { SettingOutlined, PlusOutlined, EditOutlined, DeleteOutlined, DownOutlined , RightOutlined } from "@ant-design/icons";
 import { fetchUnits, addUnit, updateUnit, deleteUnit, type Unit } from "../features/units/unitsAPI";
 import { fetchCompanies, type Company } from "../features/companies/companyAPI";
 import { fetchUnitModels, type UnitModel } from "../features/unitmodels/unitModelAPI";
 import { fetchSensorsByUnit, addSensor, updateSensor, deleteSensor, type Sensor } from "../features/sensors/sensorAPI";
 import { useAppSelector } from "../app/hooks";
 import { selectAuth } from "../app/store";
+import { GenericTable } from "../components/GenericTable";
 
 // Utility for persistent column keys
 const COLUMN_VISIBILITY_KEY = "unitList.visibleColumns";
@@ -65,6 +66,7 @@ const UnitList: React.FC = () => {
     const [editingId, setEditingId] = useState<number | null>(null);
     const [form] = Form.useForm();
     const [modalLoading, setModalLoading] = useState(false);
+    const [expandedRowKeys, setExpandedRowKeys] = useState<React.Key[]>([]);
 
     // Column visibility state (persistent)
     const defaultVisibleKeys = allColumnDefs.filter(col => col.key !== "id").map(col => col.key as string);
@@ -286,58 +288,186 @@ const UnitList: React.FC = () => {
         ),
     }));
 
-    // Add the Actions column after filtering
-    const tableColumns = [
-        ...columns,
-        {
-            title: "Actions",
-            key: "actions",
-            width: 120,
-            render: (_: any, record: Unit) => (
-                <Space>
+    const handleExpandRow = (record: Unit) => {
+        setExpandedRowKeys(keys =>
+            keys.includes(record.id)
+                ? keys.filter(key => key !== record.id)
+                : [...keys, record.id]
+        );
+    };
+
+    const actionsColumn = {
+        title: "",
+        key: "actions",
+        align: "center" as const,
+        className: "actions-col",
+        render: (_: any, record: Unit) => (
+            <span className="actions-col-inner">
+                <Tooltip title="edit">
                     <Button
                         icon={<EditOutlined />}
                         size="small"
+                        style={{ padding: 0, minWidth: 0, width: 28, height: 28 }}
                         onClick={() => handleEdit(record)}
                     />
-                    <Popconfirm
-                        title="Delete this unit?"
-                        onConfirm={() => handleDelete(record.id)}
-                        okText="Yes"
-                        cancelText="No"
-                    >
-                        <Button
-                            icon={<DeleteOutlined />}
-                            size="small"
-                            danger
+                </Tooltip>
+                <Popconfirm
+                    title="Delete this unit?"
+                    onConfirm={() => handleDelete(record.id)}
+                    okText="Yes"
+                    cancelText="No"
+                >
+                    <Tooltip title="delete">
+
+                    <Button
+                        icon={<DeleteOutlined />}
+                        size="small"
+                        danger
                         />
-                    </Popconfirm>
-                </Space>
-            ),
-        },
+                    </Tooltip>
+                </Popconfirm>
+                <Tooltip title={expandedRowKeys.includes(record.id) ? "Hide Sensors" : "Sensors"}>
+                    <Button
+                        icon={expandedRowKeys.includes(record.id) ? <DownOutlined /> : <RightOutlined />}
+                        size="small"
+                        style={{ marginLeft: 4, padding: 0, minWidth: 0, width: 28, height: 28 }}
+                        onClick={() => handleExpandRow(record)}
+                    />
+                </Tooltip>
+            </span>
+        ),
+    };
+
+    // Place Actions column first
+    const tableColumns = [
+        actionsColumn,
+        ...columns,
     ];
+
+
+    const mainTable = (
+        <GenericTable<Unit>
+            data={units}
+            columns={tableColumns}
+            title={() =>
+                <>
+                    <h4>Units</h4>
+                    <div>
+                        <Button size="small" onClick={handleAdd}
+                            style={{ margin: "0 10px 0 0" }} >
+                            Add <PlusOutlined />
+                        </Button>
+                        <Dropdown menu={{ items: columnMenuItems }} trigger={["click"]}>
+                            <Button size="small">
+                                Columns <SettingOutlined />
+                            </Button>
+                        </Dropdown>
+                    </div>
+                </>
+            }
+            expandable={{
+                expandedRowRender: (unit: Unit) => {
+                    const sensors = sensorsByUnit[unit.id] || [];
+                    setEditingId(unit.id);
+                    return getSensorsTable(unit, sensors);
+                },
+                expandedRowKeys,
+                onExpand: (expanded, record) => handleExpandRow(record),
+                showExpandColumn: false
+            }}
+        />
+    );
+
+    // Sensors table as a ReactNode (function that takes sensors and unit)
+    const getSensorsTable = (unit: Unit, sensors: Sensor[]): React.ReactNode => (
+        <div style={{ padding: "12px 0 12px 10px" }} >
+            <GenericTable<Sensor>
+                title={() =>
+                    <>
+                        <h6>Sensors for Unit {unit.manufacturerCode}</h6>
+                        <div>
+                            <Button size="small" onClick={() => openSensorModal(unit.id)}
+                                style={{ margin: "0 10px 0 0" }} >
+                                Add <PlusOutlined />
+                            </Button>
+                        </div>
+                    </>
+                }
+                data={sensors}
+                columns={[
+                    {
+                        title: "",
+                        key: "actions",
+                        align: "center" as const,
+                        className: "actions-col",
+                        render: (_: any, record: Sensor) => (
+                            <Space>
+                                <Button
+                                    icon={<EditOutlined />}
+                                    size="small"
+                                    onClick={() => openSensorModal(unit.id, record)}
+                                />
+                                <Popconfirm
+                                    title="Delete this sensor?"
+                                    onConfirm={() => handleDeleteSensor(record.id)}
+                                    okText="Yes"
+                                    cancelText="No"
+                                >
+                                    <Button
+                                        icon={<DeleteOutlined />}
+                                        size="small"
+                                        danger
+                                    />
+                                </Popconfirm>
+                            </Space>
+                        ),
+                    },
+                    { title: "Name", dataIndex: "name", key: "name", width: 200 },
+                    { title: "Channel", dataIndex: "channel", key: "channel", width: 100 },
+                    { title: "Channel Type", dataIndex: "channelType", key: "channelType", width: 200 },
+                    { title: "Low Value", dataIndex: "lowValue", key: "lowValue", width: 100 },
+                    { title: "High Value", dataIndex: "highValue", key: "highValue", width: 100 },
+                    { title: "Engineering Units", dataIndex: "engineeringUnits", key: "engineeringUnits", width: 100 },
+
+                ]}
+            />
+            <Modal
+                title={sensorModal.sensor ? "Edit Sensor" : "Add Sensor"}
+                open={sensorModal.open}
+                onCancel={handleSensorModalCancel}
+                onOk={handleSensorModalOk}
+                confirmLoading={sensorModalLoading}
+                destroyOnHidden={true}
+            >
+                <Form layout="vertical" form={sensorForm}>
+                    <Form.Item label="Name" name="name" rules={[{ required: true, message: "Please enter a name" }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item label="Channel" name="channel" rules={[{ required: true, message: "Please enter a channel" }]}>
+                        <InputNumber min={0} style={{ width: "100%" }} />
+                    </Form.Item>
+                    <Form.Item label="Channel Type" name="channelType">
+                        <InputNumber min={0} style={{ width: "100%" }} />
+                    </Form.Item>
+                    <Form.Item label="Low Value" name="lowValue">
+                        <InputNumber style={{ width: "100%" }} />
+                    </Form.Item>
+                    <Form.Item label="High Value" name="highValue">
+                        <InputNumber style={{ width: "100%" }} />
+                    </Form.Item>
+                    <Form.Item label="Engineering Units" name="engineeringUnits">
+                        <Input />
+                    </Form.Item>
+                </Form>
+            </Modal>
+        </div>
+    )
 
     if (loading) return <div>Loading units...</div>;
     if (error) return <div style={{ color: "red" }}>Error: {error}</div>;
 
     return (
-        <div>
-            <div style={{ marginBottom: 16 }}>
-                <Dropdown menu={{ items: columnMenuItems }} trigger={["click"]}>
-                    <Button>
-                        Columns <DownOutlined />
-                    </Button>
-                </Dropdown>
-            </div>
-            <h2>Units</h2>
-            <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={handleAdd}
-                style={{ marginBottom: 16 }}
-            >
-                Add Unit
-            </Button>
+        <div style={{ padding: "12px 0 12px 30px" }} >
             <Modal
                 title={isEdit ? "Edit Unit" : "Add Unit"}
                 open={showModal}
@@ -452,100 +582,7 @@ const UnitList: React.FC = () => {
                     </Form.Item>
                 </Form>
             </Modal>
-            <Table<Unit>
-                bordered
-                dataSource={units}
-                columns={tableColumns}
-                rowKey="id"
-                pagination={false}
-                scroll={{ x: "max-content" }}
-                expandable={{
-                    expandedRowRender: (unit: Unit) => {
-                        const sensors = sensorsByUnit[unit.id] || [];
-                        setEditingId(unit.id);
-                        return (
-                            <div>
-                                <Button
-                                    type="primary"
-                                    size="small"
-                                    onClick={() => openSensorModal(unit.id)}
-                                    style={{ marginBottom: 8 }}
-                                >
-                                    Add Sensor
-                                </Button>
-                                <Table<Sensor>
-                                    dataSource={sensors}
-                                    columns={[
-                                        { title: "Name", dataIndex: "name", key: "name", width: 200 },
-                                        { title: "Channel", dataIndex: "channel", key: "channel", width: 100 },
-                                        { title: "Channel Type", dataIndex: "channelType", key: "channelType", width: 200 },
-                                        { title: "Low Value", dataIndex: "lowValue", key: "lowValue", width: 100 },
-                                        { title: "High Value", dataIndex: "highValue", key: "highValue", width: 100 },
-                                        { title: "Engineering Units", dataIndex: "engineeringUnits", key: "engineeringUnits", width: 100 },
-                                        {
-                                            title: "Actions",
-                                            key: "actions",
-                                            render: (_: any, record: Sensor) => (
-                                                <Space>
-                                                    <Button
-                                                        icon={<EditOutlined />}
-                                                        size="small"
-                                                        onClick={() => openSensorModal(unit.id, record)}
-                                                    />
-                                                    <Popconfirm
-                                                        title="Delete this sensor?"
-                                                        onConfirm={() => handleDeleteSensor(record.id)}
-                                                        okText="Yes"
-                                                        cancelText="No"
-                                                    >
-                                                        <Button
-                                                            icon={<DeleteOutlined />}
-                                                            size="small"
-                                                            danger
-                                                        />
-                                                    </Popconfirm>
-                                                </Space>
-                                            ),
-                                        },
-                                    ]}
-                                    rowKey="id"
-                                    pagination={false}
-                                    size="small"
-                                />
-                                <Modal
-                                    title={sensorModal.sensor ? "Edit Sensor" : "Add Sensor"}
-                                    open={sensorModal.open}
-                                    onCancel={handleSensorModalCancel}
-                                    onOk={handleSensorModalOk}
-                                    confirmLoading={sensorModalLoading}
-                                    destroyOnHidden={true}
-                                >
-                                    <Form layout="vertical" form={sensorForm}>
-                                        <Form.Item label="Name" name="name" rules={[{ required: true, message: "Please enter a name" }]}>
-                                            <Input />
-                                        </Form.Item>
-                                        <Form.Item label="Channel" name="channel" rules={[{ required: true, message: "Please enter a channel" }]}>
-                                            <InputNumber min={0} style={{ width: "100%" }} />
-                                        </Form.Item>
-                                        <Form.Item label="Channel Type" name="channelType">
-                                            <InputNumber min={0} style={{ width: "100%" }} />
-                                        </Form.Item>
-                                        <Form.Item label="Low Value" name="lowValue">
-                                            <InputNumber style={{ width: "100%" }} />
-                                        </Form.Item>
-                                        <Form.Item label="High Value" name="highValue">
-                                            <InputNumber style={{ width: "100%" }} />
-                                        </Form.Item>
-                                        <Form.Item label="Engineering Units" name="engineeringUnits">
-                                            <Input />
-                                        </Form.Item>
-                                    </Form>
-                                </Modal>
-                            </div>
-                        );
-                    },
-                }}
-            />
+            { mainTable }
         </div>
     );
 };

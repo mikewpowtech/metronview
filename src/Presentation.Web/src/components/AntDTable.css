@@ -16,6 +16,13 @@
     font-weight: 500;
 }
 
+.compact-table .ant-table-title {
+    background-color: lightgray;
+    display: flex;
+    align-items: center;
+    justify-content:space-between;
+}
+
 /* Minimal width for actions column based on content */
 .compact-table .actions-col {
     padding-left: 2px !important;

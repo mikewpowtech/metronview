@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
-import { Table, Button, Modal, Input, Form, Popconfirm, message, Dropdown, Checkbox, Select, Tooltip } from "antd";
+import { Button, Modal, Input, Form, message, Dropdown, Checkbox, Select, Tooltip } from "antd";
 import { PlusOutlined, EditOutlined, SettingOutlined } from "@ant-design/icons";
 import {
     fetchCompanies,
@@ -206,78 +206,86 @@ const CompanyList: React.FC = () => {
         ...columns,
     ];
 
+    const MainTable: React.FC = () => (
+        <GenericTable<Company>
+            data={companies}
+            columns={tableColumns}
+            title={() =>
+                <>
+                    <h4>Companies</h4>
+                    <div>
+                        <Button size="small" onClick={handleAdd}
+                            style={{ margin: "0 10px 0 0" }} >
+                            Add <PlusOutlined />
+                        </Button>
+                        <Dropdown menu={{ items: columnMenuItems }} trigger={["click"]}>
+                            <Button size="small">
+                                Columns <SettingOutlined />
+                            </Button>
+                        </Dropdown>
+                    </div>
+                </>
+            }
+        />
+    );
+
+    const MainModal: React.FC = () => (
+        <Modal
+            title={isEdit ? "Edit Company" : "Add Company"}
+            open={showModal}
+            onCancel={handleModalCancel}
+            onOk={handleModalOk}
+            okText="Save"
+            confirmLoading={modalLoading}
+            destroyOnHidden={true}
+        >
+            <Form
+                layout="vertical"
+                form={form}
+                initialValues={{
+                    name: "",
+                    parentCompanyId: undefined,
+                }}
+            >
+                <Form.Item
+                    label="Name"
+                    name="name"
+                    rules={[{ required: true, message: "Please enter a name" }]}
+                >
+                    <Input placeholder="Company Name" />
+                </Form.Item>
+                <Form.Item label="Parent Company" name="parentCompanyId">
+                    <Select
+                        allowClear
+                        showSearch
+                        placeholder="Select a parent company"
+                        optionFilterProp="children"
+                        filterOption={(input, option) =>
+                            typeof option?.children === "string" &&
+                            (option.children as string).toLowerCase().includes(input.toLowerCase())
+                        }
+                    >
+                        {companies
+                            .filter(c => !isEdit || c.id !== editingId) // Prevent selecting self as parent
+                            .map(company => (
+                                <Select.Option key={company.id} value={company.id}>
+                                    {company.name}
+                                </Select.Option>
+                            ))}
+                    </Select>
+                </Form.Item>
+            </Form>
+        </Modal>
+    )
+
+
     if (loading) return <div>Loading companies...</div>;
     if (error) return <div style={{ color: "red" }}>Error: {error}</div>;
 
     return (
         <div style={{ padding: "12px 0 12px 30px" }} >
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", marginBottom: 12 }}>
-                <Dropdown menu={{ items: columnMenuItems }} trigger={["click"]}>
-                    <Button size="middle">
-                        Columns <SettingOutlined />
-                    </Button>
-                </Dropdown>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-                <h2 style={{ margin: 0, fontSize: 20 }}>Companies</h2>
-                <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={handleAdd}
-                >
-                    Add Company
-                </Button>
-            </div>
-            <Modal
-                title={isEdit ? "Edit Company" : "Add Company"}
-                open={showModal}
-                onCancel={handleModalCancel}
-                onOk={handleModalOk}
-                okText="Save"
-                confirmLoading={modalLoading}
-                destroyOnHidden={true}
-            >
-                <Form
-                    layout="vertical"
-                    form={form}
-                    initialValues={{
-                        name: "",
-                        parentCompanyId: undefined,
-                    }}
-                >
-                    <Form.Item
-                        label="Name"
-                        name="name"
-                        rules={[{ required: true, message: "Please enter a name" }]}
-                    >
-                        <Input placeholder="Company Name" />
-                    </Form.Item>
-                    <Form.Item label="Parent Company" name="parentCompanyId">
-                        <Select
-                            allowClear
-                            showSearch
-                            placeholder="Select a parent company"
-                            optionFilterProp="children"
-                            filterOption={(input, option) =>
-                                typeof option?.children === "string" &&
-                                (option.children as string).toLowerCase().includes(input.toLowerCase())
-                            }
-                        >
-                            {companies
-                                .filter(c => !isEdit || c.id !== editingId) // Prevent selecting self as parent
-                                .map(company => (
-                                    <Select.Option key={company.id} value={company.id}>
-                                        {company.name}
-                                    </Select.Option>
-                                ))}
-                        </Select>
-                    </Form.Item>
-                </Form>
-            </Modal>
-            <GenericTable<Company>
-                data={companies}
-                columns={tableColumns}
-            />
+            <MainModal/>
+            <MainTable/>
         </div>
     );
 };
