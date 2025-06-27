@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
-import { Table, Button, Modal, Form, InputNumber, DatePicker, Space, Popconfirm, message, Dropdown, Checkbox, Select } from "antd";
+import {
+    Tooltip, Button, Modal, Form, InputNumber, DatePicker,
+    Popconfirm, message, Dropdown, Checkbox, Select
+} from "antd";
 import dayjs from "dayjs";
 import { fetchReadings, addReading, updateReading, deleteReading, type Reading } from "../features/readings/readingAPI";
 import { fetchSensors, type Sensor } from "../features/sensors/sensorAPI";
 import { useAppSelector } from "../app/hooks";
 import { selectAuth } from "../app/store";
 import { PlusOutlined, EditOutlined, DeleteOutlined, DownOutlined } from "@ant-design/icons";
+import { GenericTable } from "../components/GenericTable";
 
 const allColumnDefs = [
   { title: "Date Received", dataIndex: "dateReceivedUtc", key: "dateReceivedUtc", width: 180 },
@@ -161,35 +165,43 @@ const ReadingsList: React.FC = () => {
   }));
 
   // Add the Actions column after filtering
-  const tableColumns = [
-    ...columns,
-    {
-      title: "Actions",
-      key: "actions",
-      width: 120,
-      render: (_: any, record: Reading) => (
-        <Space>
+      const actionsColumns = {
+          title: "",
+          key: "actions",
+          align: "center" as const,
+          className: "actions-col",
+          render: (_: any, record: Reading) => (
+              <span className="actions-col-inner">
+                  <Tooltip title="edit">
           <Button
             icon={<EditOutlined />}
             size="small"
             onClick={() => handleEdit(record)}
-          />
+                      />
+                  </Tooltip>
           <Popconfirm
             title="Delete this reading?"
             onConfirm={() => handleDelete(record.dateRecordedUtc, record.sensor.id)}
             okText="Yes"
             cancelText="No"
-          >
+                  >
+                      <Tooltip title="delete">
             <Button
               icon={<DeleteOutlined />}
               size="small"
               danger
-            />
+                          />
+            </Tooltip>
           </Popconfirm>
-        </Space>
+        </span>
       ),
-    },
-  ];
+    };
+
+    // Place Actions column first
+    const tableColumns = [
+        actionsColumns,
+        ...columns,
+    ];
 
   if (loading) return <div>Loading readings...</div>;
   if (error) return <div style={{ color: "red" }}>Error: {error}</div>;
@@ -261,10 +273,9 @@ const ReadingsList: React.FC = () => {
             <InputNumber style={{ width: "100%" }} />
           </Form.Item>
         </Form>
-      </Modal>
-      <Table<Reading>
-        bordered
-        dataSource={readings}
+          </Modal>
+      <GenericTable<Reading>
+        data={readings}
         columns={tableColumns}
         rowKey={r => `${r.dateRecordedUtc}_${r.sensor.id}`}
         pagination={{
@@ -278,7 +289,6 @@ const ReadingsList: React.FC = () => {
                 setPageSize(size);
             },
         }}
-        scroll={{ x: "max-content" }}
       />
     </div>
   );

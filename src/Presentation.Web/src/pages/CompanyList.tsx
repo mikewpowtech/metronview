@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { Table, Button, Modal, Input, Form, Popconfirm, message, Dropdown, Checkbox, Select, Tooltip } from "antd";
-import { PlusOutlined, EditOutlined, DeleteOutlined, DownOutlined } from "@ant-design/icons";
+import { PlusOutlined, EditOutlined, SettingOutlined } from "@ant-design/icons";
 import {
     fetchCompanies,
     addCompany,
@@ -11,7 +11,7 @@ import {
 } from "../features/companies/companyAPI";
 import { useAppSelector } from "../app/hooks";
 import { selectAuth } from "../app/store";
-import "./AntDTable.css"; // For custom compact styles
+import { GenericTable } from "../components/GenericTable";
 
 const allColumnDefs = [
     { title: "ID", dataIndex: "id", key: "id", width: 100 },
@@ -210,11 +210,11 @@ const CompanyList: React.FC = () => {
     if (error) return <div style={{ color: "red" }}>Error: {error}</div>;
 
     return (
-        <div>
-            <div style={{ marginBottom: 16 }}>
+        <div style={{ padding: "12px 0 12px 30px" }} >
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", marginBottom: 12 }}>
                 <Dropdown menu={{ items: columnMenuItems }} trigger={["click"]}>
-                    <Button>
-                        Columns <DownOutlined />
+                    <Button size="middle">
+                        Columns <SettingOutlined />
                     </Button>
                 </Dropdown>
             </div>
@@ -274,15 +274,9 @@ const CompanyList: React.FC = () => {
                     </Form.Item>
                 </Form>
             </Modal>
-            <Table<Company>
-                bordered
-                dataSource={companies}
+            <GenericTable<Company>
+                data={companies}
                 columns={tableColumns}
-                rowKey="id"
-                pagination={false}
-                scroll={{ x: "max-content" }}
-                size="middle"
-                className="compact-table"
             />
         </div>
     );

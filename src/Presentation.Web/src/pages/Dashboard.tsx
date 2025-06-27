@@ -7,7 +7,7 @@ import { fetchDashboardUnits, type UnitSummary } from "../features/dashboard/das
 import { useAppSelector } from "../app/hooks";
 import { selectAuth } from "../app/store";
 import { useNavigate } from "react-router-dom";
-import "./AntDTable.css"; // For custom compact styles
+import { GenericTable } from "../components/GenericTable";
 import dayjs from "dayjs"; // Add this import for date formatting
 
 // Persistent column visibility utilities
@@ -155,15 +155,9 @@ const Dashboard: React.FC = () => {
                     </Button>
                 </Dropdown>
             </div>
-            <Table<UnitSummary>
-                bordered
-                dataSource={units}
+            <GenericTable<UnitSummary>
+                data={units}
                 columns={tableColumns}
-                rowKey="id"
-                pagination={false}
-                scroll={{ x: "max-content" }}
-                size="middle"
-                className="compact-table"
             />
         </div>
     );
