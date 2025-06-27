@@ -1,0 +1,29 @@
+.compact-table .ant-table-cell,
+.compact-table .ant-table-thead > tr > th {
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    font-size: 14px;
+    line-height: 1.4;
+}
+.compact-table .ant-btn {
+    min-width: 0 !important;
+    height: 28px !important;
+    font-size: 14px !important;
+}
+.compact-table .ant-table-thead > tr > th {
+    font-weight: 500;
+}
+
+/* Minimal width for actions column based on content */
+.compact-table .actions-col {
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+    width: 1%;
+    white-space: nowrap;
+}
+.compact-table .actions-col-inner {
+    display: inline-flex;
+    gap: 4px;
+}

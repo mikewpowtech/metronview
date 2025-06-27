@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
-import { Table, Button, Dropdown, Checkbox } from "antd";
-import { DownOutlined, FileSearchOutlined } from "@ant-design/icons";
+import { Table, Button, Dropdown, Checkbox, Tooltip } from "antd";
+import { DownOutlined } from "@ant-design/icons";
+import SettingFilled from "@ant-design/icons/SettingFilled";
 import { fetchDashboardUnits, type UnitSummary } from "../features/dashboard/dashboardAPI";
 import { useAppSelector } from "../app/hooks";
 import { selectAuth } from "../app/store";
 import { useNavigate } from "react-router-dom";
+import "./Dashboard.css"; // For custom compact styles
+import dayjs from "dayjs"; // Add this import for date formatting
 
 // Persistent column visibility utilities
 const COLUMN_VISIBILITY_KEY = "dashboard.visibleColumns";
@@ -22,7 +25,7 @@ function getPersistedVisibleKeys(defaultKeys: string[]) {
     }
 }
 function setPersistedVisibleKeys(keys: string[]) {
-    if (typeof window !== "undefined") {
+    if (typeof window   !== "undefined") {
         localStorage.setItem(COLUMN_VISIBILITY_KEY, JSON.stringify(keys));
     }
 }
@@ -31,10 +34,17 @@ function setPersistedVisibleKeys(keys: string[]) {
 const allColumnDefs = [
     { title: "ID", dataIndex: "id", key: "id", width: 100 },
     { title: "Unit Type", dataIndex: "unitType", key: "unitType", width: 120 },
-    { title: "Last Comms(UTC)", dataIndex: "lastComms", key: "lastComms", width: 140 },
-    { title: "Carrier", dataIndex: "carrier", key: "carrier", width: 120 },
-    { title: "Signal", dataIndex: "signal", key: "signal", width: 120 },
-    { title: "Company", dataIndex: "company", key: "company", width: 180 },
+    {
+        title: "Last Comms(UTC)",
+        dataIndex: "lastComms",
+        key: "lastComms",
+        width: 140,
+        render: (value: string) =>
+            value ? dayjs(value).format("YYYY-MM-DD HH:mm:ss") : "",
+    },
+    { title: "Carrier", dataIndex: "carrier", key: "carrier", width: 110 },
+    { title: "Signal", dataIndex: "signal", key: "signal", width: 90 },
+    { title: "Company", dataIndex: "company", key: "company", width: 150 },
 ];
 
 const Dashboard: React.FC = () => {
@@ -80,20 +90,6 @@ const Dashboard: React.FC = () => {
         }
     };
 
-    //// Fetch configuration uploads for a unit (modal, still available if needed)
-    //const showConfigUploads = async (unitId: number) => {
-    //    setConfigModal({ open: true, unitId });
-    //    setConfigLoading(true);
-    //    try {
-    //        const uploads = await fetchConfigurationUploadsByUnit(unitId, token);
-    //        setConfigUploads(uploads);
-    //    } catch {
-    //        setConfigUploads([]);
-    //    } finally {
-    //        setConfigLoading(false);
-    //    }
-    //};
-
     // Dropdown menu items for columns
     const columnMenuItems = allColumnDefs.map(col => ({
         key: col.key,
@@ -118,22 +114,31 @@ const Dashboard: React.FC = () => {
         ),
     }));
 
-    // Add the Actions column
+    // Add the Actions column as the first column, with minimal width for the buttons
+    const actionsColumn = {
+        title: "",
+        key: "actions",
+        align: "center" as const,
+        className: "actions-col",
+        render: (_: any, record: UnitSummary) => (
+            <span className="actions-col-inner">
+                <Tooltip title="configuration">
+                    <Button
+                        icon={<SettingFilled />}
+                        size="small"
+                        style={{ padding: 0, minWidth: 0, width: 28, height: 28 }}
+                        onClick={() => navigate(`/configurationuploads/${record.id}`)}
+                    />
+                </Tooltip>
+                {/* Add more buttons here if needed */}
+            </span>
+        ),
+    };
+
+    // Place Actions column first
     const tableColumns = [
+        actionsColumn,
         ...columns,
-        {
-            title: "Actions",
-            key: "actions",
-            width: 160,
-            render: (_: any, record: UnitSummary) => (
-                <Button
-                    icon={<FileSearchOutlined />}
-                    size="small"
-                    onClick={() => navigate(`/configurationuploads/${record.id}`)}
-                >
-                </Button>
-            ),
-        },
     ];
 
     if (loading) return <div>Loading dashboard...</div>;
@@ -141,14 +146,14 @@ const Dashboard: React.FC = () => {
 
     return (
         <div>
-            <div style={{ marginBottom: 16 }}>
+            <div style={{ marginBottom: 12 }}>
                 <Dropdown menu={{ items: columnMenuItems }} trigger={["click"]}>
-                    <Button>
+                    <Button size="middle">
                         Columns <DownOutlined />
                     </Button>
                 </Dropdown>
             </div>
-            <h2>Home - Units & Readings Overview</h2>
+            <h2 style={{ fontSize: 20, margin: "12px 0" }}>Home - Units & Readings Overview</h2>
             <Table<UnitSummary>
                 bordered
                 dataSource={units}
@@ -156,8 +161,9 @@ const Dashboard: React.FC = () => {
                 rowKey="id"
                 pagination={false}
                 scroll={{ x: "max-content" }}
+                size="middle"
+                className="compact-table"
             />
-            {/* The modal logic can be removed if you only want navigation */}
         </div>
     );
 };
