@@ -36,9 +36,13 @@ public class UnitController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Unit>> AddUnit([FromBody] Unit unit)
     {
-        if (unit.UnitTypeId < 1 || string.IsNullOrWhiteSpace(unit.ManufacturerCode))
+        if (unit.UnitTypeId < 1)
         {
-            return BadRequest("Required fields are missing.");
+            return BadRequest("UnitType is invalid.");
+        }
+        if (string.IsNullOrWhiteSpace(unit.ManufacturerCode))
+        {
+            return BadRequest("ManufacturerCode is missing");
         }
 
         var createdUnit = await _unitService.AddAsync(unit);

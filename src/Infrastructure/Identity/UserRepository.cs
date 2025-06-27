@@ -102,6 +102,7 @@ namespace Infrastructure.Identity
         {
             var claims = await GetUserClaimsAsync(dbUser.Id);
             await userManager.RemoveAuthenticationTokenAsync(dbUser, "REFRESHTOKENPROVIDER", "RefreshToken");
+            await userManager.UpdateAsync(dbUser);
 
             var token = TokenUtil.GetToken(tokenSettings, dbUser.Id, dbUser?.UserName ?? "", claims);
             var refreshToken = await userManager.GenerateUserTokenAsync(dbUser, "REFRESHTOKENPROVIDER", "RefreshToken");
