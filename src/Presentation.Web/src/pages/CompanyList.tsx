@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
-import { Table, Button, Modal, Input, Form, Space, Popconfirm, message, Dropdown, Checkbox, Select } from "antd";
+import { Table, Button, Modal, Input, Form, Popconfirm, message, Dropdown, Checkbox, Select, Tooltip } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined, DownOutlined } from "@ant-design/icons";
 import {
     fetchCompanies,
@@ -10,6 +11,7 @@ import {
 } from "../features/companies/companyAPI";
 import { useAppSelector } from "../app/hooks";
 import { selectAuth } from "../app/store";
+import "./AntDTable.css"; // For custom compact styles
 
 const allColumnDefs = [
     { title: "ID", dataIndex: "id", key: "id", width: 100 },
@@ -161,35 +163,47 @@ const CompanyList: React.FC = () => {
         ),
     }));
 
-    // Add the Actions column after filtering
-    const tableColumns = [
-        ...columns,
-        {
-            title: "Actions",
-            key: "actions",
-            width: 120,
-            render: (_: any, record: Company) => (
-                <Space>
+    // Add the Actions column as the first column, with minimal width for the buttons
+    const actionsColumn = {
+        title: "",
+        key: "actions",
+        align: "center" as const,
+        className: "actions-col",
+        render: (_: any, record: Company) => (
+            <span className="actions-col-inner">
+                <Tooltip title="edit">
                     <Button
                         icon={<EditOutlined />}
                         size="small"
+                        style={{ padding: 0, minWidth: 0, width: 28, height: 28 }}
                         onClick={() => handleEdit(record)}
                     />
-                    <Popconfirm
-                        title="Delete this company?"
-                        onConfirm={() => handleDelete(record.id)}
-                        okText="Yes"
-                        cancelText="No"
-                    >
-                        <Button
-                            icon={<DeleteOutlined />}
-                            size="small"
-                            danger
-                        />
-                    </Popconfirm>
-                </Space>
-            ),
-        },
+                </Tooltip>
+                {/*<Popconfirm*/}
+                {/*    title="Delete this company?"*/}
+                {/*    onConfirm={() => handleDelete(record.id)}*/}
+                {/*    okText="Yes"*/}
+                {/*    cancelText="No"*/}
+                {/*>*/}
+                {/*    <Tooltip title="delete">*/}
+
+                {/*    <Button*/}
+                {/*        icon={<DeleteOutlined />}*/}
+                {/*        size="small"*/}
+                {/*        danger*/}
+                {/*        />*/}
+                {/*    </Tooltip>*/}
+                {/*</Popconfirm>*/}
+
+                {/* Add more buttons here if needed */}
+            </span>
+        ),
+    };
+
+    // Place Actions column first
+    const tableColumns = [
+        actionsColumn,
+        ...columns,
     ];
 
     if (loading) return <div>Loading companies...</div>;
@@ -204,15 +218,16 @@ const CompanyList: React.FC = () => {
                     </Button>
                 </Dropdown>
             </div>
-            <h2>Companies</h2>
-            <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={handleAdd}
-                style={{ marginBottom: 16 }}
-            >
-                Add Company
-            </Button>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+                <h2 style={{ margin: 0, fontSize: 20 }}>Companies</h2>
+                <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={handleAdd}
+                >
+                    Add Company
+                </Button>
+            </div>
             <Modal
                 title={isEdit ? "Edit Company" : "Add Company"}
                 open={showModal}
@@ -266,6 +281,8 @@ const CompanyList: React.FC = () => {
                 rowKey="id"
                 pagination={false}
                 scroll={{ x: "max-content" }}
+                size="middle"
+                className="compact-table"
             />
         </div>
     );

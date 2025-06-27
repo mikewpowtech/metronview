@@ -122,9 +122,21 @@ export const UserLayout = ({ UserName }: iUser) => {
     return (
         <App>
             <Layout className="layout" style={{ minHeight: "100vh" }}>
-                <Header style={{ display: "flex", alignItems: "center", backgroundColor: "#5a6a71" }}>
+                {/* AppLogo on its own line */}
+                <div style={{ background: "#5a6a71", padding: "4px 0 2px 0", display: "flex", justifyContent: "flex-start" }}>
                     <AppLogo />
-                    <div style={{ minWidth: "500px", display: "flex" }}>
+                </div>
+                <Header
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        background: "linear-gradient(to bottom, #5a6a71 0%, #3a4a99 100%)",
+                        minHeight: 40,
+                        height: 40,
+                        padding: "0 40px",
+                    }}
+                >
+                    <div style={{ minWidth: "400px", display: "flex" }}>
                         {menuDropdowns.map(menu => (
                             <Dropdown
                                 key={menu.key}
@@ -136,10 +148,11 @@ export const UserLayout = ({ UserName }: iUser) => {
                                         color: current === menu.key ? "#1890ff" : "#fff",
                                         fontWeight: 500,
                                         cursor: "pointer",
-                                        marginRight: 24,
+                                        marginRight: 16,
                                         userSelect: "none",
-                                        padding: "0 12px",
-                                        lineHeight: "48px",
+                                        padding: "0 8px",
+                                        lineHeight: "36px",
+                                        fontSize: 15,
                                         borderBottom: current === menu.key ? "2px solid #1890ff" : "none",
                                     }}
                                     onClick={() => handleClick(menu.key)}
@@ -153,11 +166,12 @@ export const UserLayout = ({ UserName }: iUser) => {
                         <Dropdown menu={userMenu} trigger={["click"]}>
                             <span
                                 style={{
-                                    marginLeft: 14,
+                                    marginLeft: 10,
                                     color: "#fff",
                                     fontWeight: 500,
                                     cursor: "pointer",
                                     userSelect: "none",
+                                    fontSize: 15,
                                 }}
                             >
                                 {UserName}
@@ -165,7 +179,7 @@ export const UserLayout = ({ UserName }: iUser) => {
                         </Dropdown>
                     </div>
                 </Header>
-                <Content style={{ padding: "0 50px", flex: 1, minHeight: 0 }}>
+                <Content style={{ padding: "0 30px", flex: 1, minHeight: 0 }}>
                     <Outlet />
                 </Content>
                 <AppFooter />

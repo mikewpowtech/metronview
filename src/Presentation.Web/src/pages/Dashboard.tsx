@@ -1,12 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { Table, Button, Dropdown, Checkbox, Tooltip } from "antd";
-import { DownOutlined } from "@ant-design/icons";
+import { DownOutlined, SettingOutlined } from "@ant-design/icons";
 import SettingFilled from "@ant-design/icons/SettingFilled";
 import { fetchDashboardUnits, type UnitSummary } from "../features/dashboard/dashboardAPI";
 import { useAppSelector } from "../app/hooks";
 import { selectAuth } from "../app/store";
 import { useNavigate } from "react-router-dom";
-import "./Dashboard.css"; // For custom compact styles
+import "./AntDTable.css"; // For custom compact styles
 import dayjs from "dayjs"; // Add this import for date formatting
 
 // Persistent column visibility utilities
@@ -145,15 +146,15 @@ const Dashboard: React.FC = () => {
     if (error) return <div style={{ color: "red" }}>Error: {error}</div>;
 
     return (
-        <div>
-            <div style={{ marginBottom: 12 }}>
+        <div style={{ padding: "12px 0 12px 30px" }} >
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                <h2 style={{ fontSize: 20, margin: "12px 0 12px 0" }}>Home - Units & Readings Overview</h2>
                 <Dropdown menu={{ items: columnMenuItems }} trigger={["click"]}>
                     <Button size="middle">
-                        Columns <DownOutlined />
+                        Columns <SettingOutlined />
                     </Button>
                 </Dropdown>
             </div>
-            <h2 style={{ fontSize: 20, margin: "12px 0" }}>Home - Units & Readings Overview</h2>
             <Table<UnitSummary>
                 bordered
                 dataSource={units}
