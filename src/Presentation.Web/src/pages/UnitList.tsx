@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
-import { Tooltip, Table, Button, Modal, Input, Form, InputNumber, Space, Popconfirm, message, Dropdown, Checkbox, Select } from "antd";
+import { Tooltip, Button, Modal, Input, Form, InputNumber, Space, Popconfirm, message, Dropdown, Checkbox, Select } from "antd";
 import { SettingOutlined, PlusOutlined, EditOutlined, DeleteOutlined, DownOutlined , RightOutlined } from "@ant-design/icons";
 import { fetchUnits, addUnit, updateUnit, deleteUnit, type Unit } from "../features/units/unitsAPI";
 import { fetchCompanies, type Company } from "../features/companies/companyAPI";
@@ -372,7 +372,7 @@ const UnitList: React.FC = () => {
                     return getSensorsTable(unit, sensors);
                 },
                 expandedRowKeys,
-                onExpand: (expanded, record) => handleExpandRow(record),
+                onExpand: (_,record) => handleExpandRow(record),
                 showExpandColumn: false
             }}
         />

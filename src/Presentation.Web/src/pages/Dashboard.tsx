@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
-import { Table, Button, Dropdown, Checkbox, Tooltip } from "antd";
-import { DownOutlined, SettingOutlined } from "@ant-design/icons";
+import { Button, Dropdown, Checkbox, Tooltip } from "antd";
+import { SettingOutlined } from "@ant-design/icons";
 import SettingFilled from "@ant-design/icons/SettingFilled";
 import { fetchDashboardUnits, type UnitSummary } from "../features/dashboard/dashboardAPI";
 import { useAppSelector } from "../app/hooks";
@@ -9,7 +9,6 @@ import { selectAuth } from "../app/store";
 import { useNavigate } from "react-router-dom";
 import { GenericTable } from "../components/GenericTable";
 import dayjs from "dayjs"; // Add this import for date formatting
-import type { Unit } from "../features/units/unitsAPI";
 
 // Persistent column visibility utilities
 const COLUMN_VISIBILITY_KEY = "dashboard.visibleColumns";

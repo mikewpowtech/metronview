@@ -6,7 +6,6 @@ import {
     fetchCompanies,
     addCompany,
     updateCompany,
-    deleteCompany,
     type Company
 } from "../features/companies/companyAPI";
 import { useAppSelector } from "../app/hooks";
@@ -96,15 +95,15 @@ const CompanyList: React.FC = () => {
         setShowModal(true);
     };
 
-    const handleDelete = async (id: number) => {
-        try {
-            await deleteCompany(id, token);
-            setCompanies(prev => prev.filter(c => c.id !== id));
-            message.success("Company deleted");
-        } catch (err: any) {
-            message.error(err.message || "Failed to delete company");
-        }
-    };
+    // const handleDelete = async (id: number) => {
+    //     try {
+    //         await deleteCompany(id, token);
+    //         setCompanies(prev => prev.filter(c => c.id !== id));
+    //         message.success("Company deleted");
+    //     } catch (err: any) {
+    //         message.error(err.message || "Failed to delete company");
+    //     }
+    // };
 
     const handleModalOk = async () => {
         try {
