@@ -1,83 +1,36 @@
-import { App, Layout, Menu,Button } from "antd";
+import { App, Layout } from "antd";
 import { Content, Header } from "antd/es/layout/layout";
-import { useEffect, useState } from "react";
-import { LoginModal } from "../features/user/Login";
-import { Outlet, useLocation } from "react-router";
 import { AppLogo } from "../features/AppLogo";
 import { AppFooter } from "../features/Footer";
+import { LoginCard } from "../features/user/LoginCard";
+import { useNavigate } from "react-router-dom";
 
 export const DefaultLayout = () => {
-  const [loginOpen, setLoginOpen] = useState(false);
-  //const navigate = useNavigate();
-  const location = useLocation();
-  const [current, setCurrent] = useState(
-    location.pathname === "/" || location.pathname === ""
-      ? "/"
-      : location.pathname
-  );
+    const navigate = useNavigate();
+    const onLoginSuccess = () => navigate("/");
 
-  useEffect(() => {
-    if (location) {
-      if (current !== location.pathname) {
-        setCurrent(location.pathname);
-      }
-    }
-  }, [location]);
-
-  // Inside your component:
-
-
-  //const handleClick = (key: string) => {
-  //  navigate(key);
-  //};
-
-    // Menu for login/register
-  //const loginMenu = {
-  //  items: [
-  //    {
-  //      key: "/login",
-  //      label: "Login",
-  //      onClick: () => handleClick("/login"),
-  //    },
-  //    {
-  //      key: "/register",
-  //      label: "Register",
-  //      onClick: () => handleClick("/register"),
-  //    },
-  //  ],
-  //};
-
-  return (
-    <App>
-      <Layout className="layout">
-        <Header style={{ display: "flex", alignItems: "center" }}>
-          <AppLogo />
-          <Menu
-            theme="dark"
-            mode="horizontal"
-            defaultSelectedKeys={["/"]}
-            selectedKeys={[current]}
-            items={[
-              // {
-              //   key: "/",
-              //   label: "Home",
-              //   onClick: (e) => {
-              //     handleClick(e.key);
-              //   },
-              // },
-            ]}          style={{ flex: 1, minWidth: 0 }}
-        />        
-<Button type="text" style={{ color: "#fff", marginLeft: 24 }} onClick={() => setLoginOpen(true)}>
-  Login
-</Button>
-
-          <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
-        </Header>
-        <Content style={{ padding: "0 50px", minHeight: "400px" }}>
-          <Outlet />
-        </Content>
-      </Layout>
-      <AppFooter />
-    </App>
-  );
+    return (
+        <App>
+            <Layout className="layout" style={{ minHeight: "100vh" }}>
+                {/* AppLogo on its own line */}
+                <div style={{ background: "#5a6a71", padding: "4px 0 2px 0", display: "flex", justifyContent: "flex-start" }}>
+                    <AppLogo />
+                </div>
+                <Header
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        background: "linear-gradient(to bottom, #5a6a71 0%, #3a4a99 100%)",
+                        minHeight: 40,
+                        height: 40,
+                        padding: "0 40px",
+                    }}
+                ></Header>
+                <Content style={{ padding: "0 30px", flex: 1, minHeight: 0 }}>
+                    <LoginCard onLoginSuccess={onLoginSuccess} />
+                </Content>
+                <AppFooter />
+            </Layout>
+        </App>
+    );
 };
