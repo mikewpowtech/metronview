@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
-import { Button, Modal, Input, Form, message, Dropdown, Checkbox, Select, Tooltip } from "antd";
-import { PlusOutlined, EditOutlined, SettingOutlined } from "@ant-design/icons";
+import { Modal, Input, Form, message, Select } from "antd";
 import {
     fetchCompanies,
     addCompany,
@@ -10,15 +9,13 @@ import {
 } from "../features/companies/companyAPI";
 import { useAppSelector } from "../app/hooks";
 import { selectAuth } from "../app/store";
-import { GenericTable } from "../components/GenericTable";
+import { ExtendedAntDTable, type ExtendedTableColumnDefinition } from "../components/ExtendedTable";
 
-const allColumnDefs = [
+const companyColumnDefinitions: ExtendedTableColumnDefinition[] =  [
     { title: "ID", dataIndex: "id", key: "id", width: 100 },
     { title: "Company Name", dataIndex: "name", key: "name", width: 200 },
     { title: "Parent Company", dataIndex: "parentCompanyId", key: "parentCompanyId", width: 200 },
 ];
-
-//record: Company, index: number, companies?: Company[]
 
 const CompanyList: React.FC = () => {
 
@@ -33,36 +30,10 @@ const CompanyList: React.FC = () => {
     const [form] = Form.useForm();
     const [modalLoading, setModalLoading] = useState(false);
 
-    // Column visibility state
-    const [visibleKeys, setVisibleKeys] = useState<string[]>(
-        allColumnDefs.filter(col => col.key !== "id").map(col => col.key as string)
-    );
-    const [columns, setColumns] = useState(allColumnDefs);
-
     useEffect(() => {
         loadCompanies();
         // eslint-disable-next-line
     }, [token]);
-
-    useEffect(() => {
-        // Replace the parentCompanyId render function to show the company name
-        setColumns(
-            allColumnDefs
-                .filter(col => visibleKeys.includes(col.key as string))
-                .map(col =>
-                    col.key === "parentCompanyId"
-                        ? {
-                            ...col,
-                            render: (parentCompanyId: number | null) => {
-                                if (!parentCompanyId) return "";
-                                const parent = companies.find(c => c.id === parentCompanyId);
-                                return parent ? parent.name : parentCompanyId;
-                            }
-                        }
-                        : col
-                )
-        );
-    }, [visibleKeys, companies]);
 
     const loadCompanies = async () => {
         setLoading(true);
@@ -140,94 +111,6 @@ const CompanyList: React.FC = () => {
         form.resetFields();
     };
 
-    // Dropdown menu items for columns
-    const columnMenuItems = allColumnDefs.map(col => ({
-        key: col.key,
-        label: (
-            <Checkbox
-                checked={visibleKeys.includes(col.key as string)}
-                onChange={e => {
-                    const checked = e.target.checked;
-                    setVisibleKeys(keys =>
-                        checked
-                            ? [...keys, col.key as string]
-                            : keys.filter(k => k !== col.key)
-                    );
-                }}
-                disabled={visibleKeys.length === 1 && visibleKeys.includes(col.key as string)}
-                style={{ width: "100%", padding: "4px 12px" }}
-            >
-                {col.title}
-            </Checkbox>
-        ),
-    }));
-
-    // Add the Actions column as the first column, with minimal width for the buttons
-    const actionsColumn = {
-        title: "",
-        key: "actions",
-        align: "center" as const,
-        className: "actions-col",
-        render: (_: any, record: Company) => (
-            <span className="actions-col-inner">
-                <Tooltip title="edit">
-                    <Button
-                        icon={<EditOutlined />}
-                        size="small"
-                        style={{ padding: 0, minWidth: 0, width: 28, height: 28 }}
-                        onClick={() => handleEdit(record)}
-                    />
-                </Tooltip>
-                {/*<Popconfirm*/}
-                {/*    title="Delete this company?"*/}
-                {/*    onConfirm={() => handleDelete(record.id)}*/}
-                {/*    okText="Yes"*/}
-                {/*    cancelText="No"*/}
-                {/*>*/}
-                {/*    <Tooltip title="delete">*/}
-
-                {/*    <Button*/}
-                {/*        icon={<DeleteOutlined />}*/}
-                {/*        size="small"*/}
-                {/*        danger*/}
-                {/*        />*/}
-                {/*    </Tooltip>*/}
-                {/*</Popconfirm>*/}
-
-                {/* Add more buttons here if needed */}
-            </span>
-        ),
-    };
-
-    // Place Actions column first
-    const tableColumns = [
-        actionsColumn,
-        ...columns,
-    ];
-
-    const MainTable: React.FC = () => (
-        <GenericTable<Company>
-            data={companies}
-            columns={tableColumns}
-            title={() =>
-                <>
-                    <h4>Companies</h4>
-                    <div>
-                        <Button size="small" onClick={handleAdd}
-                            style={{ margin: "0 10px 0 0" }} >
-                            Add <PlusOutlined />
-                        </Button>
-                        <Dropdown menu={{ items: columnMenuItems }} trigger={["click"]}>
-                            <Button size="small">
-                                Columns <SettingOutlined />
-                            </Button>
-                        </Dropdown>
-                    </div>
-                </>
-            }
-        />
-    );
-
     const MainModal: React.FC = () => (
         <Modal
             title={isEdit ? "Edit Company" : "Add Company"}
@@ -277,6 +160,18 @@ const CompanyList: React.FC = () => {
         </Modal>
     )
 
+    const companiesColumnMapper = (col: any) => {
+        return col.key === "parentCompanyId"
+            ? {
+                ...col,
+                render: (parentCompanyId: number | null) => {
+                    if (!parentCompanyId) return "";
+                    const parent = companies.find(c => c.id === parentCompanyId);
+                    return parent ? parent.name : parentCompanyId;
+                }
+            }
+            : col
+    }
 
     if (loading) return <div>Loading companies...</div>;
     if (error) return <div style={{ color: "red" }}>Error: {error}</div>;
@@ -284,9 +179,17 @@ const CompanyList: React.FC = () => {
     return (
         <div style={{ padding: "12px 0 12px 30px" }} >
             <MainModal/>
-            <MainTable/>
+            <ExtendedAntDTable<Company>
+                data={companies}
+                tableColumns={companyColumnDefinitions}
+                title="Company"
+                onAdd={handleAdd}
+                onEdit={handleEdit}
+                columnMapper={companiesColumnMapper}
+            />
         </div>
     );
+
 };
 
 export default CompanyList;

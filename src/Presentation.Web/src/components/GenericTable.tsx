@@ -1,4 +1,5 @@
-import { Table } from "antd";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Table as AntdTable } from "antd";
 import type { TableProps } from "antd";
 import "./AntDTable.css"; // For custom compact styles
 
@@ -14,7 +15,7 @@ export function GenericTable<T extends object>(props: GenericTableProps<T>) {
     const defaultPagination = pagination ?? false;
 
     return (
-        <Table<T>
+        <AntdTable<T>
             dataSource={data}
             columns={columns}
             bordered
