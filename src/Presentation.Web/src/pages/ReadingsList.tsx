@@ -87,7 +87,7 @@ const ReadingsList: React.FC = () => {
     const handleDelete = async (record: Reading) => {
         try {
             await deleteReading(record, token);
-            setReadings(prev => prev.filter(r => !(r.dateRecordedUtc === record.dateRecordedUtc && r.sensor.id === record.sensorId)));
+            setReadings(prev => prev.filter(r => !(r.dateRecordedUtc === record.dateRecordedUtc && r.sensor.id === record.sensor.id)));
             message.success("Reading deleted");
         } catch (err: any) {
             message.error(err.message || "Failed to delete reading");

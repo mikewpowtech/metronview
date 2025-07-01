@@ -5,7 +5,7 @@ import { DownOutlined, RightOutlined } from "@ant-design/icons";
 import { fetchUnits, addUnit, updateUnit, deleteUnit, type Unit } from "../features/units/unitsAPI";
 import { fetchCompanies, type Company } from "../features/companies/companyAPI";
 import { fetchUnitModels, type UnitModel } from "../features/unitmodels/unitModelAPI";
-import { fetchSensorsByUnit, addSensor, updateSensor, deleteSensor, type Sensor } from "../features/sensors/sensorAPI";
+import { fetchSensorsByUnit, addSensor, updateSensor, type Sensor } from "../features/sensors/sensorAPI";
 import { useAppSelector } from "../app/hooks";
 import { selectAuth } from "../app/store";
 import { ExtendedAntDTable } from "../components/ExtendedAntDTable";
@@ -189,10 +189,10 @@ const UnitList: React.FC = () => {
     };
 
     // Sensor modal handlers
-    const openSensorModal = (unitId: number, sensor?: Sensor) => {
-        setSensorModal({ open: true, unitId, sensor });
-        sensorForm.setFieldsValue(sensor ? { ...sensor } : { name: "", channel: 0, channelType: undefined, lowValue: undefined, highValue: undefined, engineeringUnits: "", unitId });
-    };
+    // const openSensorModal = (unitId: number, sensor?: Sensor) => {
+    //     setSensorModal({ open: true, unitId, sensor });
+    //     sensorForm.setFieldsValue(sensor ? { ...sensor } : { name: "", channel: 0, channelType: undefined, lowValue: undefined, highValue: undefined, engineeringUnits: "", unitId });
+    // };
 
     const handleSensorModalOk = async () => {
         try {
@@ -223,15 +223,15 @@ const UnitList: React.FC = () => {
         sensorForm.resetFields();
     };
 
-    const handleDeleteSensor = async (sensorId: number) => {
-        try {
-            await deleteSensor(sensorId, token);
-            message.success("Sensor deleted");
-            loadUnits(); // Reload sensors for the unit
-        } catch (err: any) {
-            message.error(err.message || "Failed to delete sensor");
-        }
-    };
+    // const handleDeleteSensor = async (sensorId: number) => {
+    //     try {
+    //         await deleteSensor(sensorId, token);
+    //         message.success("Sensor deleted");
+    //         loadUnits(); // Reload sensors for the unit
+    //     } catch (err: any) {
+    //         message.error(err.message || "Failed to delete sensor");
+    //     }
+    // };
 
     const handleExpandRow = (record: Unit) => {
         setExpandedRowKeys(keys =>
@@ -276,7 +276,7 @@ const UnitList: React.FC = () => {
     const getSensorsTable = (unit: Unit, sensors: Sensor[]): React.ReactNode => (
         <div style={{ padding: "12px 0 12px 10px" }} >
             <ExtendedAntDTable<Sensor>
-                title="Sensors"
+                title={"Sensors for " + unit.unitCode}
                 data={sensors}
                 tableColumns={[
                     { title: "Name", dataIndex: "name", key: "name", width: 200 },
