@@ -1,15 +1,11 @@
 import { useEffect, useState } from "react";
-import {
-    Tooltip, Button, Modal, Form, InputNumber, DatePicker,
-    Popconfirm, message, Dropdown, Checkbox, Select
-} from "antd";
+import { Modal, Form, InputNumber, DatePicker, message, Select } from "antd";
 import dayjs from "dayjs";
 import { fetchReadings, addReading, updateReading, deleteReading, type Reading } from "../features/readings/readingAPI";
 import { fetchSensors, type Sensor } from "../features/sensors/sensorAPI";
 import { useAppSelector } from "../app/hooks";
 import { selectAuth } from "../app/store";
-import { SettingOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
-import { GenericTable } from "../components/GenericTable";
+import { ExtendedAntDTable } from "../components/ExtendedAntDTable";
 
 const allColumnDefs = [
     {
@@ -49,24 +45,11 @@ const ReadingsList: React.FC = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(PAGE_SIZE);
 
-    // Column visibility state
-    const [visibleKeys, setVisibleKeys] = useState<string[]>(
-        allColumnDefs.filter(col => col.key !== "id").map(col => col.key as string)
-    );
-
-    const [columns, setColumns] = useState(allColumnDefs);
-
     useEffect(() => {
         loadReadings();
         fetchSensors(token).then(setSensors).catch(() => setSensors([]));
         // eslint-disable-next-line
     }, [token]);
-
-    useEffect(() => {
-        setColumns(
-            allColumnDefs.filter(col => visibleKeys.includes(col.key as string))
-        );
-    }, [visibleKeys]);
 
     const loadReadings = async () => {
         setLoading(true);
@@ -101,10 +84,10 @@ const ReadingsList: React.FC = () => {
         setShowModal(true);
     };
 
-    const handleDelete = async (dateRecordedUtc: string, sensorId: number) => {
+    const handleDelete = async (record: Reading) => {
         try {
-            await deleteReading(dateRecordedUtc, sensorId, token);
-            setReadings(prev => prev.filter(r => !(r.dateRecordedUtc === dateRecordedUtc && r.sensor.id === sensorId)));
+            await deleteReading(record, token);
+            setReadings(prev => prev.filter(r => !(r.dateRecordedUtc === record.dateRecordedUtc && r.sensor.id === record.sensorId)));
             message.success("Reading deleted");
         } catch (err: any) {
             message.error(err.message || "Failed to delete reading");
@@ -152,102 +135,6 @@ const ReadingsList: React.FC = () => {
         setEditingKey(null);
         form.resetFields();
     };
-
-    // Dropdown menu items for columns
-    const columnMenuItems = allColumnDefs.map(col => ({
-        key: col.key,
-        label: (
-            <Checkbox
-                checked={visibleKeys.includes(col.key as string)}
-                onChange={e => {
-                    const checked = e.target.checked;
-                    setVisibleKeys(keys =>
-                        checked
-                            ? [...keys, col.key as string]
-                            : keys.filter(k => k !== col.key)
-                    );
-                }}
-                disabled={visibleKeys.length === 1 && visibleKeys.includes(col.key as string)}
-                style={{ width: "100%", padding: "4px 12px" }}
-            >
-                {col.title}
-            </Checkbox>
-        ),
-    }));
-
-    // Add the Actions column after filtering
-    const actionsColumns = {
-        title: "",
-        key: "actions",
-        align: "center" as const,
-        className: "actions-col",
-        render: (_: any, record: Reading) => (
-            <span className="actions-col-inner">
-                <Tooltip title="edit">
-                    <Button
-                        icon={<EditOutlined />}
-                        size="small"
-                        onClick={() => handleEdit(record)}
-                    />
-                </Tooltip>
-                <Popconfirm
-                    title="Delete this reading?"
-                    onConfirm={() => handleDelete(record.dateRecordedUtc, record.sensor.id)}
-                    okText="Yes"
-                    cancelText="No"
-                >
-                    <Tooltip title="delete">
-                        <Button
-                            icon={<DeleteOutlined />}
-                            size="small"
-                            danger
-                        />
-                    </Tooltip>
-                </Popconfirm>
-            </span>
-        ),
-    };
-
-    // Place Actions column first
-    const tableColumns = [
-        actionsColumns,
-        ...columns,
-    ];
-
-    const MainTable: React.FC = () => (
-        <GenericTable<Reading>
-            data={readings}
-            columns={tableColumns}
-            rowKey={r => `${r.dateRecordedUtc}_${r.sensor.id}`}
-            title={() =>
-                <>
-                    <h4>Telemetry</h4>
-                    <div>
-                        <Button size="small" onClick={handleAdd}
-                            style={{ margin: "0 10px 0 0" }} >
-                            Add <PlusOutlined />
-                        </Button>
-                        <Dropdown menu={{ items: columnMenuItems }} trigger={["click"]}>
-                            <Button size="small">
-                                Columns <SettingOutlined />
-                            </Button>
-                        </Dropdown>
-                    </div>
-                </>
-            }
-            pagination={{
-                current: currentPage,
-                pageSize: pageSize,
-                total: readings.length,
-                showSizeChanger: true,
-                pageSizeOptions: [10, 20, 50, 100],
-                onChange: (page, size) => {
-                    setCurrentPage(page);
-                    setPageSize(size);
-                },
-            }}
-        />
-    );
 
     const MainModal: React.FC = () => (
         <Modal
@@ -308,7 +195,25 @@ const ReadingsList: React.FC = () => {
     return (
         <div style={{ padding: "12px 0 12px 30px" }} >
             <MainModal />
-            <MainTable />
+            <ExtendedAntDTable<Reading>
+                data={readings}
+                tableColumns={allColumnDefs}
+                title="Telemetry"
+                onAdd={handleAdd}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                pagination={{
+                    current: currentPage,
+                    pageSize: pageSize,
+                    total: readings.length,
+                    showSizeChanger: true,
+                    pageSizeOptions: [10, 20, 50, 100],
+                    onChange: (page, size) => {
+                        setCurrentPage(page);
+                        setPageSize(size);
+                    },
+                }}
+            />
         </div>
     );
 };

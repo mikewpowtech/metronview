@@ -1,35 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from "react";
-import { Tooltip, Button, Modal, Input, Form, InputNumber, Space, Popconfirm, message, Dropdown, Checkbox, Select } from "antd";
-import { SettingOutlined, PlusOutlined, EditOutlined, DeleteOutlined, DownOutlined , RightOutlined } from "@ant-design/icons";
+import React, { useEffect, useState } from "react";
+import { Tooltip, Button, Modal, Input, Form, InputNumber, message, Select } from "antd";
+import { DownOutlined, RightOutlined } from "@ant-design/icons";
 import { fetchUnits, addUnit, updateUnit, deleteUnit, type Unit } from "../features/units/unitsAPI";
 import { fetchCompanies, type Company } from "../features/companies/companyAPI";
 import { fetchUnitModels, type UnitModel } from "../features/unitmodels/unitModelAPI";
 import { fetchSensorsByUnit, addSensor, updateSensor, deleteSensor, type Sensor } from "../features/sensors/sensorAPI";
 import { useAppSelector } from "../app/hooks";
 import { selectAuth } from "../app/store";
-import { GenericTable } from "../components/GenericTable";
-
-// Utility for persistent column keys
-const COLUMN_VISIBILITY_KEY = "unitList.visibleColumns";
-
-function getPersistedVisibleKeys(defaultKeys: string[]) {
-    if (typeof window === "undefined") return defaultKeys;
-    const stored = localStorage.getItem(COLUMN_VISIBILITY_KEY);
-    if (!stored) return defaultKeys;
-    try {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) return parsed;
-        return defaultKeys;
-    } catch {
-        return defaultKeys;
-    }
-}
-function setPersistedVisibleKeys(keys: string[]) {
-    if (typeof window !== "undefined") {
-        localStorage.setItem(COLUMN_VISIBILITY_KEY, JSON.stringify(keys));
-    }
-}
+import { ExtendedAntDTable } from "../components/ExtendedAntDTable";
 
 const unitStatusOptions = [
     { value: 0, label: "Active" },
@@ -68,11 +47,6 @@ const UnitList: React.FC = () => {
     const [modalLoading, setModalLoading] = useState(false);
     const [expandedRowKeys, setExpandedRowKeys] = useState<React.Key[]>([]);
 
-    // Column visibility state (persistent)
-    const defaultVisibleKeys = allColumnDefs.filter(col => col.key !== "id").map(col => col.key as string);
-    const [visibleKeys, setVisibleKeys] = useState<string[]>(() => getPersistedVisibleKeys(defaultVisibleKeys));
-    const [columns, setColumns] = useState(allColumnDefs);
-
     // Sensor-related states
     const [sensorModal, setSensorModal] = useState<{ open: boolean, unitId?: number, sensor?: Sensor }>({ open: false });
     const [sensorForm] = Form.useForm();
@@ -86,44 +60,37 @@ const UnitList: React.FC = () => {
         // eslint-disable-next-line
     }, [token]);
 
-    useEffect(() => {
-        setColumns(
-            allColumnDefs
-                .filter(col => visibleKeys.includes(col.key as string))
-                .map(col => {
-                    if (col.key === "companyID") {
-                        return {
-                            ...col,
-                            render: (_: never, record: Unit) => {
-                                if (!record.companyID) return "";
-                                const company = companies.find(c => c.id === record.companyID);
-                                return company?.name ?? "";
-                            }
-                        };
-                    }
-                    if (col.key === "unitTypeId") {
-                        return {
-                            ...col,
-                            render: (_: never, record: Unit) => {
-                                const model = unitModels.find(m => m.id === record.unitTypeId);
-                                return model?.name ?? "not specified";
-                            }
-                        };
-                    }
-                    if (col.key === "status") {
-                        return {
-                            ...col,
-                            render: (_: never, record: Unit) => {
-                                const status = unitStatusOptions.find(opt => opt.value === record.status);
-                                return status?.label ?? "Unknown";
-                            }
-                        };
-                    }
-                    return col;
-                })
-        );
-        setPersistedVisibleKeys(visibleKeys);
-    }, [visibleKeys, companies, unitModels]);
+    const columnMapper = (col: any) => {
+        if (col.key === "companyID") {
+            return {
+                ...col,
+                render: (_: never, record: Unit) => {
+                    if (!record.companyID) return "";
+                    const company = companies.find(c => c.id === record.companyID);
+                    return company?.name ?? "";
+                }
+            };
+        }
+        if (col.key === "unitTypeId") {
+            return {
+                ...col,
+                render: (_: never, record: Unit) => {
+                    const model = unitModels.find(m => m.id === record.unitTypeId);
+                    return model?.name ?? "not specified";
+                }
+            };
+        }
+        if (col.key === "status") {
+            return {
+                ...col,
+                render: (_: never, record: Unit) => {
+                    const status = unitStatusOptions.find(opt => opt.value === record.status);
+                    return status?.label ?? "Unknown";
+                }
+            };
+        }
+        return col;
+    }
 
     const loadUnits = async () => {
         setLoading(true);
@@ -266,28 +233,6 @@ const UnitList: React.FC = () => {
         }
     };
 
-    // Dropdown menu items for columns
-    const columnMenuItems = allColumnDefs.map(col => ({
-        key: col.key,
-        label: (
-            <Checkbox
-                checked={visibleKeys.includes(col.key as string)}
-                onChange={e => {
-                    const checked = e.target.checked;
-                    setVisibleKeys(keys =>
-                        checked
-                            ? [...keys, col.key as string]
-                            : keys.filter(k => k !== col.key)
-                    );
-                }}
-                disabled={visibleKeys.length === 1 && visibleKeys.includes(col.key as string)}
-                style={{ width: "100%", padding: "4px 12px" }}
-            >
-                {col.title}
-            </Checkbox>
-        ),
-    }));
-
     const handleExpandRow = (record: Unit) => {
         setExpandedRowKeys(keys =>
             keys.includes(record.id)
@@ -296,132 +241,44 @@ const UnitList: React.FC = () => {
         );
     };
 
-    const actionsColumn = {
-        title: "",
-        key: "actions",
-        align: "center" as const,
-        className: "actions-col",
-        render: (_: any, record: Unit) => (
-            <span className="actions-col-inner">
-                <Tooltip title="edit">
-                    <Button
-                        icon={<EditOutlined />}
-                        size="small"
-                        style={{ padding: 0, minWidth: 0, width: 28, height: 28 }}
-                        onClick={() => handleEdit(record)}
-                    />
-                </Tooltip>
-                <Popconfirm
-                    title="Delete this unit?"
-                    onConfirm={() => handleDelete(record.id)}
-                    okText="Yes"
-                    cancelText="No"
-                >
-                    <Tooltip title="delete">
-
-                    <Button
-                        icon={<DeleteOutlined />}
-                        size="small"
-                        danger
-                        />
-                    </Tooltip>
-                </Popconfirm>
-                <Tooltip title={expandedRowKeys.includes(record.id) ? "Hide Sensors" : "Sensors"}>
-                    <Button
-                        icon={expandedRowKeys.includes(record.id) ? <DownOutlined /> : <RightOutlined />}
-                        size="small"
-                        style={{ marginLeft: 4, padding: 0, minWidth: 0, width: 28, height: 28 }}
-                        onClick={() => handleExpandRow(record)}
-                    />
-                </Tooltip>
-            </span>
-        ),
-    };
-
-    // Place Actions column first
-    const tableColumns = [
-        actionsColumn,
-        ...columns,
-    ];
-
-
-    const mainTable = (
-        <GenericTable<Unit>
-            data={units}
-            columns={tableColumns}
-            title={() =>
-                <>
-                    <h4>Units</h4>
-                    <div>
-                        <Button size="small" onClick={handleAdd}
-                            style={{ margin: "0 10px 0 0" }} >
-                            Add <PlusOutlined />
-                        </Button>
-                        <Dropdown menu={{ items: columnMenuItems }} trigger={["click"]}>
-                            <Button size="small">
-                                Columns <SettingOutlined />
-                            </Button>
-                        </Dropdown>
-                    </div>
-                </>
-            }
-            expandable={{
-                expandedRowRender: (unit: Unit) => {
-                    const sensors = sensorsByUnit[unit.id] || [];
-                    setEditingId(unit.id);
-                    return getSensorsTable(unit, sensors);
-                },
-                expandedRowKeys,
-                onExpand: (_,record) => handleExpandRow(record),
-                showExpandColumn: false
-            }}
-        />
-    );
+    const SensorListModal: React.FC = () => (
+        <Modal
+            title={sensorModal.sensor ? "Edit Sensor" : "Add Sensor"}
+            open={sensorModal.open}
+            onCancel={handleSensorModalCancel}
+            onOk={handleSensorModalOk}
+            confirmLoading={sensorModalLoading}
+            destroyOnHidden={true}
+        >
+            <Form layout="vertical" form={sensorForm}>
+                <Form.Item label="Name" name="name" rules={[{ required: true, message: "Please enter a name" }]}>
+                    <Input />
+                </Form.Item>
+                <Form.Item label="Channel" name="channel" rules={[{ required: true, message: "Please enter a channel" }]}>
+                    <InputNumber min={0} style={{ width: "100%" }} />
+                </Form.Item>
+                <Form.Item label="Channel Type" name="channelType">
+                    <InputNumber min={0} style={{ width: "100%" }} />
+                </Form.Item>
+                <Form.Item label="Low Value" name="lowValue">
+                    <InputNumber style={{ width: "100%" }} />
+                </Form.Item>
+                <Form.Item label="High Value" name="highValue">
+                    <InputNumber style={{ width: "100%" }} />
+                </Form.Item>
+                <Form.Item label="Engineering Units" name="engineeringUnits">
+                    <Input />
+                </Form.Item>
+            </Form>
+        </Modal>);
 
     // Sensors table as a ReactNode (function that takes sensors and unit)
     const getSensorsTable = (unit: Unit, sensors: Sensor[]): React.ReactNode => (
         <div style={{ padding: "12px 0 12px 10px" }} >
-            <GenericTable<Sensor>
-                title={() =>
-                    <>
-                        <h6>Sensors for Unit {unit.manufacturerCode}</h6>
-                        <div>
-                            <Button size="small" onClick={() => openSensorModal(unit.id)}
-                                style={{ margin: "0 10px 0 0" }} >
-                                Add <PlusOutlined />
-                            </Button>
-                        </div>
-                    </>
-                }
+            <ExtendedAntDTable<Sensor>
+                title="Sensors"
                 data={sensors}
-                columns={[
-                    {
-                        title: "",
-                        key: "actions",
-                        align: "center" as const,
-                        className: "actions-col",
-                        render: (_: any, record: Sensor) => (
-                            <Space>
-                                <Button
-                                    icon={<EditOutlined />}
-                                    size="small"
-                                    onClick={() => openSensorModal(unit.id, record)}
-                                />
-                                <Popconfirm
-                                    title="Delete this sensor?"
-                                    onConfirm={() => handleDeleteSensor(record.id)}
-                                    okText="Yes"
-                                    cancelText="No"
-                                >
-                                    <Button
-                                        icon={<DeleteOutlined />}
-                                        size="small"
-                                        danger
-                                    />
-                                </Popconfirm>
-                            </Space>
-                        ),
-                    },
+                tableColumns={[
                     { title: "Name", dataIndex: "name", key: "name", width: 200 },
                     { title: "Channel", dataIndex: "channel", key: "channel", width: 100 },
                     { title: "Channel Type", dataIndex: "channelType", key: "channelType", width: 200 },
@@ -431,158 +288,163 @@ const UnitList: React.FC = () => {
 
                 ]}
             />
-            <Modal
-                title={sensorModal.sensor ? "Edit Sensor" : "Add Sensor"}
-                open={sensorModal.open}
-                onCancel={handleSensorModalCancel}
-                onOk={handleSensorModalOk}
-                confirmLoading={sensorModalLoading}
-                destroyOnHidden={true}
-            >
-                <Form layout="vertical" form={sensorForm}>
-                    <Form.Item label="Name" name="name" rules={[{ required: true, message: "Please enter a name" }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label="Channel" name="channel" rules={[{ required: true, message: "Please enter a channel" }]}>
-                        <InputNumber min={0} style={{ width: "100%" }} />
-                    </Form.Item>
-                    <Form.Item label="Channel Type" name="channelType">
-                        <InputNumber min={0} style={{ width: "100%" }} />
-                    </Form.Item>
-                    <Form.Item label="Low Value" name="lowValue">
-                        <InputNumber style={{ width: "100%" }} />
-                    </Form.Item>
-                    <Form.Item label="High Value" name="highValue">
-                        <InputNumber style={{ width: "100%" }} />
-                    </Form.Item>
-                    <Form.Item label="Engineering Units" name="engineeringUnits">
-                        <Input />
-                    </Form.Item>
-                </Form>
-            </Modal>
+            <SensorListModal />
         </div>
     )
+
+    const UnitListModal: React.FC = () => (<Modal
+        title={isEdit ? "Edit Unit" : "Add Unit"}
+        open={showModal}
+        onCancel={handleModalCancel}
+        onOk={handleModalOk}
+        okText="Save"
+        confirmLoading={modalLoading}
+        destroyOnHidden={true}
+    >
+        <Form
+            layout="vertical"
+            form={form}
+            initialValues={{
+                unitTypeId: "",
+                phoneNumber: "",
+                pin: "",
+                manufacturerCode: "",
+                unitCode: "",
+                secret: "",
+                unitStatusID: "",
+                companyID: undefined,
+                daysBeforeNotReported: undefined,
+                customFieldValues: "",
+            }}
+        >
+            <Form.Item
+                label="Unit Type"
+                name="unitTypeId"
+                rules={[{ required: true, message: "Please select a unit type" }]}
+            >
+                <Select
+                    showSearch
+                    allowClear
+                    placeholder="Select a unit type"
+                    optionFilterProp="children"
+                    filterOption={(input, option) =>
+                        typeof option?.children === "string" &&
+                        (option.children as string).toLowerCase().includes(input.toLowerCase())
+                    }
+                >
+                    {unitModels.map(model => (
+                        <Select.Option key={model.id} value={model.id.toString()}>
+                            {model.code} - {model.name}
+                        </Select.Option>
+                    ))}
+                </Select>
+            </Form.Item>
+            <Form.Item label="Phone Number" name="phoneNumber">
+                <Input placeholder="Phone Number" />
+            </Form.Item>
+            <Form.Item label="PIN" name="pin">
+                <Input placeholder="PIN" />
+            </Form.Item>
+            <Form.Item
+                label="Manufacturer Code"
+                name="manufacturerCode"
+                rules={[{ required: true, message: "Please enter a manufacturer code" }]}
+            >
+                <Input placeholder="Manufacturer Code" />
+            </Form.Item>
+            <Form.Item label="Unit Code" name="unitCode">
+                <Input placeholder="Unit Code" />
+            </Form.Item>
+            <Form.Item label="Secret" name="secret">
+                <Input placeholder="Secret" />
+            </Form.Item>
+            <Form.Item
+                label="Unit Status"
+                name="status"
+                rules={[{ required: true, message: "Please select a unit status" }]}
+            >
+                <Select
+                    showSearch
+                    allowClear
+                    placeholder="Select a unit status"
+                    optionFilterProp="children"
+                    filterOption={(input, option) =>
+                        typeof option?.children === "string" &&
+                        (option.children as string).toLowerCase().includes(input.toLowerCase())
+                    }
+                >
+                    {unitStatusOptions.map(status => (
+                        <Select.Option key={status.value} value={status.value}>
+                            {status.label}
+                        </Select.Option>
+                    ))}
+                </Select>
+            </Form.Item>
+            <Form.Item label="Company" name="companyID">
+                <Select
+                    allowClear
+                    showSearch
+                    placeholder="Select a company"
+                    optionFilterProp="children"
+                    filterOption={(input, option) =>
+                        typeof option?.children === "string" &&
+                        (option.children as string).toLowerCase().includes(input.toLowerCase())
+                    }
+                >
+                    {companies.map(company => (
+                        <Select.Option key={company.id} value={company.id}>
+                            {company.name}
+                        </Select.Option>
+                    ))}
+                </Select>
+            </Form.Item>
+            <Form.Item label="Days Before Not Reported" name="daysBeforeNotReported">
+                <InputNumber min={0} style={{ width: "100%" }} placeholder="Days Before Not Reported" />
+            </Form.Item>
+            <Form.Item label="Custom Field Values" name="customFieldValues">
+                <Input placeholder="Custom Field Values" />
+            </Form.Item>
+        </Form>
+    </Modal>);
+
+    const customActions = (record: Unit) => (
+        <Tooltip title={expandedRowKeys.includes(record.id) ? "Hide Sensors" : "Sensors"}>
+            <Button
+                icon={expandedRowKeys.includes(record.id) ? <DownOutlined /> : <RightOutlined />}
+                size="small"
+                style={{ marginLeft: 4, padding: 0, minWidth: 0, width: 28, height: 28 }}
+                onClick={() => handleExpandRow(record)}
+            />
+        </Tooltip>
+    );
+
 
     if (loading) return <div>Loading units...</div>;
     if (error) return <div style={{ color: "red" }}>Error: {error}</div>;
 
     return (
         <div style={{ padding: "12px 0 12px 30px" }} >
-            <Modal
-                title={isEdit ? "Edit Unit" : "Add Unit"}
-                open={showModal}
-                onCancel={handleModalCancel}
-                onOk={handleModalOk}
-                okText="Save"
-                confirmLoading={modalLoading}
-                destroyOnHidden={true}
-            >
-                <Form
-                    layout="vertical"
-                    form={form}
-                    initialValues={{
-                        unitTypeId: "",
-                        phoneNumber: "",
-                        pin: "",
-                        manufacturerCode: "",
-                        unitCode: "",
-                        secret: "",
-                        unitStatusID: "",
-                        companyID: undefined,
-                        daysBeforeNotReported: undefined,
-                        customFieldValues: "",
-                    }}
-                >
-                    <Form.Item
-                        label="Unit Type"
-                        name="unitTypeId"
-                        rules={[{ required: true, message: "Please select a unit type" }]}
-                    >
-                        <Select
-                            showSearch
-                            allowClear
-                            placeholder="Select a unit type"
-                            optionFilterProp="children"
-                            filterOption={(input, option) =>
-                                typeof option?.children === "string" &&
-                                (option.children as string).toLowerCase().includes(input.toLowerCase())
-                            }
-                        >
-                            {unitModels.map(model => (
-                                <Select.Option key={model.id} value={model.id.toString()}>
-                                    {model.code} - {model.name}
-                                </Select.Option>
-                            ))}
-                        </Select>
-                    </Form.Item>
-                    <Form.Item label="Phone Number" name="phoneNumber">
-                        <Input placeholder="Phone Number" />
-                    </Form.Item>
-                    <Form.Item label="PIN" name="pin">
-                        <Input placeholder="PIN" />
-                    </Form.Item>
-                    <Form.Item
-                        label="Manufacturer Code"
-                        name="manufacturerCode"
-                        rules={[{ required: true, message: "Please enter a manufacturer code" }]}
-                    >
-                        <Input placeholder="Manufacturer Code" />
-                    </Form.Item>
-                    <Form.Item label="Unit Code" name="unitCode">
-                        <Input placeholder="Unit Code" />
-                    </Form.Item>
-                    <Form.Item label="Secret" name="secret">
-                        <Input placeholder="Secret" />
-                    </Form.Item>
-                    <Form.Item
-                        label="Unit Status"
-                        name="status"
-                        rules={[{ required: true, message: "Please select a unit status" }]}
-                    >
-                        <Select
-                            showSearch
-                            allowClear
-                            placeholder="Select a unit status"
-                            optionFilterProp="children"
-                            filterOption={(input, option) =>
-                                typeof option?.children === "string" &&
-                                (option.children as string).toLowerCase().includes(input.toLowerCase())
-                            }
-                        >
-                            {unitStatusOptions.map(status => (
-                                <Select.Option key={status.value} value={status.value}>
-                                    {status.label}
-                                </Select.Option>
-                            ))}
-                        </Select>
-                    </Form.Item>
-                    <Form.Item label="Company" name="companyID">
-                        <Select
-                            allowClear
-                            showSearch
-                            placeholder="Select a company"
-                            optionFilterProp="children"
-                            filterOption={(input, option) =>
-                                typeof option?.children === "string" &&
-                                (option.children as string).toLowerCase().includes(input.toLowerCase())
-                            }
-                        >
-                            {companies.map(company => (
-                                <Select.Option key={company.id} value={company.id}>
-                                    {company.name}
-                                </Select.Option>
-                            ))}
-                        </Select>
-                    </Form.Item>
-                    <Form.Item label="Days Before Not Reported" name="daysBeforeNotReported">
-                        <InputNumber min={0} style={{ width: "100%" }} placeholder="Days Before Not Reported" />
-                    </Form.Item>
-                    <Form.Item label="Custom Field Values" name="customFieldValues">
-                        <Input placeholder="Custom Field Values" />
-                    </Form.Item>
-                </Form>
-            </Modal>
-            { mainTable }
+            <UnitListModal />
+            <ExtendedAntDTable<Unit>
+                data={units}
+                tableColumns={allColumnDefs}
+                title="Units"
+                onAdd={handleAdd}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                columnMapper={columnMapper}
+                customActions={customActions}
+                expandable={{
+                    expandedRowRender: (unit: Unit) => {
+                        const sensors = sensorsByUnit[unit.id] || [];
+                        setEditingId(unit.id);
+                        return sensors.length > 0 ? getSensorsTable(unit, sensors) : null;
+                    },
+                    expandedRowKeys,
+                    onExpand: (_, record) => handleExpandRow(record),
+                    showExpandColumn: false
+                }}
+            />
         </div>
     );
 };

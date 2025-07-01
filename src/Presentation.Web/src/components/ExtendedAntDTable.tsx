@@ -4,7 +4,9 @@ import { PlusOutlined, SettingOutlined, EditOutlined, DeleteOutlined } from "@an
 import type { TableProps } from "antd";
 import "./AntDTable.css"; // For custom compact styles
 import { useState, type ReactNode, useEffect } from "react";
-import type { ColumnsType } from "antd/es/table";
+//import type { ColumnsType } from "antd/es/table";
+import ResizableTitle from "../components/ResizableTitle";
+//import { table } from "console";
 
 export type ExtendedTableColumnDefinition = {
     key: string;
@@ -17,26 +19,38 @@ export type ExtendedTableProps<T> = Omit<TableProps<T>, "dataSource" | "columns"
     data: T[];
     tableColumns: ExtendedTableColumnDefinition[];
     onEdit?: (record: T) => void;
-    onDelete?: (id: number) => void;
+    customActions?: (record: T) => any;
+    onDelete?: (id: any) => void;
     onAdd?: () => void; 
     columnMapper?: (col: any) => any;
 };
 
-export function ExtendedAntDTable<T extends { id: number }>(props: ExtendedTableProps<T>): ReactNode {
+export function ExtendedAntDTable<T>(props: ExtendedTableProps<T>): ReactNode {
 
-    const { data, tableColumns, rowKey, pagination, title, onAdd, onDelete, onEdit, columnMapper, ...rest } = props;
+    const { data, tableColumns, rowKey, pagination, title, onAdd, onDelete, onEdit, columnMapper,customActions, ...rest } = props;
     const defaultRowKey = rowKey ?? "id";
     const defaultPagination = pagination ?? false;
     const defaultVisibleKeys = tableColumns.filter(col => col.key !== "id").map(col => col.key as string);
     const [visibleKeys, setVisibleKeys] = useState<string[]>(() => getPersistedVisibleKeys(defaultVisibleKeys));
+
+
     const [columns, setColumns] = useState(tableColumns);
 
     useEffect(() => {
-        // Replace the parentCompanyId render function to show the company name
+        // Map columns and add onHeaderCell for resizing
         setColumns(
             tableColumns
                 .filter(col => visibleKeys.includes(col.key as string))
-                .map(col => columnMapper ?columnMapper!(col):col)
+                .map((col, index) => {
+                    const mappedCol = columnMapper ? columnMapper(col) : col;
+                    return {
+                        ...mappedCol,
+                        onHeaderCell: (column: any) => ({
+                            width: column.width,
+                            onResize: handleResize(index),
+                        }),
+                    };
+                })
         );
     }, [visibleKeys, columnMapper, tableColumns]);
 
@@ -141,16 +155,31 @@ export function ExtendedAntDTable<T extends { id: number }>(props: ExtendedTable
                         </Tooltip>
                     </Popconfirm>)
                 }
-                {/* Add more buttons here if needed */}
+                {/* Render custom actions if defined */}
+                {customActions && customActions(record)}
             </span>
         ),
     };
+
+    const handleResize = (index: number) => (_: any, { size }: any) => {
+        setColumns(prevColumns => {
+            const nextColumns = [...prevColumns];
+            nextColumns[index] = {
+                ...nextColumns[index],
+                width: size.width,
+            };
+            return nextColumns;
+        });
+    };
+
 
     // Place Actions column first
     const finalizedColumns = [
         actionsColumn,
         ...columns,
-    ] as ColumnsType<T>;
+    ];
+
+
 
     return (
         <AntdTable<T>
@@ -163,6 +192,11 @@ export function ExtendedAntDTable<T extends { id: number }>(props: ExtendedTable
             size="middle"
             className="compact-table"
             title={tableTitle}
+            components={{
+                header: {
+                    cell: ResizableTitle,
+                },
+            }}
             {...rest}
         />
     );

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { Table, Button, Modal, Input, Form, Space, Popconfirm, message } from "antd";
-import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { Modal, Input, Form, message } from "antd";
 import {
     fetchUnitModels,
     addUnitModel,
@@ -10,6 +9,7 @@ import {
 } from "../features/unitmodels/unitModelAPI";
 import { useAppSelector } from "../app/hooks";
 import { selectAuth } from "../app/store";
+import { ExtendedAntDTable } from "../components/ExtendedAntDTable";
 
 const allColumnDefs = [
     { title: "ID", dataIndex: "id", key: "id", width: 80 },
@@ -112,90 +112,56 @@ const UnitModelList: React.FC = () => {
         form.resetFields();
     };
 
-    const columns = [
-        ...allColumnDefs,
-        {
-            title: "Actions",
-            key: "actions",
-            width: 120,
-            render: (_: any, record: UnitModel) => (
-                <Space>
-                    <Button
-                        icon={<EditOutlined />}
-                        size="small"
-                        onClick={() => handleEdit(record)}
-                    />
-                    <Popconfirm
-                        title="Delete this unit model?"
-                        onConfirm={() => handleDelete(record.id)}
-                        okText="Yes"
-                        cancelText="No"
-                    >
-                        <Button
-                            icon={<DeleteOutlined />}
-                            size="small"
-                            danger
-                        />
-                    </Popconfirm>
-                </Space>
-            ),
-        },
-    ];
 
     if (loading) return <div>Loading unit models...</div>;
     if (error) return <div style={{ color: "red" }}>Error: {error}</div>;
 
-    return (
-        <div>
-            <h2>Unit Models</h2>
-            <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={handleAdd}
-                style={{ marginBottom: 16 }}
+    const MainModal: React.FC = () => (
+        <Modal
+            title={isEdit ? "Edit Unit Model" : "Add Unit Model"}
+            open={showModal}
+            onCancel={handleModalCancel}
+            onOk={handleModalOk}
+            okText="Save"
+            confirmLoading={modalLoading}
+            destroyOnClose
+        >
+            <Form
+                layout="vertical"
+                form={form}
+                initialValues={{ code: "", name: "", description: "" }}
             >
-                Add Unit Model
-            </Button>
-            <Modal
-                title={isEdit ? "Edit Unit Model" : "Add Unit Model"}
-                open={showModal}
-                onCancel={handleModalCancel}
-                onOk={handleModalOk}
-                okText="Save"
-                confirmLoading={modalLoading}
-                destroyOnClose
-            >
-                <Form
-                    layout="vertical"
-                    form={form}
-                    initialValues={{ code: "", name: "", description: "" }}
+                <Form.Item
+                    label="Code"
+                    name="code"
+                    rules={[{ required: true, message: "Please enter a code" }]}
                 >
-                    <Form.Item
-                        label="Code"
-                        name="code"
-                        rules={[{ required: true, message: "Please enter a code" }]}
-                    >
-                        <Input placeholder="Code" />
-                    </Form.Item>
-                    <Form.Item
-                        label="Name"
-                        name="name"
-                        rules={[{ required: true, message: "Please enter a name" }]}
-                    >
-                        <Input placeholder="Name" />
-                    </Form.Item>
-                    <Form.Item label="Description" name="description">
-                        <Input placeholder="Description" />
-                    </Form.Item>
-                </Form>
-            </Modal>
-            <Table<UnitModel>
-                bordered
-                dataSource={unitModels}
-                columns={columns}
-                rowKey="id"
-                pagination={false}
-                scroll={{ x: "max-content" }}
+                    <Input placeholder="Code" />
+                </Form.Item>
+                <Form.Item
+                    label="Name"
+                    name="name"
+                    rules={[{ required: true, message: "Please enter a name" }]}
+                >
+                    <Input placeholder="Name" />
+                </Form.Item>
+                <Form.Item label="Description" name="description">
+                    <Input placeholder="Description" />
+                </Form.Item>
+            </Form>
+        </Modal>
+    );
+
+    return (
+        <div style={{ padding: "12px 0 12px 30px" }} >
+            <MainModal />
+            <ExtendedAntDTable<UnitModel>
+                data={unitModels}
+                tableColumns={allColumnDefs}
+                title="Unit Models"
+                onAdd={handleAdd}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
             />
         </div>
     );

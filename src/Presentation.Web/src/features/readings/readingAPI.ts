@@ -69,12 +69,11 @@ export async function updateReading(
 
 // Delete a reading
 export async function deleteReading(
-  dateRecordedUtc: string,
-  sensorId: number,
+  record: Reading,
   token?: string
 ): Promise<void> {
   await axios.delete(
-    `${BASE_URL}/api/reading/${encodeURIComponent(dateRecordedUtc)}/${sensorId}`,
+    `${BASE_URL}/api/reading/${encodeURIComponent(record.dateRecordedUtc)}/${record.sensor.id}`,
     {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     }

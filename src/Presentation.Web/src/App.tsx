@@ -14,6 +14,7 @@ import UsersList from "./pages/UsersList";
 import EditProfile from "./pages/EditProfile";
 import UnitList from "./pages/UnitList";
 import SystemStatus from "./pages/SystemStatus";
+import AlarmInstructions from "./pages/AlarmInstructions";
 import CompanyList from "./pages/CompanyList";
 import SensorList from "./pages/SensorList";
 import ReadingsList from "./pages/ReadingsList";
@@ -52,6 +53,7 @@ export const App = () => {
                             <Route path="/companies" element={<CompanyList />} />
                             <Route path="/sensors" element={<SensorList />} />
                             <Route path="/unitmodels" element={<UnitModelList />} />
+                            <Route path="/alarminstructions" element={<AlarmInstructions />} />
                             <Route path="/configurationuploads/:unitId" element={<ConfigurationUploads />} />
                             <Route path="*" element={<NotFoundPage />} />
                         </Route>

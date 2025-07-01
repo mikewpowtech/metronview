@@ -9,7 +9,7 @@ import {
 } from "../features/companies/companyAPI";
 import { useAppSelector } from "../app/hooks";
 import { selectAuth } from "../app/store";
-import { ExtendedAntDTable, type ExtendedTableColumnDefinition } from "../components/ExtendedTable";
+import { ExtendedAntDTable, type ExtendedTableColumnDefinition } from "../components/ExtendedAntDTable";
 
 const companyColumnDefinitions: ExtendedTableColumnDefinition[] =  [
     { title: "ID", dataIndex: "id", key: "id", width: 100 },
@@ -160,7 +160,7 @@ const CompanyList: React.FC = () => {
         </Modal>
     )
 
-    const companiesColumnMapper = (col: any) => {
+    const columnMapper = (col: any) => {
         return col.key === "parentCompanyId"
             ? {
                 ...col,
@@ -185,7 +185,7 @@ const CompanyList: React.FC = () => {
                 title="Company"
                 onAdd={handleAdd}
                 onEdit={handleEdit}
-                columnMapper={companiesColumnMapper}
+                columnMapper={columnMapper}
             />
         </div>
     );
