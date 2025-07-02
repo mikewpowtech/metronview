@@ -218,6 +218,7 @@ const UsersList: React.FC = () => {
                 tableColumns={allColumnDefs}
                 title="Users List"
                 columnMapper={columnMapper}
+                loading={loading}
             />
         </div>
     );

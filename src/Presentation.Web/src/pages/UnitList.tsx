@@ -140,11 +140,15 @@ const UnitList: React.FC = () => {
         setShowModal(true);
     };
 
-    const handleDelete = async (id: number) => {
+    const handleDelete = async (record: Unit) => {
         try {
-            await deleteUnit(id, token);
-            setUnits(prev => prev.filter(u => u.id !== id));
-            message.success("Unit deleted");
+            if (record.id) {
+                await deleteUnit(record.id, token);
+                setUnits(prev => prev.filter(u => u.id !== record.id));
+                message.success("Unit deleted");
+            } else {
+                message.error("Unit ID is required for deletion");
+            }
         } catch (err: any) {
             message.error(err.message || "Failed to delete unit");
         }
@@ -418,8 +422,6 @@ const UnitList: React.FC = () => {
         </Tooltip>
     );
 
-
-    if (loading) return <div>Loading units...</div>;
     if (error) return <div style={{ color: "red" }}>Error: {error}</div>;
 
     return (
@@ -444,6 +446,7 @@ const UnitList: React.FC = () => {
                     onExpand: (_, record) => handleExpandRow(record),
                     showExpandColumn: false
                 }}
+                loading={loading}
             />
         </div>
     );

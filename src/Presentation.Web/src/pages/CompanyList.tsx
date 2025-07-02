@@ -66,16 +66,6 @@ const CompanyList: React.FC = () => {
         setShowModal(true);
     };
 
-    // const handleDelete = async (id: number) => {
-    //     try {
-    //         await deleteCompany(id, token);
-    //         setCompanies(prev => prev.filter(c => c.id !== id));
-    //         message.success("Company deleted");
-    //     } catch (err: any) {
-    //         message.error(err.message || "Failed to delete company");
-    //     }
-    // };
-
     const handleModalOk = async () => {
         try {
             setModalLoading(true);
@@ -173,7 +163,6 @@ const CompanyList: React.FC = () => {
             : col
     }
 
-    if (loading) return <div>Loading companies...</div>;
     if (error) return <div style={{ color: "red" }}>Error: {error}</div>;
 
     return (
@@ -186,6 +175,7 @@ const CompanyList: React.FC = () => {
                 onAdd={handleAdd}
                 onEdit={handleEdit}
                 columnMapper={columnMapper}
+                loading={loading}
             />
         </div>
     );

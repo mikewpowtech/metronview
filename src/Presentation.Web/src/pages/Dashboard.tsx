@@ -69,7 +69,6 @@ const Dashboard: React.FC = () => {
         </Tooltip>
     );
 
-    if (loading) return <div>Loading dashboard...</div>;
     if (error) return <div style={{ color: "red" }}>Error: {error}</div>;
 
     return (
@@ -79,6 +78,7 @@ const Dashboard: React.FC = () => {
                 tableColumns={allColumnDefs as ExtendedTableColumnDefinition[]}
                 title="Dashboard"
                 customActions={actions}
+                loading={loading}
             />
         </div>
     );

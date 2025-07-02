@@ -72,7 +72,7 @@ export async function updateSensor(
 
 // Delete a sensor
 export async function deleteSensor(
-  id: number,
+  id: number|string,
   token?: string
 ): Promise<void> {
   await axios.delete(

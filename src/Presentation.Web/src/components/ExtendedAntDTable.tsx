@@ -20,7 +20,7 @@ export type ExtendedTableProps<T> = Omit<TableProps<T>, "dataSource" | "columns"
     tableColumns: ExtendedTableColumnDefinition[];
     onEdit?: (record: T) => void;
     customActions?: (record: T) => any;
-    onDelete?: (id: any) => void;
+    onDelete?: (record: T) => void;
     onAdd?: () => void; 
     columnMapper?: (col: any) => any;
 };
@@ -141,7 +141,7 @@ export function ExtendedAntDTable<T>(props: ExtendedTableProps<T>): ReactNode {
                 {onDelete && (
                     <Popconfirm
                         title="Delete this item?"
-                        onConfirm={() => onDelete(record.id)}
+                        onConfirm={() => onDelete(record)}
                         okText="Yes"
                         cancelText="No"
                     >

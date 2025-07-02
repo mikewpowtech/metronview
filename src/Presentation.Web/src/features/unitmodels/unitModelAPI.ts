@@ -55,7 +55,7 @@ export async function updateUnitModel(
 
 // Delete a unit model
 export async function deleteUnitModel(
-    id: number,
+    id: number|string,
     token?: string
 ): Promise<void> {
     await axios.delete(

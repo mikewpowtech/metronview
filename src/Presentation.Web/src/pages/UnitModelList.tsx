@@ -67,11 +67,15 @@ const UnitModelList: React.FC = () => {
         setShowModal(true);
     };
 
-    const handleDelete = async (id: number) => {
+    const handleDelete = async (record: UnitModel) => {
         try {
-            await deleteUnitModel(id, token);
-            setUnitModels(prev => prev.filter(u => u.id !== id));
+            if(record.id){
+            await deleteUnitModel(record.id, token);
+            setUnitModels(prev => prev.filter(u => u.id !== record.id));
             message.success("Unit model deleted");
+            }else{
+                message.error("Unit model ID is required for deletion");
+            }
         } catch (err: any) {
             message.error(err.message || "Failed to delete unit model");
         }

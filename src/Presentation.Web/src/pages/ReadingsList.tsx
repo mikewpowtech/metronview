@@ -84,8 +84,12 @@ const ReadingsList: React.FC = () => {
         setShowModal(true);
     };
 
-    const handleDelete = async (record: Reading) => {
+    const handleDelete = async (record:Reading) => {
         try {
+            if(!record.sensor || !record.dateRecordedUtc) {
+                message.error("Sensor and date recorded are required for deletion");
+                return;
+            }
             await deleteReading(record, token);
             setReadings(prev => prev.filter(r => !(r.dateRecordedUtc === record.dateRecordedUtc && r.sensor.id === record.sensor.id)));
             message.success("Reading deleted");
@@ -144,7 +148,7 @@ const ReadingsList: React.FC = () => {
             onOk={handleModalOk}
             okText="Save"
             confirmLoading={modalLoading}
-            destroyOnClose
+            destroyOnHidden={true}
         >
             <Form
                 layout="vertical"
@@ -189,7 +193,6 @@ const ReadingsList: React.FC = () => {
         </Modal>
     );
 
-    if (loading) return <div>Loading readings...</div>;
     if (error) return <div style={{ color: "red" }}>Error: {error}</div>;
 
     return (
@@ -213,6 +216,7 @@ const ReadingsList: React.FC = () => {
                         setPageSize(size);
                     },
                 }}
+                loading={loading}
             />
         </div>
     );

@@ -85,11 +85,15 @@ const SensorList: React.FC = () => {
         setShowModal(true);
     };
 
-    const handleDelete = async (id: number) => {
+    const handleDelete = async (record: Sensor) => {
         try {
-            await deleteSensor(id, token);
-            setSensors(prev => prev.filter(s => s.id !== id));
-            message.success("Sensor deleted");
+            if (record.id) {
+                await deleteSensor(record.id, token);
+                setSensors(prev => prev.filter(s => s.id !== record.id));
+                message.success("Sensor deleted");
+            } else {
+                message.error("Sensor ID is required for deletion");
+            }
         } catch (err: any) {
             message.error(err.message || "Failed to delete sensor");
         }
