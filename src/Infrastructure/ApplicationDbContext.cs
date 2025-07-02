@@ -1,5 +1,4 @@
-﻿using Domain;
-using Infrastructure.DbClasses;
+﻿using Infrastructure.DbClasses;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -16,10 +15,65 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<UnitModelDb> UnitModels { get; set; } = default!; // Added for UnitModel support
     public DbSet<ConfigurationUploadDb> ConfigurationUploads { get; set; } = default!;
     public DbSet<UnitStatusDb> UnitStatuses { get; set; } = default!;
+    public DbSet<TriggerDb> Triggers { get; set; } = null!;
+    public DbSet<TriggerTypeDb> TriggerTypes { get; set; } = null!;
+    public DbSet<CommunicationModeDb> RecipientModes { get; set; } = null!;
+    public DbSet<RecipientDb> Recipients { get; set; } = null!;
+    public DbSet<RecipientSetDb> RecipientSets { get; set; } = null!;
+    public DbSet<AlarmDb> Alarms { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<AlarmDb>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            // Foreign key for Company
+            entity.HasOne(e => e.Company)
+                .WithMany()
+                .HasForeignKey(e => e.CompanyId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Foreign key for RecipientSet
+            entity.HasOne(e => e.RecipientSet)
+                .WithMany()
+                .HasForeignKey(e => e.RecipientSetId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Optional one-to-many relationship: AlarmDb -> TriggerDb
+            entity.HasMany(e => e.Triggers)
+                  .WithOne(e => e.Alarm)
+                  .HasForeignKey(e => e.AlarmId)
+                  .OnDelete(DeleteBehavior.NoAction)
+                  .IsRequired(false); // Triggers are optional
+        });
+
+        modelBuilder.Entity<RecipientDb>()
+            .HasMany(r => r.RecipientSets)
+            .WithMany(rs => rs.Recipients)
+            .UsingEntity(j => j.ToTable("RecipientSetRecipients")); // Optional: custom join table name
+
+        modelBuilder.Entity<TriggerDb>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.HasOne(e => e.Alarm)
+                .WithMany(a => a.Triggers) // or .WithMany(a => a.Triggers) if you have a collection in AlarmDb
+                .HasForeignKey(e => e.AlarmId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(e => e.TriggerType)
+                .WithMany()
+                .HasForeignKey(e => e.TriggerTypeId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(e => e.CommunicationMode)
+                .WithMany()
+                .HasForeignKey(e => e.CommunicationModeId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
 
         modelBuilder.Entity<ConfigurationUploadDb>(entity =>
         {
@@ -45,11 +99,25 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         {
             entity.HasKey(e => e.Id);
 
-            // Configure the foreign key relationship
+            // Foreign key to UnitDb
             entity.HasOne(e => e.Unit)
-                  .WithMany(e => e.Sensors) // or .WithMany(u => u.Sensors) if you have a collection navigation property in UnitDb
+                  .WithMany(u => u.Sensors)
                   .HasForeignKey(e => e.UnitId)
-                  .OnDelete(DeleteBehavior.NoAction); // or your preferred delete behavior
+                  .OnDelete(DeleteBehavior.NoAction);
+
+            // Foreign key to CompanyDb
+            entity.HasOne(e => e.Company)
+                  .WithMany()
+                  .HasForeignKey(e => e.CompanyId)
+                  .OnDelete(DeleteBehavior.NoAction)
+                      .IsRequired(false);
+
+            // Foreign key to AlarmDb
+            entity.HasOne(e => e.Alarm)
+                  .WithMany()
+                  .HasForeignKey(e => e.AlarmId)
+                  .OnDelete(DeleteBehavior.NoAction)
+                .IsRequired(false);
         });
 
         modelBuilder.Entity<UnitDb>(entity =>
@@ -65,7 +133,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.HasOne(u => u.Company)
             .WithMany()
             .HasForeignKey(u => u.CompanyID)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.NoAction)
+                .IsRequired(false);
         });
 
         modelBuilder.Entity<ReadingDb>(entity =>

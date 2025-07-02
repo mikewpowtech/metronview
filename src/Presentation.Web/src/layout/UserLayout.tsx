@@ -83,16 +83,16 @@ export const UserLayout = ({ UserName }: iUser) => {
             label: "Alarms",
             items: [
                 {
-                    key: "/alarmhistory",
+                    key: "/alarms",
                     label: <span onClick={() => handleClick("/alarmhistory")}>History</span>,
                 },
                 {
                     key: "/recipients",
-                    label: <span onClick={() => handleClick("/recipients")}>Recipients</span>,
+                    label: <span onClick={() => handleClick("/recipients")}>Contacts</span>,
                 },
                 {
-                    key: "/recipientgroups",
-                    label: <span onClick={() => handleClick("/recipientgroups")}>Recipient Groups</span>,
+                    key: "/recipientsets",
+                    label: <span onClick={() => handleClick("/recipientsets")}>Recipient Sets</span>,
                 },
                 {
                     key: "/senderoptions",

@@ -8,6 +8,7 @@ import {
     type Sensor
 } from "../features/sensors/sensorAPI";
 import { fetchCompanies, type Company } from "../features/companies/companyAPI";
+import { fetchAlarms, type Alarm } from "../features/alarms/alarmAPI";
 import { useAppSelector } from "../app/hooks";
 import { selectAuth } from "../app/store";
 import { ExtendedAntDTable } from "../components/ExtendedAntDTable";
@@ -22,6 +23,7 @@ const allColumnDefs = [
     { title: "Engineering Units", dataIndex: "engineeringUnits", key: "engineeringUnits", width: 80 },
     { title: "Unit ID", dataIndex: "unitId", key: "unitId", width: 120 },
     { title: "Company ID", dataIndex: "companyID", key: "companyID", width: 120 },
+    { title: "Alarm ID", dataIndex: "alarmId", key: "alarmId", width: 120 },
 ];
 
 const SensorList: React.FC = () => {
@@ -36,17 +38,20 @@ const SensorList: React.FC = () => {
     const [form] = Form.useForm();
     const [modalLoading, setModalLoading] = useState(false);
 
-    // Add this state for companies
+    // Add this state for companies and alarms
     const [companies, setCompanies] = useState<Company[]>([]);
+    const [alarms, setAlarms] = useState<Alarm[]>([]);
 
     useEffect(() => {
         loadSensors();
         fetchCompanies(token)
             .then(setCompanies)
             .catch(() => setCompanies([]));
+        fetchAlarms(token)
+            .then(setAlarms)
+            .catch(() => setAlarms([]));
         // eslint-disable-next-line
     }, [token]);
-
 
     const loadSensors = async () => {
         setLoading(true);
@@ -81,6 +86,7 @@ const SensorList: React.FC = () => {
             engineeringUnits: record.engineeringUnits ?? "",
             unitId: record.unitId ?? "",
             companyID: record.companyID ?? "",
+            alarmId: record.alarmId ?? "",
         });
         setShowModal(true);
     };
@@ -156,6 +162,7 @@ const SensorList: React.FC = () => {
                     engineeringUnits: "",
                     unitId: "",
                     companyID: "",
+                    alarmId: "",
                 }}
             >
                 <Form.Item
@@ -201,6 +208,24 @@ const SensorList: React.FC = () => {
                         {companies.map(company => (
                             <Select.Option key={company.id} value={company.id}>
                                 {company.name}
+                            </Select.Option>
+                        ))}
+                    </Select>
+                </Form.Item>
+                <Form.Item label="Alarm ID" name="alarmId">
+                    <Select
+                        showSearch
+                        allowClear
+                        placeholder="Select an alarm"
+                        optionFilterProp="children"
+                        filterOption={(input, option) =>
+                            typeof option?.children === "string" &&
+                            (option.children as string).toLowerCase().includes(input.toLowerCase())
+                        }
+                    >
+                        {alarms.map(alarm => (
+                            <Select.Option key={alarm.id} value={alarm.id}>
+                                {alarm.name}
                             </Select.Option>
                         ))}
                     </Select>

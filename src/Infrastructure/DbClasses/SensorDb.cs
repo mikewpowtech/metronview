@@ -14,4 +14,10 @@ public class SensorDb
     public int? HighValue { get; set; }
     public string? EngineeringUnits { get; set; }
     public string? Name { get; set; }
+
+    public int? CompanyId { get; set; } // [Code] [varchar](100) NOT NULL
+    public CompanyDb? Company { get; set; } // Navigation property for Company
+
+    public int? AlarmId { get; set; } // [Code] [varchar](100) NOT NULL
+    public AlarmDb? Alarm { get; set; } // Navigation property for Alarm
 }

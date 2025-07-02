@@ -11,4 +11,6 @@ public class Sensor
     public int? HighValue { get; set; } // [HighValue] [int] NULL
     public string? EngineeringUnits { get; set; } // [EngineeringUnits] [varchar](23) NULL
     public string? Name { get; set; } // [Name] [varchar](100) NULL
+    public int? CompanyId { get; set; } // [Code] [varchar](100) NOT NULL
+    public int? AlarmId { get; set; } // [Code] [varchar](100) NOT NULL
 }

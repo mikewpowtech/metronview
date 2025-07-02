@@ -1,10 +1,13 @@
+using Application.Alarms;
 using Application.Companies;
-using Application.Identity;
-using Application.Units;
-using Application.Sensors;
-using Application.Readings;
-using Application.Dashboard;
 using Application.ConfigurationUploads;
+using Application.Dashboard;
+using Application.Identity;
+using Application.Readings;
+using Application.Recipients;
+using Application.RecipientSets;
+using Application.Sensors;
+using Application.Units;
 using Infrastructure.Identity;
 using Infrastructure.Mapping;
 using Infrastructure.Repositories;
@@ -46,6 +49,11 @@ namespace Infrastructure
             services.AddScoped<IReadingRepository, ReadingRepository>();
             services.AddScoped<IDashboardRepository, DashboardRepository>();
             services.AddScoped<IConfigurationUploadRepository, ConfigurationUploadRepository>();
+            services.AddScoped<IAlarmRepository, AlarmRepository>();
+            services.AddScoped<IRecipientRepository, RecipientRepository>();
+            services.AddScoped<IRecipientService, RecipientService>();
+            services.AddScoped<IRecipientSetRepository, RecipientSetRepository>();
+            services.AddScoped<IRecipientSetService, RecipientSetService>();
 
             // Register DbContext Initializer
             services.AddScoped<ApplicationDbContextInitialiser>();

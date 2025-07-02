@@ -13,6 +13,7 @@ import { Spin } from "antd";
 import UsersList from "./pages/UsersList";
 import EditProfile from "./pages/EditProfile";
 import UnitList from "./pages/UnitList";
+import AlarmList from "./pages/AlarmList";
 import SystemStatus from "./pages/SystemStatus";
 import AlarmInstructions from "./pages/AlarmInstructions";
 import CompanyList from "./pages/CompanyList";
@@ -21,6 +22,8 @@ import ReadingsList from "./pages/ReadingsList";
 import UnitModelList from "./pages/UnitModelList"; // <-- Import the page
 import Dashboard from "./pages/Dashboard";
 import ConfigurationUploads from "./pages/ConfigurationUploads";
+import RecipientList from "./pages/RecipientList";
+import RecipientSetList from "./pages/RecipientSetList";
 
 export const App = () => {
     const auth = useAppSelector(selectAuth);
@@ -54,6 +57,9 @@ export const App = () => {
                             <Route path="/sensors" element={<SensorList />} />
                             <Route path="/unitmodels" element={<UnitModelList />} />
                             <Route path="/alarminstructions" element={<AlarmInstructions />} />
+                            <Route path="/alarms" element={<AlarmList />} />
+                            <Route path="/recipients" element={<RecipientList />} />
+                            <Route path="/recipientsets" element={<RecipientSetList />} />
                             <Route path="/configurationuploads/:unitId" element={<ConfigurationUploads />} />
                             <Route path="*" element={<NotFoundPage />} />
                         </Route>

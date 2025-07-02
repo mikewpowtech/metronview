@@ -4,6 +4,7 @@ using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250702174121_ModifyAlarmOrder")]
+    partial class ModifyAlarmOrder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -223,17 +226,11 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("AlarmId")
-                        .HasColumnType("int");
-
                     b.Property<byte>("Channel")
                         .HasColumnType("tinyint");
 
                     b.Property<byte?>("ChannelType")
                         .HasColumnType("tinyint");
-
-                    b.Property<int?>("CompanyId")
-                        .HasColumnType("int");
 
                     b.Property<string>("EngineeringUnits")
                         .HasColumnType("nvarchar(max)");
@@ -251,10 +248,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AlarmId");
-
-                    b.HasIndex("CompanyId");
 
                     b.HasIndex("UnitId");
 
@@ -669,13 +662,13 @@ namespace Infrastructure.Migrations
                     b.HasOne("Infrastructure.DbClasses.CompanyDb", "Company")
                         .WithMany()
                         .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Infrastructure.DbClasses.RecipientSetDb", "RecipientSet")
                         .WithMany()
                         .HasForeignKey("RecipientSetId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Company");
@@ -715,25 +708,11 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Infrastructure.DbClasses.SensorDb", b =>
                 {
-                    b.HasOne("Infrastructure.DbClasses.AlarmDb", "Alarm")
-                        .WithMany()
-                        .HasForeignKey("AlarmId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("Infrastructure.DbClasses.CompanyDb", "Company")
-                        .WithMany()
-                        .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
                     b.HasOne("Infrastructure.DbClasses.UnitDb", "Unit")
                         .WithMany("Sensors")
                         .HasForeignKey("UnitId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
-
-                    b.Navigation("Alarm");
-
-                    b.Navigation("Company");
 
                     b.Navigation("Unit");
                 });
@@ -769,7 +748,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Infrastructure.DbClasses.CompanyDb", "Company")
                         .WithMany()
                         .HasForeignKey("CompanyID")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Infrastructure.DbClasses.UnitModelDb", "UnitType")
                         .WithMany()

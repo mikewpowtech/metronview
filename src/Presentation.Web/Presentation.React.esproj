@@ -11,10 +11,9 @@
   <ItemGroup>
     <None Remove=".vite\**" />
     <None Remove=".vscode\**" />
+    <None Remove="src\features\NewFolder\**" />
     <TypeScriptConfiguration Remove=".vite\**" />
     <TypeScriptConfiguration Remove=".vscode\**" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="src\features\NewFolder\" />
+    <TypeScriptConfiguration Remove="src\features\NewFolder\**" />
   </ItemGroup>
 </Project>

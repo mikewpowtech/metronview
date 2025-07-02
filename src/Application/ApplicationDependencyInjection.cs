@@ -1,3 +1,4 @@
+using Application.Alarms;
 using Application.Companies;
 using Application.ConfigurationUploads;
 using Application.Dashboard;
@@ -24,6 +25,7 @@ namespace Application
             services.AddScoped<IReadingService, ReadingService>();
             services.AddScoped<IDashboardService, DashboardService>();
             services.AddScoped<IConfigurationUploadService, ConfigurationUploadService>();
+            services.AddScoped<IAlarmService, AlarmService>();
 
             // Register Mapster for mapping
             services.AddMapster();
