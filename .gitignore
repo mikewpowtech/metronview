@@ -470,3 +470,4 @@ Thumbs.db
 **/wwwroot/lib/
 **/ClientApp/dist/
 **/ClientApp/build/
+src/Presentation.Web/obj/Debug//package.g.props
