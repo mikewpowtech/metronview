@@ -404,3 +404,4 @@ FodyWeavers.xsd
 .env.development.local
 .env.test.local
 .env.production.local
+src/Presentation.Web/obj/Debug//package.g.props

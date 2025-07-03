@@ -48,7 +48,8 @@
         "hidden": false,
         "group": "Full Stack",
         "order": 1
-      }
+      },
+      "preLaunchTask": "build"
     }
   ]
 }

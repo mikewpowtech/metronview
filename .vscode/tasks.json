@@ -76,6 +76,44 @@
 			}
 		},
 		{
+			"label": "Wait for API",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-c",
+				"until curl -s http://localhost:5202/swagger > /dev/null 2>&1; do echo 'Waiting for API to start...'; sleep 2; done; echo 'API is ready!'"
+			],
+			"group": "build",
+			"isBackground": false,
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			}
+		},
+		{
+			"label": "Start Full Application (Sequential)",
+			"dependsOrder": "sequence",
+			"dependsOn": [
+				"build",
+				"Start API Server",
+				"Wait for API",
+				"Start Frontend Dev Server"
+			],
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			}
+		},
+		{
 			"label": "Install Frontend Dependencies",
 			"type": "shell",
 			"command": "npm",

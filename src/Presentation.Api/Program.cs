@@ -158,7 +158,6 @@ namespace Api
                 await initialiser.SeedAsync();
             }
 
-            app.UseHttpsRedirection();
             app.UseCors("webAppRequests");
             app.UseAuthentication();
             app.UseAuthorization();
