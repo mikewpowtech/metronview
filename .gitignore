@@ -471,3 +471,4 @@ Thumbs.db
 **/ClientApp/dist/
 **/ClientApp/build/
 src/Presentation.Web/obj/Debug//package.g.props
+src/.DS_Store
