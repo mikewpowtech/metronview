@@ -405,3 +405,68 @@ FodyWeavers.xsd
 .env.test.local
 .env.production.local
 src/Presentation.Web/obj/Debug//package.g.props
+
+# Additional Node.js and frontend files
+**/node_modules/
+**/dist/
+**/dist-ssr/
+**/.next/
+**/.nuxt/
+**/.vuepress/dist/
+**/.serverless/
+**/.fusebox/
+**/.dynamodb/
+**/.tern-port
+**/coverage/
+**/.nyc_output/
+**/lib-cov/
+**/.grunt/
+**/bower_components/
+**/.lock-wscript
+**/build/Release/
+**/.eslintcache
+**/.stylelintcache
+**/.cache/
+**/.parcel-cache/
+**/.vscode/
+
+# macOS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# JetBrains IDEs
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Additional Visual Studio files
+*.code-workspace
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Package manager lock files (uncomment if you want to ignore them)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Build output directories that might be missed
+**/wwwroot/dist/
+**/wwwroot/lib/
+**/ClientApp/dist/
+**/ClientApp/build/
