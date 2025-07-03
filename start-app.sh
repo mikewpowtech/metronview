@@ -53,7 +53,7 @@ cd ../..
 
 echo "🎉 Application started successfully!"
 echo "   Frontend: http://localhost:3000"
-echo "   API: http://localhost:5202"
+echo "   API: http://localhost:5202 (redirects to Swagger)"
 echo "   Swagger: http://localhost:5202/swagger"
 echo ""
 echo "Press Ctrl+C to stop all services"
