@@ -1,0 +1,14 @@
+{
+  "files.exclude": {
+    "**/bin": true,
+    "**/obj": true,
+    "**/node_modules": true,
+    "**/dist": true
+  },
+  "dotnet.defaultSolution": "App.sln",
+  "omnisharp.enableRoslynAnalyzers": true,
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "eslint.workingDirectories": [
+    "src/Presentation.Web"
+  ]
+}
