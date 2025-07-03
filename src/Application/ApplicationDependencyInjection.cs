@@ -6,6 +6,7 @@ using Application.Dashboard;
 using Application.Identity;
 using Application.Readings;
 using Application.Sensors;
+using Application.Triggers;
 using Application.TriggerTypes;
 using Application.Units;
 using Mapster;
@@ -30,6 +31,7 @@ namespace Application
             services.AddScoped<IAlarmService, AlarmService>();
             services.AddScoped<ITriggerTypeService, TriggerTypeService>();
             services.AddScoped<ICommunicationModeService, CommunicationModeService>();
+            services.AddScoped<ITriggerService, TriggerService>();
 
             // Register Mapster for mapping
             services.AddMapster();

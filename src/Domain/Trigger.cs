@@ -13,9 +13,9 @@ public class Trigger
     public bool IsEnabled { get; set; } = true; // [IsActive] [bit] NOT NULL, default value is true
 
     // Navigation property for Alarm
-    public Alarm Alarm { get; set; } = null!;
+    public Alarm? Alarm { get; set; }
     // Navigation property for TriggerType
-    public TriggerType TriggerType { get; set; } = null!;
+    public TriggerType? TriggerType { get; set; }
     // Navigation property for RecipientMode
-    public CommunicationMode CommunicationMode { get; set; } = null!;
+    public CommunicationMode? CommunicationMode { get; set; }
 }
