@@ -1,5 +1,6 @@
 using Application.Alarms;
 using Application.Companies;
+using Application.CommunicationModes;
 using Application.ConfigurationUploads;
 using Application.Dashboard;
 using Application.Identity;
@@ -7,6 +8,7 @@ using Application.Readings;
 using Application.Recipients;
 using Application.RecipientSets;
 using Application.Sensors;
+using Application.TriggerTypes;
 using Application.Units;
 using Infrastructure.Identity;
 using Infrastructure.Mapping;
@@ -50,6 +52,8 @@ namespace Infrastructure
             services.AddScoped<IDashboardRepository, DashboardRepository>();
             services.AddScoped<IConfigurationUploadRepository, ConfigurationUploadRepository>();
             services.AddScoped<IAlarmRepository, AlarmRepository>();
+            services.AddScoped<ITriggerTypeRepository, TriggerTypeRepository>();
+            services.AddScoped<ICommunicationModeRepository, CommunicationModeRepository>();
             services.AddScoped<IRecipientRepository, RecipientRepository>();
             services.AddScoped<IRecipientService, RecipientService>();
             services.AddScoped<IRecipientSetRepository, RecipientSetRepository>();

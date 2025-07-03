@@ -1,4 +1,5 @@
 ﻿using Infrastructure.Identity;
+using Infrastructure.DbClasses;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -63,5 +64,69 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
                 await userManager.AddToRolesAsync(administrator, new[] { administratorRole.Name });
             }
         }
+
+        // Default trigger types
+        await SeedTriggerTypesAsync();
+
+        // Default communication modes
+        await SeedCommunicationModesAsync();
+    }
+
+    private async Task SeedTriggerTypesAsync()
+    {
+        var triggerTypes = new List<TriggerTypeDb>
+        {
+            new TriggerTypeDb { Code = "U", Name = "rising past", Order = 1 },
+            new TriggerTypeDb { Code = "D", Name = "falling past", Order = 2 },
+            new TriggerTypeDb { Code = "A", Name = "above or equal to", Order = 3 },
+            new TriggerTypeDb { Code = "B", Name = "below or equal to", Order = 4 },
+            new TriggerTypeDb { Code = "C", Name = "rate of change", Order = 5 },
+            new TriggerTypeDb { Code = "S", Name = "not reported for (mins)", Order = 6 }
+        };
+
+        // Clear existing trigger types and reseed with new data
+        if (await context.TriggerTypes.AnyAsync())
+        {
+            context.TriggerTypes.RemoveRange(context.TriggerTypes);
+            await context.SaveChangesAsync();
+        }
+
+        // Add new trigger types
+        foreach (var triggerType in triggerTypes)
+        {
+            context.TriggerTypes.Add(triggerType);
+        }
+
+        await context.SaveChangesAsync();
+    }
+
+    private async Task SeedCommunicationModesAsync()
+    {
+        // Clear existing data to allow for updates
+        var existingCommunicationModes = await context.RecipientModes.ToListAsync();
+        if (existingCommunicationModes.Any())
+        {
+            context.RecipientModes.RemoveRange(existingCommunicationModes);
+            await context.SaveChangesAsync();
+        }
+
+        var communicationModes = new List<CommunicationModeDb>
+        {
+            new CommunicationModeDb { Code = "E", Name = "email", Order = 1 },
+            new CommunicationModeDb { Code = "S", Name = "SMS", Order = 2 },
+            new CommunicationModeDb { Code = "W", Name = "web service call", Order = 3 },
+            new CommunicationModeDb { Code = "M", Name = "MQTT message", Order = 4 },
+            new CommunicationModeDb { Code = "U", Name = "upload configuration", Order = 5 }
+        };
+
+        foreach (var communicationMode in communicationModes)
+        {
+            if (!await context.RecipientModes.AnyAsync(cm => cm.Code == communicationMode.Code))
+            {
+                context.RecipientModes.Add(communicationMode);
+            }
+        }
+
+        await context.SaveChangesAsync();
     }
 }

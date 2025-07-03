@@ -1,10 +1,12 @@
 using Application.Alarms;
 using Application.Companies;
+using Application.CommunicationModes;
 using Application.ConfigurationUploads;
 using Application.Dashboard;
 using Application.Identity;
 using Application.Readings;
 using Application.Sensors;
+using Application.TriggerTypes;
 using Application.Units;
 using Mapster;
 using Microsoft.Extensions.Configuration;
@@ -26,6 +28,8 @@ namespace Application
             services.AddScoped<IDashboardService, DashboardService>();
             services.AddScoped<IConfigurationUploadService, ConfigurationUploadService>();
             services.AddScoped<IAlarmService, AlarmService>();
+            services.AddScoped<ITriggerTypeService, TriggerTypeService>();
+            services.AddScoped<ICommunicationModeService, CommunicationModeService>();
 
             // Register Mapster for mapping
             services.AddMapster();
