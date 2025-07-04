@@ -24,6 +24,7 @@ import Dashboard from "./pages/Dashboard";
 import ConfigurationUploads from "./pages/ConfigurationUploads";
 import RecipientList from "./pages/RecipientList";
 import RecipientSetList from "./pages/RecipientSetList";
+import TriggerList from "./pages/TriggerList";
 
 export const App = () => {
     const auth = useAppSelector(selectAuth);
@@ -58,6 +59,7 @@ export const App = () => {
                             <Route path="/unitmodels" element={<UnitModelList />} />
                             <Route path="/alarminstructions" element={<AlarmInstructions />} />
                             <Route path="/alarms" element={<AlarmList />} />
+                            <Route path="/triggers" element={<TriggerList />} />
                             <Route path="/recipients" element={<RecipientList />} />
                             <Route path="/recipientsets" element={<RecipientSetList />} />
                             <Route path="/configurationuploads/:unitId" element={<ConfigurationUploads />} />

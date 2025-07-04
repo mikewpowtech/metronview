@@ -9,14 +9,8 @@ import {
 } from "../features/unitmodels/unitModelAPI";
 import { useAppSelector } from "../app/hooks";
 import { selectAuth } from "../app/store";
-import { ExtendedAntDTable } from "../components/ExtendedAntDTable";
-
-const allColumnDefs = [
-    { title: "ID", dataIndex: "id", key: "id", width: 80 },
-    { title: "Code", dataIndex: "code", key: "code", width: 120 },
-    { title: "Name", dataIndex: "name", key: "name", width: 150 },
-    { title: "Description", dataIndex: "description", key: "description", width: 200 },
-];
+import { ExtendedAntDTable } from "../components/NewExtendedAntDTable";
+import { getColumns } from "../features/unitmodels/unitModelColums";
 
 const UnitModelList: React.FC = () => {
     const auth = useAppSelector(selectAuth);
@@ -116,8 +110,6 @@ const UnitModelList: React.FC = () => {
         form.resetFields();
     };
 
-
-    if (loading) return <div>Loading unit models...</div>;
     if (error) return <div style={{ color: "red" }}>Error: {error}</div>;
 
     const MainModal: React.FC = () => (
@@ -128,7 +120,7 @@ const UnitModelList: React.FC = () => {
             onOk={handleModalOk}
             okText="Save"
             confirmLoading={modalLoading}
-            destroyOnClose
+            destroyOnHidden={true}
         >
             <Form
                 layout="vertical"
@@ -161,11 +153,12 @@ const UnitModelList: React.FC = () => {
             <MainModal />
             <ExtendedAntDTable<UnitModel>
                 data={unitModels}
-                tableColumns={allColumnDefs}
+                tableColumns={getColumns()}
                 title="Unit Models"
                 onAdd={handleAdd}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                loading={loading}
             />
         </div>
     );

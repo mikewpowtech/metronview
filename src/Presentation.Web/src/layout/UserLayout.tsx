@@ -87,6 +87,10 @@ export const UserLayout = ({ UserName }: iUser) => {
                     label: <span onClick={() => handleClick("/alarmhistory")}>History</span>,
                 },
                 {
+                    key: "/triggers",
+                    label: <span onClick={() => handleClick("/triggers")}>Triggers</span>,
+                },
+                {
                     key: "/recipients",
                     label: <span onClick={() => handleClick("/recipients")}>Contacts</span>,
                 },

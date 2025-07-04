@@ -35,6 +35,28 @@ export async function fetchSensorsByUnit(unitId: number, token?: string): Promis
     return response.data;
 }
 
+// Fetch sensors by company ID
+export async function fetchSensorsByCompany(companyId: number, token?: string): Promise<Sensor[]> {
+    const response = await axios.get<Sensor[]>(
+        `${BASE_URL}/api/sensor/by-company/${companyId}`,
+        {
+            headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        }
+    );
+    return response.data;
+}
+
+// Fetch sensors by alarm ID
+export async function fetchSensorsByAlarm(alarmId: number, token?: string): Promise<Sensor[]> {
+    const response = await axios.get<Sensor[]>(
+        `${BASE_URL}/api/sensor/by-alarm/${alarmId}`,
+        {
+            headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        }
+    );
+    return response.data;
+}
+
 // Add a new sensor
 export async function addSensor(
     sensor: Omit<Sensor, "id">,

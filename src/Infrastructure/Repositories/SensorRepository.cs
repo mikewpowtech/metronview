@@ -42,6 +42,24 @@ public class SensorRepository : ISensorRepository
         return _mapper.Map<List<Sensor>>(entities);
     }
 
+    public async Task<List<Sensor>> GetByCompanyIdAsync(int companyId)
+    {
+        var entities = await _context.Sensors
+            .AsNoTracking()
+            .Where(s => s.CompanyId == companyId)
+            .ToListAsync();
+        return _mapper.Map<List<Sensor>>(entities);
+    }
+
+    public async Task<List<Sensor>> GetByAlarmIdAsync(int alarmId)
+    {
+        var entities = await _context.Sensors
+            .AsNoTracking()
+            .Where(s => s.AlarmId == alarmId)
+            .ToListAsync();
+        return _mapper.Map<List<Sensor>>(entities);
+    }
+
     public async Task<Sensor> AddAsync(Sensor sensor)
     {
         var entity = _mapper.Map<SensorDb>(sensor);

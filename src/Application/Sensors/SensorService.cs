@@ -15,6 +15,10 @@ public class SensorService : ISensorService
 
     public Task<List<Sensor>> GetByUnitIdAsync(int unitId) => _sensorRepository.GetByUnitIdAsync(unitId);
 
+    public Task<List<Sensor>> GetByCompanyIdAsync(int companyId) => _sensorRepository.GetByCompanyIdAsync(companyId);
+
+    public Task<List<Sensor>> GetByAlarmIdAsync(int alarmId) => _sensorRepository.GetByAlarmIdAsync(alarmId);
+
     public Task<List<Sensor>> GetAllAsync() => _sensorRepository.GetAllAsync();
 
     public Task<Sensor> AddAsync(Sensor sensor) => _sensorRepository.AddAsync(sensor);

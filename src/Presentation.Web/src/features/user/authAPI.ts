@@ -1,6 +1,6 @@
 import axios from "axios";
 import type { iAppResponse } from "../../app/appResponse";
-import type { ApplicationUser } from "../../pages/UsersList";
+import type { ApplicationUser } from "../../features/user/userColumns";
 
 const BASE_URL = import.meta.env.REACT_APP_API_URL as string;
 

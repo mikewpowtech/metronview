@@ -7,10 +7,11 @@ import { useAppSelector } from "../app/hooks";
 import { selectAuth } from "../app/store";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs"; // Add this import for date 
-import { ExtendedAntDTable, type ExtendedTableColumnDefinition } from "../components/ExtendedAntDTable";
+import { ExtendedAntDTable } from "../components/NewExtendedAntDTable";
+import type { ColumnsType } from "antd/es/table";
 
 // Update columns to match UnitSummary fields
-const allColumnDefs = [
+const allColumnDefs : ColumnsType<UnitSummary> = [
     { title: "ID", dataIndex: "id", key: "id", width: 100 },
     { title: "Unit Type", dataIndex: "unitType", key: "unitType", width: 120 },
     {
@@ -75,7 +76,7 @@ const Dashboard: React.FC = () => {
         <div style={{ padding: "12px 0 12px 30px" }} >
             <ExtendedAntDTable<UnitSummary>
                 data={units}
-                tableColumns={allColumnDefs as ExtendedTableColumnDefinition[]}
+                tableColumns={allColumnDefs}
                 title="Dashboard"
                 customActions={actions}
                 loading={loading}

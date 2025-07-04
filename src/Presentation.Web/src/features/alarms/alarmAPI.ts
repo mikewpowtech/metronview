@@ -11,6 +11,14 @@ export interface Alarm {
     // Add other properties as needed
 }
 
+// Interface for creating/updating alarms (without navigation properties)
+export interface AlarmRequest {
+    companyId: number;
+    name: string;
+    recipientSetId: number;
+    isActive: boolean;
+}
+
 // Fetch all alarms
 export async function fetchAlarms(token?: string): Promise<Alarm[]> {
     const response = await axios.get<Alarm[]>(`${BASE_URL}/api/alarm`, {
@@ -21,7 +29,7 @@ export async function fetchAlarms(token?: string): Promise<Alarm[]> {
 
 // Add a new alarm
 export async function addAlarm(
-    alarm: Omit<Alarm, "id">,
+    alarm: AlarmRequest,
     token?: string
 ): Promise<Alarm> {
     const response = await axios.post<Alarm>(
@@ -40,7 +48,7 @@ export async function addAlarm(
 // Update an existing alarm
 export async function updateAlarm(
     id: number,
-    alarm: Alarm,
+    alarm: AlarmRequest & { id: number },
     token?: string
 ): Promise<void> {
     await axios.put(

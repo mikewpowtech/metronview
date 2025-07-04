@@ -9,9 +9,10 @@ import {
 } from "../features/companies/companyAPI";
 import { useAppSelector } from "../app/hooks";
 import { selectAuth } from "../app/store";
-import { ExtendedAntDTable, type ExtendedTableColumnDefinition } from "../components/ExtendedAntDTable";
+import { ExtendedAntDTable } from "../components/NewExtendedAntDTable";
+import type { ColumnsType } from "antd/es/table";
 
-const companyColumnDefinitions: ExtendedTableColumnDefinition[] =  [
+const companyColumnDefinitions: ColumnsType<Company> =  [
     { title: "ID", dataIndex: "id", key: "id", width: 100 },
     { title: "Company Name", dataIndex: "name", key: "name", width: 200 },
     { title: "Parent Company", dataIndex: "parentCompanyId", key: "parentCompanyId", width: 200 },

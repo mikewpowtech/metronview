@@ -1,32 +1,29 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Modal, Input, Form, InputNumber, message, Select } from "antd";
 import {
     fetchSensors,
     addSensor,
     updateSensor,
     deleteSensor,
-    type Sensor
+    type Sensor,
+    fetchSensorsByCompany,
+    fetchSensorsByAlarm,
+    fetchSensorsByUnit
 } from "../features/sensors/sensorAPI";
 import { fetchCompanies, type Company } from "../features/companies/companyAPI";
 import { fetchAlarms, type Alarm } from "../features/alarms/alarmAPI";
 import { useAppSelector } from "../app/hooks";
 import { selectAuth } from "../app/store";
-import { ExtendedAntDTable } from "../components/ExtendedAntDTable";
+import { ExtendedAntDTable } from "../components/NewExtendedAntDTable";
+import { getSensorColumns } from "../features/sensors/sensorColumns";
 
-const allColumnDefs = [
-    { title: "ID", dataIndex: "id", key: "id", width: 100 },
-    { title: "Name", dataIndex: "name", key: "name", width: 150 },
-    { title: "Channel", dataIndex: "channel", key: "channel", width: 50 },
-    { title: "Channel Type", dataIndex: "channelType", key: "channelType", width: 75 },
-    { title: "Low Value", dataIndex: "lowValue", key: "lowValue", width: 75 },
-    { title: "High Value", dataIndex: "highValue", key: "highValue", width: 75 },
-    { title: "Engineering Units", dataIndex: "engineeringUnits", key: "engineeringUnits", width: 80 },
-    { title: "Unit ID", dataIndex: "unitId", key: "unitId", width: 120 },
-    { title: "Company ID", dataIndex: "companyID", key: "companyID", width: 120 },
-    { title: "Alarm ID", dataIndex: "alarmId", key: "alarmId", width: 120 },
-];
+export interface SensorListProps {
+    unitId?: number;
+    companyId?: number;
+    alarmId?: number;
+}
 
-const SensorList: React.FC = () => {
+const SensorList: React.FC<SensorListProps> = ({ unitId, companyId, alarmId }) => {
     const auth = useAppSelector(selectAuth);
     const token = auth?.accessToken;
     const [sensors, setSensors] = useState<Sensor[]>([]);
@@ -56,8 +53,21 @@ const SensorList: React.FC = () => {
     const loadSensors = async () => {
         setLoading(true);
         try {
+            if(unitId){
+                const data = await fetchSensorsByUnit(unitId, token);
+                setSensors(data);
+            }
+            else if (companyId) {
+                const data = await fetchSensorsByCompany(companyId, token);
+                setSensors(data);
+            }
+            else if (alarmId) {
+                const data = await fetchSensorsByAlarm(alarmId, token);
+                setSensors(data);
+            }else{
             const data = await fetchSensors(token);
             setSensors(data);
+            }
             setError(null);
         } catch (err: any) {
             setError(err.message || "An error occurred while fetching sensors.");
@@ -148,7 +158,7 @@ const SensorList: React.FC = () => {
             onOk={handleModalOk}
             okText="Save"
             confirmLoading={modalLoading}
-            destroyOnClose
+            destroyOnHidden={true}
         >
             <Form
                 layout="vertical"
@@ -234,7 +244,6 @@ const SensorList: React.FC = () => {
         </Modal>
     );
 
-    if (loading) return <div>Loading sensors...</div>;
     if (error) return <div style={{ color: "red" }}>Error: {error}</div>;
 
     return (
@@ -242,11 +251,12 @@ const SensorList: React.FC = () => {
             <MainModal />
             <ExtendedAntDTable<Sensor>
                 data={sensors}
-                tableColumns={allColumnDefs}
+                tableColumns={getSensorColumns()}
                 title="Sensors"
                 onAdd={handleAdd}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                loading={loading}
             />
         </div>
     );

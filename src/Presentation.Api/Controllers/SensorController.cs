@@ -33,6 +33,20 @@ public class SensorController(ISensorService sensorService) : ControllerBase
         return Ok(sensors);
     }
 
+    [HttpGet("by-company/{companyId}")]
+    public async Task<IActionResult> GetSensorsByCompany(int companyId)
+    {
+        var sensors = await sensorService.GetByCompanyIdAsync(companyId);
+        return Ok(sensors);
+    }
+
+    [HttpGet("by-alarm/{alarmId}")]
+    public async Task<IActionResult> GetSensorsByAlarm(int alarmId)
+    {
+        var sensors = await sensorService.GetByAlarmIdAsync(alarmId);
+        return Ok(sensors);
+    }
+
     [HttpPost]
     public async Task<ActionResult<Sensor>> AddSensor([FromBody] Sensor sensor)
     {

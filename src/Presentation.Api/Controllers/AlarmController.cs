@@ -1,6 +1,7 @@
 using Application.Alarms;
 using Domain;
 using Microsoft.AspNetCore.Mvc;
+using Presentation.Api.Models;
 
 namespace Presentation.Api.Controllers;
 
@@ -32,17 +33,34 @@ public class AlarmController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Alarm>> Add([FromBody] Alarm alarm)
+    public async Task<ActionResult<Alarm>> Add([FromBody] AlarmDto alarmDto)
     {
+        var alarm = new Alarm
+        {
+            CompanyId = alarmDto.CompanyId,
+            Name = alarmDto.Name,
+            RecipientSetId = alarmDto.RecipientSetId,
+            IsActive = alarmDto.IsActive
+        };
+        
         var created = await _alarmService.AddAsync(alarm);
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
     [HttpPut("{id:int}")]
-    public async Task<ActionResult> Update(int id, [FromBody] Alarm alarm)
+    public async Task<ActionResult> Update(int id, [FromBody] AlarmDto alarmDto)
     {
-        if (id != alarm.Id)
+        if (id != alarmDto.Id)
             return BadRequest("ID mismatch");
+
+        var alarm = new Alarm
+        {
+            Id = alarmDto.Id,
+            CompanyId = alarmDto.CompanyId,
+            Name = alarmDto.Name,
+            RecipientSetId = alarmDto.RecipientSetId,
+            IsActive = alarmDto.IsActive
+        };
 
         var updated = await _alarmService.UpdateAsync(alarm);
         if (!updated)

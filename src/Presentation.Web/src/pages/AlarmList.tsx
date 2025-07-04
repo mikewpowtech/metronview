@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Modal, Input, Form, message, Switch, Select } from "antd";
+import { Modal, Input, Form, message, Switch, Select, Tooltip, Button } from "antd";
+import { DownOutlined, RightOutlined } from "@ant-design/icons";
 import {
     fetchAlarms,
     addAlarm,
@@ -11,15 +12,9 @@ import { fetchCompanies, type Company } from "../features/companies/companyAPI";
 import { fetchRecipientSets, type RecipientSet } from "../features/recipientSets/recipientSetAPI";
 import { useAppSelector } from "../app/hooks";
 import { selectAuth } from "../app/store";
-import { ExtendedAntDTable } from "../components/ExtendedAntDTable";
-
-const allColumnDefs = [
-    { title: "ID", dataIndex: "id", key: "id", width: 100 },
-    { title: "Name", dataIndex: "name", key: "name", width: 200 },
-    { title: "Company", dataIndex: "companyId", key: "companyId", width: 150 },
-    { title: "RecipientSet", dataIndex: "recipientSetId", key: "recipientSetId", width: 120 },
-    { title: "Active", dataIndex: "isActive", key: "isActive", width: 80 },
-];
+import { ExtendedAntDTable } from "../components/NewExtendedAntDTable";
+import { getColumns } from "../features/alarms/alarmColumns";
+import TriggerList from "./TriggerList";
 
 const AlarmList: React.FC = () => {
     const auth = useAppSelector(selectAuth);
@@ -32,6 +27,7 @@ const AlarmList: React.FC = () => {
     const [editingId, setEditingId] = useState<number | null>(null);
     const [form] = Form.useForm();
     const [modalLoading, setModalLoading] = useState(false);
+    const [expandedRowKeys, setExpandedRowKeys] = useState<React.Key[]>([]);
 
     // Companies and recipient sets for selection
     const [companies, setCompanies] = useState<Company[]>([]);
@@ -74,8 +70,8 @@ const AlarmList: React.FC = () => {
         setEditingId(record.id);
         form.setFieldsValue({
             name: record.name ?? "",
-            companyId: record.companyId ?? "",
-            recipientSetId: record.recipientSetId ?? "",
+            companyId: record.companyId ?? undefined,
+            recipientSetId: record.recipientSetId ?? undefined,
             isActive: record.isActive ?? true,
         });
         setShowModal(true);
@@ -99,16 +95,35 @@ const AlarmList: React.FC = () => {
         try {
             setModalLoading(true);
             const values = await form.validateFields();
+            
+            // Ensure data types are correct and validate
+            const companyId = parseInt(values.companyId);
+            const recipientSetId = parseInt(values.recipientSetId);
+            
+            if (isNaN(companyId) || isNaN(recipientSetId)) {
+                message.error('Please select valid Company and Recipient Set');
+                return;
+            }
+            
+            const alarmData = {
+                name: values.name,
+                companyId: companyId,
+                recipientSetId: recipientSetId,
+                isActive: values.isActive
+            };
+            
             if (isEdit && editingId !== null) {
-                await updateAlarm(editingId, { ...values, id: editingId }, token);
+                // For update, send the alarm data with the ID
+                const alarmWithId = { ...alarmData, id: editingId };
+                await updateAlarm(editingId, alarmWithId, token);
                 setAlarms(prev =>
                     prev.map(a =>
-                        a.id === editingId ? { ...a, ...values } : a
+                        a.id === editingId ? { ...a, ...alarmData } : a
                     )
                 );
                 message.success("Alarm updated");
             } else {
-                const added = await addAlarm(values, token);
+                const added = await addAlarm(alarmData, token);
                 setAlarms(prev => [...prev, added]);
                 message.success("Alarm added");
             }
@@ -117,7 +132,8 @@ const AlarmList: React.FC = () => {
             form.resetFields();
         } catch (err: any) {
             if (err.errorFields) return; // Form validation error
-            message.error(err.message || "Failed to save alarm");
+            console.error('API Error:', err.response?.data || err.message);
+            message.error(err.response?.data?.message || err.response?.data || err.message || "Failed to save alarm");
         } finally {
             setModalLoading(false);
         }
@@ -137,16 +153,15 @@ const AlarmList: React.FC = () => {
             onOk={handleModalOk}
             okText="Save"
             confirmLoading={modalLoading}
-            destroyOnClose
+            destroyOnHidden={true}
         >
             <Form
                 layout="vertical"
                 form={form}
                 initialValues={{
                     name: "",
-                    companyId: "",
-                    recipientSetId: "",
-                    order: 0,
+                    companyId: undefined,
+                    recipientSetId: undefined,
                     isActive: true,
                 }}
             >
@@ -212,38 +227,28 @@ const AlarmList: React.FC = () => {
         </Modal>
     );
 
-    // Column mapping for company name, recipient set name, and active switch
-    const columnMapper = (col: any) => {
-        if (col.key === "companyId") {
-            return {
-                ...col,
-                render: (companyId: number) => {
-                    const company = companies.find(c => c.id === companyId);
-                    return company ? company.name : companyId;
-                }
-            };
-        }
-        if (col.key === "recipientSetId") {
-            return {
-                ...col,
-                render: (recipientSetId: number) => {
-                    const rs = recipientSets.find(r => r.id === recipientSetId);
-                    return rs ? rs.name : recipientSetId;
-                }
-            };
-        }
-        if (col.key === "isActive") {
-            return {
-                ...col,
-                render: (isActive: boolean) => (
-                    <span>{isActive ? "Yes" : "No"}</span>
-                )
-            };
-        }
-        return col;
+    const getTriggersTable = (alarm: Alarm): React.ReactNode => {
+        return (<TriggerList alarmId={alarm.id}></TriggerList>);
+    };
+    const handleExpandRow = (record: Alarm) => {
+        setExpandedRowKeys(keys =>
+            keys.includes(record.id)
+                ? keys.filter(key => key !== record.id)
+                : [...keys, record.id]
+        );
     };
 
-    if (loading) return <div>Loading alarms...</div>;
+    const customActions = (record: Alarm) => (
+        <Tooltip title={expandedRowKeys.includes(record.id) ? "Hide Triggers" : "Triggers"}>
+            <Button
+                icon={expandedRowKeys.includes(record.id) ? <DownOutlined /> : <RightOutlined />}
+                size="small"
+                style={{ marginLeft: 4, padding: 0, minWidth: 0, width: 28, height: 28 }}
+                onClick={() => handleExpandRow(record)}
+            />
+        </Tooltip>
+    );
+
     if (error) return <div style={{ color: "red" }}>{error}</div>;
 
     return (
@@ -251,12 +256,21 @@ const AlarmList: React.FC = () => {
             <MainModal />
             <ExtendedAntDTable<Alarm>
                 data={alarms}
-                tableColumns={allColumnDefs}
+                tableColumns={getColumns(companies, recipientSets)}
                 title="Alarms"
                 onAdd={handleAdd}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
-                columnMapper={columnMapper}
+                customActions={customActions}
+                expandable={{
+                    expandedRowRender: (alarm: Alarm) => {
+                        return getTriggersTable(alarm);
+                    },
+                    expandedRowKeys,
+                    onExpand: (_, record) => handleExpandRow(record),
+                    showExpandColumn: false
+                }}
+                loading={loading}
             />
         </div>
     );

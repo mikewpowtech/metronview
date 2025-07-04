@@ -84,17 +84,22 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
             new TriggerTypeDb { Code = "S", Name = "not reported for (mins)", Order = 6 }
         };
 
-        // Clear existing trigger types and reseed with new data
-        if (await context.TriggerTypes.AnyAsync())
-        {
-            context.TriggerTypes.RemoveRange(context.TriggerTypes);
-            await context.SaveChangesAsync();
-        }
-
-        // Add new trigger types
+        // Update existing trigger types or add new ones, don't remove
         foreach (var triggerType in triggerTypes)
         {
-            context.TriggerTypes.Add(triggerType);
+            var existing = await context.TriggerTypes.FirstOrDefaultAsync(tt => tt.Code == triggerType.Code);
+            if (existing != null)
+            {
+                // Update existing trigger type
+                existing.Name = triggerType.Name;
+                existing.Order = triggerType.Order;
+                context.TriggerTypes.Update(existing);
+            }
+            else
+            {
+                // Add new trigger type
+                context.TriggerTypes.Add(triggerType);
+            }
         }
 
         await context.SaveChangesAsync();
@@ -102,14 +107,6 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
 
     private async Task SeedCommunicationModesAsync()
     {
-        // Clear existing data to allow for updates
-        var existingCommunicationModes = await context.RecipientModes.ToListAsync();
-        if (existingCommunicationModes.Any())
-        {
-            context.RecipientModes.RemoveRange(existingCommunicationModes);
-            await context.SaveChangesAsync();
-        }
-
         var communicationModes = new List<CommunicationModeDb>
         {
             new CommunicationModeDb { Code = "E", Name = "email", Order = 1 },
@@ -119,10 +116,20 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
             new CommunicationModeDb { Code = "U", Name = "upload configuration", Order = 5 }
         };
 
+        // Update existing communication modes or add new ones, don't remove
         foreach (var communicationMode in communicationModes)
         {
-            if (!await context.RecipientModes.AnyAsync(cm => cm.Code == communicationMode.Code))
+            var existing = await context.RecipientModes.FirstOrDefaultAsync(cm => cm.Code == communicationMode.Code);
+            if (existing != null)
             {
+                // Update existing communication mode
+                existing.Name = communicationMode.Name;
+                existing.Order = communicationMode.Order;
+                context.RecipientModes.Update(existing);
+            }
+            else
+            {
+                // Add new communication mode
                 context.RecipientModes.Add(communicationMode);
             }
         }
