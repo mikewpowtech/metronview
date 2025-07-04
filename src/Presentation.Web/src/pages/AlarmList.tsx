@@ -62,19 +62,37 @@ const AlarmList: React.FC = () => {
         setIsEdit(false);
         setEditingId(null);
         form.resetFields();
+        // Set initial value for new alarm
+        form.setFieldsValue({
+            isActive: false // Default new alarms to inactive so user must explicitly activate
+        });
         setShowModal(true);
     };
 
     const handleEdit = (record: Alarm) => {
         setIsEdit(true);
         setEditingId(record.id);
-        form.setFieldsValue({
+        console.log('handleEdit - Editing alarm record:', record);
+        console.log('handleEdit - Alarm isActive value:', record.isActive, typeof record.isActive);
+        
+        // Reset form and immediately set values
+        form.resetFields();
+        const formValues = {
             name: record.name ?? "",
             companyId: record.companyId ?? undefined,
             recipientSetId: record.recipientSetId ?? undefined,
-            isActive: record.isActive ?? true,
-        });
+            isActive: Boolean(record.isActive), // Ensure it's a proper boolean
+        };
+        console.log('handleEdit - Setting form values:', formValues);
+        form.setFieldsValue(formValues);
+        
         setShowModal(true);
+        
+        // Check form values after modal opens
+        setTimeout(() => {
+            const currentValues = form.getFieldsValue();
+            console.log('handleEdit - Form values after modal opens:', currentValues);
+        }, 100);
     };
 
     const handleDelete = async (record: Alarm) => {
@@ -95,6 +113,7 @@ const AlarmList: React.FC = () => {
         try {
             setModalLoading(true);
             const values = await form.validateFields();
+            console.log('Form values when submitting:', values);
             
             // Ensure data types are correct and validate
             const companyId = parseInt(values.companyId);
@@ -109,12 +128,14 @@ const AlarmList: React.FC = () => {
                 name: values.name,
                 companyId: companyId,
                 recipientSetId: recipientSetId,
-                isActive: values.isActive
+                isActive: Boolean(values.isActive) // Ensure we always have a boolean value
             };
+            console.log('Alarm data being saved:', alarmData);
             
             if (isEdit && editingId !== null) {
                 // For update, send the alarm data with the ID
                 const alarmWithId = { ...alarmData, id: editingId };
+                console.log('Updating alarm with:', alarmWithId);
                 await updateAlarm(editingId, alarmWithId, token);
                 setAlarms(prev =>
                     prev.map(a =>
@@ -147,13 +168,79 @@ const AlarmList: React.FC = () => {
 
     const MainModal: React.FC = () => (
         <Modal
-            title={isEdit ? "Edit Alarm" : "Add Alarm"}
+            title={
+                <div style={{
+                    fontSize: '16px',
+                    fontWeight: 600,
+                    color: '#ffffff',
+                    padding: '4px 0',
+                    marginBottom: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                }}>
+                    <div style={{
+                        width: '24px',
+                        height: '24px',
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, #1890ff 0%, #40a9ff 100%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        fontSize: '12px',
+                        fontWeight: 'bold'
+                    }}>
+                        {isEdit ? "E" : "A"}
+                    </div>
+                    {isEdit ? "Edit Alarm" : "Add Alarm"}
+                </div>
+            }
             open={showModal}
             onCancel={handleModalCancel}
             onOk={handleModalOk}
             okText="Save"
             confirmLoading={modalLoading}
             destroyOnHidden={true}
+            styles={{
+                header: {
+                    background: '#1890ff',
+                    borderRadius: '8px 8px 0 0',
+                    padding: '16px 24px',
+                    border: '2px solid #1890ff',
+                    borderBottom: 'none',
+                    marginBottom: '0'
+                },
+                body: {
+                    background: '#ffffff',
+                    padding: '16px 24px',
+                    border: '2px solid #1890ff',
+                    borderTop: 'none',
+                    borderBottom: 'none',
+                    marginTop: '0'
+                },
+                footer: {
+                    background: '#ffffff',
+                    padding: '16px 24px',
+                    border: '2px solid #1890ff',
+                    borderTop: 'none',
+                    borderRadius: '0 0 8px 8px',
+                    marginTop: '0'
+                },
+                content: {
+                    padding: '0',
+                    overflow: 'hidden',
+                    borderRadius: '8px',
+                    border: 'none'
+                }
+            }}
+            closeIcon={
+                <span style={{ 
+                    color: 'white', 
+                    fontWeight: 'bold',
+                    fontSize: '16px'
+                }}>×</span>
+            }
         >
             <Form
                 layout="vertical"
@@ -162,7 +249,7 @@ const AlarmList: React.FC = () => {
                     name: "",
                     companyId: undefined,
                     recipientSetId: undefined,
-                    isActive: true,
+                    isActive: false, // Default to inactive for add modal
                 }}
             >
                 <Form.Item
@@ -216,12 +303,32 @@ const AlarmList: React.FC = () => {
                         ))}
                     </Select>
                 </Form.Item>
-                <Form.Item
-                    label="Active"
-                    name="isActive"
-                    valuePropName="checked"
-                >
-                    <Switch />
+                <Form.Item shouldUpdate>
+                    {({ getFieldValue }) => {
+                        const isActive = getFieldValue('isActive') ?? false; // Provide default value
+                        console.log('Switch render - isActive value:', isActive, 'type:', typeof isActive);
+                        console.log('Switch render - all form values:', form.getFieldsValue());
+                        return (
+                            <Form.Item
+                                label="Status"
+                                name="isActive"
+                                valuePropName="checked"
+                                style={{ marginBottom: 0 }}
+                            >
+                                <Switch 
+                                    size="default"
+                                    checkedChildren="Active" 
+                                    unCheckedChildren="Inactive"
+                                    style={{
+                                        backgroundColor: isActive ? '#52c41a' : '#ff4d4f',
+                                        transform: 'scale(1.2)', // Make it 20% bigger
+                                        transformOrigin: 'left center', // Scale from left edge to maintain alignment
+                                        minWidth: '80px' // Ensure minimum width for text
+                                    }}
+                                />
+                            </Form.Item>
+                        );
+                    }}
                 </Form.Item>
             </Form>
         </Modal>

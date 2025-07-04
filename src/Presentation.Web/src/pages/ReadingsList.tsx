@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { Modal, Form, InputNumber, DatePicker, message, Select } from "antd";
+import { Modal, Form, InputNumber, DatePicker, message, Select, Button } from "antd";
+import { BarChartOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { fetchReadings, addReading, updateReading, deleteReading, type Reading } from "../features/readings/readingAPI";
 import { fetchSensors, type Sensor } from "../features/sensors/sensorAPI";
 import { useAppSelector } from "../app/hooks";
 import { selectAuth } from "../app/store";
-import { ExtendedAntDTable } from "../components/ExtendedAntDTable";
+import { ExtendedAntDTable as NewExtendedAntDTable } from "../components/NewExtendedAntDTable";
+import ReadingsChart from "../components/ReadingsChart";
 
 const allColumnDefs = [
     {
@@ -26,8 +28,6 @@ const allColumnDefs = [
     { title: "Value", dataIndex: "value", key: "value", width: 120 },
 ];
 
-const PAGE_SIZE = 20;
-
 const ReadingsList: React.FC = () => {
     const auth = useAppSelector(selectAuth);
     const token = auth?.accessToken;
@@ -36,14 +36,11 @@ const ReadingsList: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [showModal, setShowModal] = useState(false);
+    const [showChartModal, setShowChartModal] = useState(false);
     const [isEdit, setIsEdit] = useState(false);
     const [editingKey, setEditingKey] = useState<{ dateRecordedUtc: string, sensorId: number } | null>(null);
     const [form] = Form.useForm();
     const [modalLoading, setModalLoading] = useState(false);
-
-    // Paging state
-    const [currentPage, setCurrentPage] = useState(1);
-    const [pageSize, setPageSize] = useState(PAGE_SIZE);
 
     useEffect(() => {
         loadReadings();
@@ -193,29 +190,51 @@ const ReadingsList: React.FC = () => {
         </Modal>
     );
 
+    const ChartModal: React.FC = () => (
+        <Modal
+            title="Telemetry Chart"
+            open={showChartModal}
+            onCancel={() => setShowChartModal(false)}
+            footer={null}
+            width={1000}
+        >
+            <ReadingsChart readings={readings} />
+        </Modal>
+    );
+
+    // Custom action for showing chart
+    const chartAction = () => (
+        <Button
+            icon={<BarChartOutlined />}
+            size="small"
+            style={{ 
+                margin: "0 10px 0 0",
+                backgroundColor: "#1890ff",
+                borderColor: "#1890ff",
+                color: "white"
+            }}
+            onClick={() => setShowChartModal(true)}
+        >
+            Graph
+        </Button>
+    );
+
     if (error) return <div style={{ color: "red" }}>Error: {error}</div>;
 
     return (
         <div style={{ padding: "12px 0 12px 30px" }} >
             <MainModal />
-            <ExtendedAntDTable<Reading>
+            <ChartModal />
+            <div style={{ marginBottom: "16px" }}>
+                {chartAction()}
+            </div>
+            <NewExtendedAntDTable<Reading>
                 data={readings}
                 tableColumns={allColumnDefs}
                 title="Telemetry"
                 onAdd={handleAdd}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
-                pagination={{
-                    current: currentPage,
-                    pageSize: pageSize,
-                    total: readings.length,
-                    showSizeChanger: true,
-                    pageSizeOptions: [10, 20, 50, 100],
-                    onChange: (page, size) => {
-                        setCurrentPage(page);
-                        setPageSize(size);
-                    },
-                }}
                 loading={loading}
             />
         </div>

@@ -175,6 +175,7 @@ export function ExtendedAntDTable<T>(props: ExtendedTableProps<T>): ReactNode {
 
 
     return (
+                <div style={{ padding: "12px 5px 12px 5px" }} >
         <AntdTable<T>
             dataSource={data}
             columns={finalizedColumns}
@@ -192,5 +193,6 @@ export function ExtendedAntDTable<T>(props: ExtendedTableProps<T>): ReactNode {
             }}
             {...rest}
         />
+        </div>
     );
 }

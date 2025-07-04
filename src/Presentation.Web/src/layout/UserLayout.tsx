@@ -183,8 +183,17 @@ export const UserLayout = ({ UserName }: iUser) => {
                         </Dropdown>
                     </div>
                 </Header>
-                <Content style={{ padding: "0 30px", flex: 1, minHeight: 0 }}>
-                    <Outlet />
+                <Content style={{ 
+                    padding: "20px 0", 
+                    flex: 1, 
+                    minHeight: 0
+                }}>
+                    <div style={{ 
+                        width: "100%", 
+                        padding: "0 10px"
+                    }}>
+                        <Outlet />
+                    </div>
                 </Content>
                 <AppFooter />
             </Layout>

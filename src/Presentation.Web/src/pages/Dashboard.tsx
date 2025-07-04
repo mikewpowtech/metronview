@@ -73,7 +73,6 @@ const Dashboard: React.FC = () => {
     if (error) return <div style={{ color: "red" }}>Error: {error}</div>;
 
     return (
-        <div style={{ padding: "12px 0 12px 30px" }} >
             <ExtendedAntDTable<UnitSummary>
                 data={units}
                 tableColumns={allColumnDefs}
@@ -81,7 +80,6 @@ const Dashboard: React.FC = () => {
                 customActions={actions}
                 loading={loading}
             />
-        </div>
     );
 };
 

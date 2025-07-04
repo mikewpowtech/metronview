@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { Modal, Input, Form, message, Select } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
 import {
     fetchCompanies,
     addCompany,
@@ -104,13 +105,79 @@ const CompanyList: React.FC = () => {
 
     const MainModal: React.FC = () => (
         <Modal
-            title={isEdit ? "Edit Company" : "Add Company"}
+            title={
+                <div style={{
+                    fontSize: '16px',
+                    fontWeight: 600,
+                    color: '#ffffff',
+                    padding: '4px 0',
+                    marginBottom: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                }}>
+                    <div style={{
+                        width: '24px',
+                        height: '24px',
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, #1890ff 0%, #40a9ff 100%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        fontSize: '12px',
+                        fontWeight: 'bold'
+                    }}>
+                        {isEdit ? "E" : "C"}
+                    </div>
+                    {isEdit ? "Edit Company" : "Add Company"}
+                </div>
+            }
             open={showModal}
             onCancel={handleModalCancel}
             onOk={handleModalOk}
             okText="Save"
             confirmLoading={modalLoading}
             destroyOnHidden={true}
+            styles={{
+                header: {
+                    background: '#1890ff',
+                    borderRadius: '8px 8px 0 0',
+                    padding: '16px 24px',
+                    border: '2px solid #1890ff',
+                    borderBottom: 'none',
+                    marginBottom: '0'
+                },
+                body: {
+                    background: '#ffffff',
+                    padding: '16px 24px',
+                    border: '2px solid #1890ff',
+                    borderTop: 'none',
+                    borderBottom: 'none',
+                    marginTop: '0'
+                },
+                footer: {
+                    background: '#ffffff',
+                    padding: '16px 24px',
+                    border: '2px solid #1890ff',
+                    borderTop: 'none',
+                    borderRadius: '0 0 8px 8px',
+                    marginTop: '0'
+                },
+                content: {
+                    padding: '0',
+                    overflow: 'hidden',
+                    borderRadius: '8px',
+                    border: 'none'
+                }
+            }}
+            closeIcon={
+                <span style={{ 
+                    color: 'white', 
+                    fontWeight: 'bold',
+                    fontSize: '16px'
+                }}>×</span>
+            }
         >
             <Form
                 layout="vertical"
