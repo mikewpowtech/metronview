@@ -7,12 +7,29 @@ export interface Reading {
   dateReceivedUtc: string;
   dateRecordedUtc: string;
   sensor: Sensor;
+  sensorId: number; // Add sensorId for convenience and backend compatibility
   value?: number | null;
 }
 
 // Fetch all readings
 export async function fetchReadings(token?: string): Promise<Reading[]> {
   const response = await axios.get<Reading[]>(`${BASE_URL}/api/reading`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
+  return response.data;
+}
+
+// Fetch readings by sensor ID
+export async function fetchReadingsBySensorId(sensorId: number, token?: string): Promise<Reading[]> {
+  const response = await axios.get<Reading[]>(`${BASE_URL}/api/reading/by-sensor/${sensorId}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
+  return response.data;
+}
+
+// Fetch readings by unit ID
+export async function fetchReadingsByUnitId(unitId: number, token?: string): Promise<Reading[]> {
+  const response = await axios.get<Reading[]>(`${BASE_URL}/api/reading/by-unit/${unitId}`, {
     headers: token ? { Authorization: `Bearer ${token}` } : undefined,
   });
   return response.data;

@@ -17,6 +17,12 @@ public class ReadingService : IReadingService
     public Task<List<Reading>> GetAllAsync()
         => _readingRepository.GetAllAsync();
 
+    public Task<List<Reading>> GetBySensorIdAsync(int sensorId)
+        => _readingRepository.GetBySensorIdAsync(sensorId);
+
+    public Task<List<Reading>> GetByUnitIdAsync(int unitId)
+        => _readingRepository.GetByUnitIdAsync(unitId);
+
     public Task<Reading> AddAsync(Reading reading)
         => _readingRepository.AddAsync(reading);
 

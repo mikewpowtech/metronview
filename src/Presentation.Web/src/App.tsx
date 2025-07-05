@@ -1,6 +1,6 @@
 import "bootstrap/dist/css/bootstrap-reboot.min.css";
 import "bootstrap/dist/css/bootstrap-utilities.min.css";
-import { Route, Routes } from "react-router";
+import { Route, Routes, useParams } from "react-router";
 import '@ant-design/v5-patch-for-react-19';
 import { DefaultLayout } from "./layout/DefaultLayout";
 import { RegisterPage } from "./pages/RegisterPage";
@@ -26,6 +26,18 @@ import RecipientList from "./pages/RecipientList";
 import RecipientSetList from "./pages/RecipientSetList";
 import TriggerList from "./pages/TriggerList";
 
+// Wrapper component for readings with sensor parameter
+const ReadingsWithSensor = () => {
+    const { sensorId } = useParams<{ sensorId: string }>();
+    return <ReadingsList sensorId={sensorId ? parseInt(sensorId, 10) : undefined} />;
+};
+
+// Wrapper component for readings with unit parameter
+const ReadingsWithUnit = () => {
+    const { unitId } = useParams<{ unitId: string }>();
+    return <ReadingsList unitId={unitId ? parseInt(unitId, 10) : undefined} />;
+};
+
 export const App = () => {
     const auth = useAppSelector(selectAuth);
     if (!auth.user) {
@@ -50,6 +62,8 @@ export const App = () => {
                             <Route index element={<Dashboard />} />
                             <Route path="/dashboard" element={<Dashboard />} />
                             <Route path="/readings" element={<ReadingsList />} />
+                            <Route path="/readings/sensor/:sensorId" element={<ReadingsWithSensor />} />
+                            <Route path="/readings/unit/:unitId" element={<ReadingsWithUnit />} />
                             <Route path="/users" element={<UsersList />} />
                             <Route path="/units" element={<UnitList />} />
                             <Route path="/system-status" element={<SystemStatus />} />

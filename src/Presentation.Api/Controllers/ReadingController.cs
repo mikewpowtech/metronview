@@ -24,6 +24,20 @@ public class ReadingController : ControllerBase
         return Ok(readings);
     }
 
+    [HttpGet("by-sensor/{sensorId:int}")]
+    public async Task<ActionResult<IEnumerable<Reading>>> GetReadingsBySensorId(int sensorId)
+    {
+        var readings = await _readingService.GetBySensorIdAsync(sensorId);
+        return Ok(readings);
+    }
+
+    [HttpGet("by-unit/{unitId:int}")]
+    public async Task<ActionResult<IEnumerable<Reading>>> GetReadingsByUnitId(int unitId)
+    {
+        var readings = await _readingService.GetByUnitIdAsync(unitId);
+        return Ok(readings);
+    }
+
     [HttpGet("{dateRecordedUtc}/{sensorId:int}")]
     public async Task<ActionResult<Reading>> GetReading(DateTime dateRecordedUtc, int sensorId)
     {
@@ -43,7 +57,7 @@ public class ReadingController : ControllerBase
     [HttpPut("{dateRecordedUtc}/{sensorId:int}")]
     public async Task<IActionResult> UpdateReading(DateTime dateRecordedUtc, int sensorId, [FromBody] Reading reading)
     {
-        if (dateRecordedUtc != reading.DateRecordedUtc || sensorId != reading.Sensor.Id)
+        if (dateRecordedUtc != reading.DateRecordedUtc || sensorId != reading.Sensor?.Id)
             return BadRequest("Key mismatch.");
 
         var success = await _readingService.UpdateAsync(reading);

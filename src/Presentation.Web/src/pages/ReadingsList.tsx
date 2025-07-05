@@ -1,38 +1,39 @@
 import { useEffect, useState } from "react";
-import { Modal, Form, InputNumber, DatePicker, message, Select, Button } from "antd";
+import { Modal, Form, message, Button } from "antd";
 import { BarChartOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
-import { fetchReadings, addReading, updateReading, deleteReading, type Reading } from "../features/readings/readingAPI";
+import { fetchReadings, fetchReadingsBySensorId, fetchReadingsByUnitId, deleteReading, type Reading } from "../features/readings/readingAPI";
+import { getReadingColumns, getReadingColumnsWithoutSensor } from "../features/readings/readingColumns";
+import ReadingModal from "../features/readings/ReadingModal";
 import { fetchSensors, type Sensor } from "../features/sensors/sensorAPI";
+import { fetchUnits, type Unit } from "../features/units/unitsAPI";
 import { useAppSelector } from "../app/hooks";
 import { selectAuth } from "../app/store";
 import { ExtendedAntDTable as NewExtendedAntDTable } from "../components/NewExtendedAntDTable";
 import ReadingsChart from "../components/ReadingsChart";
 
-const allColumnDefs = [
-    {
-        title: "Date Received",
-        dataIndex: "dateReceivedUtc",
-        key: "dateReceivedUtc", width: 180,
-        render: (value: string) =>
-            value ? dayjs(value).format("YYYY-MM-DD HH:mm:ss") : "" },
-    {
-        title: "Date Recorded",
-        dataIndex: "dateRecordedUtc",
-        key: "dateRecordedUtc",
-        width: 180,
-        render: (value: string) =>
-            value ? dayjs(value).format("YYYY-MM-DD HH:mm:ss") : "", },
-    { title: "Sensor ID", dataIndex: "sensor", key: "sensor", width: 100, render: (sensor: Sensor) => sensor?.id ?? "" },
-    { title: "Sensor Name", dataIndex: "sensor", key: "sensor", width: 200, render: (sensor: Sensor) => sensor?.name ?? "" },
-    { title: "Value", dataIndex: "value", key: "value", width: 120 },
-];
+interface ReadingsListProps {
+    sensorId?: number; // Optional sensor ID to filter readings for a specific sensor
+    unitId?: number;   // Optional unit ID to filter readings for a specific unit
+}
 
-const ReadingsList: React.FC = () => {
+/**
+ * ReadingsList component displays telemetry readings data.
+ * When sensorId prop is provided, it shows only readings for that specific sensor.
+ * When unitId prop is provided, it shows only readings for that specific unit.
+ * Usage:
+ * - <ReadingsList /> - Shows all readings
+ * - <ReadingsList sensorId={123} /> - Shows readings for sensor with ID 123
+ * - <ReadingsList unitId={456} /> - Shows readings for unit with ID 456
+ * - Route: /readings/sensor/:sensorId - URL-based sensor filtering
+ * - Route: /readings/unit/:unitId - URL-based unit filtering
+ */
+const ReadingsList: React.FC<ReadingsListProps> = ({ sensorId, unitId }) => {
     const auth = useAppSelector(selectAuth);
     const token = auth?.accessToken;
     const [readings, setReadings] = useState<Reading[]>([]);
     const [sensors, setSensors] = useState<Sensor[]>([]);
+    const [units, setUnits] = useState<Unit[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [showModal, setShowModal] = useState(false);
@@ -40,18 +41,40 @@ const ReadingsList: React.FC = () => {
     const [isEdit, setIsEdit] = useState(false);
     const [editingKey, setEditingKey] = useState<{ dateRecordedUtc: string, sensorId: number } | null>(null);
     const [form] = Form.useForm();
-    const [modalLoading, setModalLoading] = useState(false);
+
+    // Get column definitions based on whether we're filtering by sensor
+    const allColumnDefs = sensorId ? getReadingColumnsWithoutSensor() : getReadingColumns();
+
+    // Get display name for page title
+    const getDisplayName = () => {
+        if (sensorId) {
+            const sensor = sensors.find(s => s.id === sensorId);
+            return sensor ? `Telemetry - ${sensor.name}` : `Telemetry - Sensor ${sensorId}`;
+        } else if (unitId) {
+            const unit = units.find(u => u.id === unitId);
+            return unit ? `Telemetry - Unit ${unit.unitCode || unit.id}` : `Telemetry - Unit ${unitId}`;
+        }
+        return "Telemetry";
+    };
 
     useEffect(() => {
         loadReadings();
         fetchSensors(token).then(setSensors).catch(() => setSensors([]));
+        fetchUnits(token).then(setUnits).catch(() => setUnits([]));
         // eslint-disable-next-line
-    }, [token]);
+    }, [token, sensorId, unitId]);
 
     const loadReadings = async () => {
         setLoading(true);
         try {
-            const data = await fetchReadings(token);
+            let data: Reading[];
+            if (sensorId) {
+                data = await fetchReadingsBySensorId(sensorId, token);
+            } else if (unitId) {
+                data = await fetchReadingsByUnitId(unitId, token);
+            } else {
+                data = await fetchReadings(token);
+            }
             setReadings(data);
             setError(null);
         } catch (err: any) {
@@ -66,6 +89,10 @@ const ReadingsList: React.FC = () => {
         setIsEdit(false);
         setEditingKey(null);
         form.resetFields();
+        // Pre-select sensor if sensorId is provided
+        if (sensorId) {
+            form.setFieldsValue({ sensorId: sensorId });
+        }
         setShowModal(true);
     };
 
@@ -95,40 +122,20 @@ const ReadingsList: React.FC = () => {
         }
     };
 
-    const handleModalOk = async () => {
-        try {
-            setModalLoading(true);
-            const values = await form.validateFields();
-            const readingPayload = {
-                dateReceivedUtc: new Date().toISOString(),
-                dateRecordedUtc: values.dateRecordedUtc.toISOString(),
-                sensorId: values.sensorId,
-                value: values.value,
-            };
-            if (isEdit && editingKey) {
-                await updateReading(editingKey.dateRecordedUtc, editingKey.sensorId, readingPayload, token);
-                setReadings(prev =>
-                    prev.map(r =>
-                        r.dateRecordedUtc === editingKey.dateRecordedUtc && r.sensor.id === editingKey.sensorId
-                            ? { ...readingPayload, sensor: sensors.find(s => s.id === readingPayload.sensorId)! }
-                            : r
-                    )
-                );
-                message.success("Reading updated");
-            } else {
-                const added = await addReading({ ...readingPayload, sensor: null }, token);
-                setReadings(prev => [...prev, added]);
-                message.success("Reading added");
-            }
-            setShowModal(false);
-            setEditingKey(null);
-            form.resetFields();
-        } catch (err: any) {
-            if (err.errorFields) return; // Form validation error
-            message.error(err.message || "Failed to save reading");
-        } finally {
-            setModalLoading(false);
+    const handleModalSuccess = (reading: Reading, isEdit: boolean, editingKey?: { dateRecordedUtc: string, sensorId: number } | null) => {
+        if (isEdit && editingKey) {
+            setReadings(prev =>
+                prev.map(r =>
+                    r.dateRecordedUtc === editingKey.dateRecordedUtc && r.sensor.id === editingKey.sensorId
+                        ? reading
+                        : r
+                )
+            );
+        } else {
+            setReadings(prev => [...prev, reading]);
         }
+        setShowModal(false);
+        setEditingKey(null);
     };
 
     const handleModalCancel = () => {
@@ -136,59 +143,6 @@ const ReadingsList: React.FC = () => {
         setEditingKey(null);
         form.resetFields();
     };
-
-    const MainModal: React.FC = () => (
-        <Modal
-            title={isEdit ? "Edit Reading" : "Add Reading"}
-            open={showModal}
-            onCancel={handleModalCancel}
-            onOk={handleModalOk}
-            okText="Save"
-            confirmLoading={modalLoading}
-            destroyOnHidden={true}
-        >
-            <Form
-                layout="vertical"
-                form={form}
-                initialValues={{
-                    value: undefined,
-                }}
-            >
-                <Form.Item
-                    label="Date Recorded"
-                    name="dateRecordedUtc"
-                    rules={[{ required: true, message: "Please select the recorded date" }]}
-                >
-                    <DatePicker showTime style={{ width: "100%" }} />
-                </Form.Item>
-                <Form.Item
-                    label="Sensor"
-                    name="sensorId"
-                    rules={[{ required: true, message: "Please select a sensor" }]}
-                >
-                    <Select
-                        showSearch
-                        allowClear
-                        placeholder="Select a sensor"
-                        optionFilterProp="children"
-                        filterOption={(input, option) =>
-                            typeof option?.children === "string" &&
-                            (option.children as string).toLowerCase().includes(input.toLowerCase())
-                        }
-                    >
-                        {sensors.map(sensor => (
-                            <Select.Option key={sensor.id} value={sensor.id}>
-                                {sensor.name ?? sensor.id}
-                            </Select.Option>
-                        ))}
-                    </Select>
-                </Form.Item>
-                <Form.Item label="Value" name="value">
-                    <InputNumber style={{ width: "100%" }} />
-                </Form.Item>
-            </Form>
-        </Modal>
-    );
 
     const ChartModal: React.FC = () => (
         <Modal
@@ -223,18 +177,25 @@ const ReadingsList: React.FC = () => {
 
     return (
         <div style={{ padding: "12px 0 12px 30px" }} >
-            <MainModal />
+            <ReadingModal 
+                open={showModal}
+                isEdit={isEdit}
+                editingKey={editingKey}
+                sensors={sensors}
+                token={token}
+                onCancel={handleModalCancel}
+                onSuccess={handleModalSuccess}
+                form={form}
+            />
             <ChartModal />
-            <div style={{ marginBottom: "16px" }}>
-                {chartAction()}
-            </div>
             <NewExtendedAntDTable<Reading>
                 data={readings}
                 tableColumns={allColumnDefs}
-                title="Telemetry"
+                title={getDisplayName()}
                 onAdd={handleAdd}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                headerActions={chartAction()}
                 loading={loading}
             />
         </div>

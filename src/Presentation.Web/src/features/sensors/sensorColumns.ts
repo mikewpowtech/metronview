@@ -22,3 +22,25 @@ const columnMapper = (col: any) => {
 export const getSensorColumns = (): ColumnsType<Sensor> => {
     return columnDefinitions.map(columnMapper);
 };
+
+// Function to get columns with actions (to be used in JSX components)
+export const getSensorColumnsWithActions = (onViewReadings?: (sensor: Sensor) => void): ColumnsType<Sensor> => {
+    const baseColumns = getSensorColumns();
+    
+    if (onViewReadings) {
+        return [
+            ...baseColumns,
+            {
+                title: "Actions",
+                key: "actions",
+                width: 120,
+                render: (_, record: Sensor) => {
+                    // Return a simple string that can be styled as a link
+                    return `View Readings (${record.id})`;
+                },
+            },
+        ];
+    }
+    
+    return baseColumns;
+};

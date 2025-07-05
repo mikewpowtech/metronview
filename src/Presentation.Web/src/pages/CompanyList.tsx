@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { Modal, Input, Form, message, Select } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
 import {
     fetchCompanies,
     addCompany,

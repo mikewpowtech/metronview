@@ -35,6 +35,29 @@ public class ReadingRepository : IReadingRepository
         return _mapper.Map<List<Reading>>(entities);
     }
 
+    public async Task<List<Reading>> GetBySensorIdAsync(int sensorId)
+    {
+        var entities = await _context.Readings
+            .AsNoTracking()
+            .Include(r => r.Sensor) // Ensures Sensor is loaded
+            .Where(r => r.SensorId == sensorId)
+            .OrderByDescending(r => r.DateRecordedUtc) // Most recent first
+            .ToListAsync();
+        return _mapper.Map<List<Reading>>(entities);
+    }
+
+    public async Task<List<Reading>> GetByUnitIdAsync(int unitId)
+    {
+        var entities = await _context.Readings
+            .AsNoTracking()
+            .Include(r => r.Sensor) // Ensures Sensor is loaded
+            .Include(r => r.Unit) // Ensures Unit is loaded
+            .Where(r => r.UnitId == unitId)
+            .OrderByDescending(r => r.DateRecordedUtc) // Most recent first
+            .ToListAsync();
+        return _mapper.Map<List<Reading>>(entities);
+    }
+
     public async Task<Reading> AddAsync(Reading reading)
     {
         var entity = _mapper.Map<ReadingDb>(reading);

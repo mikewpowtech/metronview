@@ -18,14 +18,15 @@ export type ExtendedTableProps<T> = Omit<TableProps<T>, "dataSource" | "columns"
     onDelete?: (record: T) => void;
     onAdd?: () => void; 
     columnMapper?: (col: any) => any;
+    headerActions?: ReactNode; // Additional actions to display in the header
 };
 
 export function ExtendedAntDTable<T>(props: ExtendedTableProps<T>): ReactNode {
 
-    const { data, tableColumns, rowKey, pagination, title, onAdd, onDelete, onEdit, columnMapper,customActions, ...rest } = props;
+    const { data, tableColumns, rowKey, pagination, title, onAdd, onDelete, onEdit, columnMapper, customActions, headerActions, ...rest } = props;
     const defaultRowKey = rowKey ?? "id";
     const defaultPagination = pagination ?? false;
-    const defaultVisibleKeys = tableColumns.filter(col => col.key !== "id").map(col => col.key as string);
+    const defaultVisibleKeys = tableColumns.filter(col => col.key !== "id" && col.key !== "pin").map(col => col.key as string);
     const [visibleKeys, setVisibleKeys] = useState<string[]>(() => getPersistedVisibleKeys(defaultVisibleKeys));
     const [columns, setColumns] = useState<ColumnsType<T>>(tableColumns);
 
@@ -97,17 +98,36 @@ export function ExtendedAntDTable<T>(props: ExtendedTableProps<T>): ReactNode {
 
     const tableTitle = () => (
         <>
-            <h4>{title}</h4>
+            <h4 style={{ margin: "0 0 8px 0", fontSize: "16px" }}>{title}</h4>
             <div>
+                {headerActions}
                 {onAdd && (
-                    <Button size="small" onClick={onAdd}
-                        style={{ margin: "0 10px 0 0" }} >
-                        Add <PlusOutlined />
+                    <Button 
+                        size="small" 
+                        onClick={onAdd}
+                        icon={<PlusOutlined />}
+                        style={{ 
+                            margin: "0 10px 0 0",
+                            backgroundColor: "#1890ff",
+                            borderColor: "#1890ff",
+                            color: "white"
+                        }}
+                    >
+                        Add
                     </Button>)
                 }
                 <Dropdown menu={{ items: getColumnMenuItems() }} trigger={["click"]}>
-                    <Button size="small">
-                        Columns <SettingOutlined />
+                    <Button 
+                        size="small"
+                        icon={<SettingOutlined />}
+                        style={{ 
+                            margin: "0 10px 0 0",
+                            backgroundColor: "#1890ff",
+                            borderColor: "#1890ff",
+                            color: "white"
+                        }}
+                    >
+                        Columns
                     </Button>
                 </Dropdown>
             </div>
@@ -119,6 +139,7 @@ export function ExtendedAntDTable<T>(props: ExtendedTableProps<T>): ReactNode {
         key: "actions",
         align: "center" as const,
         className: "actions-col",
+        width: 80,
         render: (_: any, record: T) => (
             <span className="actions-col-inner">
                 {onEdit && (
@@ -126,7 +147,7 @@ export function ExtendedAntDTable<T>(props: ExtendedTableProps<T>): ReactNode {
                         <Button
                             icon={<EditOutlined />}
                             size="small"
-                            style={{ padding: 0, minWidth: 0, width: 28, height: 28 }}
+                            style={{ padding: 0, minWidth: 0, width: 24, height: 24, marginRight: 4 }}
                             onClick={() => onEdit(record)}
                         />
                     </Tooltip>)
@@ -144,6 +165,7 @@ export function ExtendedAntDTable<T>(props: ExtendedTableProps<T>): ReactNode {
                                 icon={<DeleteOutlined />}
                                 size="small"
                                 danger
+                                style={{ padding: 0, minWidth: 0, width: 24, height: 24, marginRight: 4 }}
                             />
                         </Tooltip>
                     </Popconfirm>)
@@ -175,7 +197,7 @@ export function ExtendedAntDTable<T>(props: ExtendedTableProps<T>): ReactNode {
 
 
     return (
-                <div style={{ padding: "12px 5px 12px 5px" }} >
+                <div style={{ padding: "8px 5px 8px 5px" }} >
         <AntdTable<T>
             dataSource={data}
             columns={finalizedColumns}
@@ -183,7 +205,7 @@ export function ExtendedAntDTable<T>(props: ExtendedTableProps<T>): ReactNode {
             rowKey={defaultRowKey}
             pagination={defaultPagination}
             scroll={{ x: "max-content" }}
-            size="middle"
+            size="small"
             className="compact-table"
             title={tableTitle}
             components={{

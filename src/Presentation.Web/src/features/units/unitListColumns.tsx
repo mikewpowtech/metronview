@@ -1,4 +1,5 @@
 import type { ColumnsType } from "antd/es/table";
+import { Tag } from "antd";
 import type { Unit } from "./unitsAPI";
 import type { Company } from "../companies/companyAPI";
 import type { UnitModel } from "../unitmodels/unitModelAPI";
@@ -17,17 +18,17 @@ export const unitStatusOptions = [
 ];
 
 const columnDefinitions: ColumnsType<Unit> = [
-    { title: "ID", dataIndex: "id", key: "id", width: 100 },
-    { title: "Unit Type", dataIndex: "unitTypeId", key: "unitTypeId", width: 120 },
+    { title: "ID", dataIndex: "id", key: "id", width: 80, sorter: (a, b) => a.id - b.id },
+    { title: "Unit Type", dataIndex: "unitTypeId", key: "unitTypeId", width: 150 },
     { title: "Phone Number", dataIndex: "phoneNumber", key: "phoneNumber", width: 140 },
     { title: "PIN", dataIndex: "pin", key: "pin", width: 80 },
     { title: "Manufacturer Code", dataIndex: "manufacturerCode", key: "manufacturerCode", width: 150 },
     { title: "Unit Code", dataIndex: "unitCode", key: "unitCode", width: 120 },
     { title: "Secret", dataIndex: "secret", key: "secret", width: 120 },
-    { title: "Status", dataIndex: "status", key: "status", width: 120 },
     { title: "Company", dataIndex: "companyID", key: "companyID", width: 180 },
     { title: "Days Before Not Reported", dataIndex: "daysBeforeNotReported", key: "daysBeforeNotReported", width: 180 },
     { title: "Custom Field Values", dataIndex: "customFieldValues", key: "customFieldValues", width: 180 },
+    { title: "Status", dataIndex: "status", key: "status", width: 120 },
 ];
 
 //add custom rendering if required
@@ -57,8 +58,26 @@ export const getUnitListColumns = ({ companies, unitModels }: UnitListColumnProp
                 ...col,
                 render: (_: never, record: Unit) => {
                     const status = unitStatusOptions.find(opt => opt.value === record.status);
-                    return status?.label ?? "Unknown";
-                }
+                    const getStatusColor = (statusValue: number) => {
+                        switch (statusValue) {
+                            case 0: return "success"; // Active
+                            case 1: return "default"; // Inactive
+                            case 2: return "warning"; // Maintenance
+                            case 3: return "error"; // Decommissioned
+                            default: return "default";
+                        }
+                    };
+                    return (
+                        <Tag color={getStatusColor(record.status)}>
+                            {status?.label ?? "Unknown"}
+                        </Tag>
+                    );
+                },
+                filters: unitStatusOptions.map(option => ({
+                    text: option.label,
+                    value: option.value,
+                })),
+                onFilter: (value: any, record: Unit) => record.status === value,
             };
         }
         return col;
