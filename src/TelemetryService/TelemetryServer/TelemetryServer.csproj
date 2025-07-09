@@ -29,6 +29,7 @@
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="9.0.1" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="../../Infrastructure/Infrastructure.csproj" />
     <ProjectReference Include="..\Metron2Client\Metron2Client.csproj" />
     <ProjectReference Include="..\Metron2Configuration\Metron2Configuration.csproj" />
     <ProjectReference Include="..\Metron2Parser\Metron2Parser.csproj" />

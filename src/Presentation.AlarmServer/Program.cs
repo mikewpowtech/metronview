@@ -9,7 +9,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using System.IO;
 using Microsoft.EntityFrameworkCore;
-using Presentation.AlarmServer.Data;
 using Microsoft.Extensions.Configuration;
 using Infrastructure;
 using Application.Alarms;
@@ -38,10 +37,8 @@ var host = Host.CreateDefaultBuilder(args)
         // Register AlarmDbContext with connection string from config
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("TelemetryDatabaseConnectionString")));
-        
         // Register Mapster
         services.AddMapster();
-
         // Register your mapping configuration
         MapsterMappingConfig.RegisterMappings();
 

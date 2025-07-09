@@ -1,4 +1,8 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Infrastructure;
+using Infrastructure.Mapping;
+using Mapster;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -42,6 +46,14 @@ var host = Host.CreateDefaultBuilder(args)
         services.AddHostedService<TelemetryManager>();
         services.AddSingleton<SqlHelper>();
         services.AddOptions<SqlHelperOptions>().Configure(o => o.ConnectionString = configuration.GetConnectionString("Telemetry"));
+                // Register AlarmDbContext with connection string from config
+        services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseSqlServer(configuration.GetConnectionString("Telemetry")));
+        // Register Mapster
+        services.AddMapster();
+        // Register your mapping configuration
+        MapsterMappingConfig.RegisterMappings();
+
         services.AddTelemetryProcessor<Metron2BulkTelemetryProcessor>();
         services.AddTelemetryProcessor<MetronAtexTelemetryProcessor>();
     })
