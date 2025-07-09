@@ -10,5 +10,8 @@
   "typescript.preferences.importModuleSpecifier": "relative",
   "eslint.workingDirectories": [
     "src/Presentation.Web"
-  ]
+  ],
+  "terminal.integrated.env.osx": {
+    "ASPNETCORE_ENVIRONMENT": "Development"
+  }
 }

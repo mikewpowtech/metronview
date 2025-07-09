@@ -4,7 +4,7 @@ export const AppLogo = () => {
       className="app-logo-header"
       style={{
         width: "100%",
-        height: 150,
+        height: 80,
         background: "url('/metronview_header.svg') no-repeat left center",
         backgroundSize: "contain",
         display: "block",

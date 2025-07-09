@@ -18,7 +18,7 @@ namespace Infrastructure.Repositories
         public async Task<Trigger?> GetByIdAsync(int id)
         {
             var db = await _context.Triggers
-                .Include(t => t.Alarm)
+                //.Include(t => t.Alarm)
                 .Include(t => t.TriggerType)
                 .Include(t => t.CommunicationMode)
                 .FirstOrDefaultAsync(t => t.Id == id);
@@ -29,7 +29,7 @@ namespace Infrastructure.Repositories
         public async Task<List<Trigger>> GetAllAsync()
         {
             var dbList = await _context.Triggers
-                .Include(t => t.Alarm)
+                //.Include(t => t.Alarm)
                 .Include(t => t.TriggerType)
                 .Include(t => t.CommunicationMode)
                 .OrderBy(t => t.Id)

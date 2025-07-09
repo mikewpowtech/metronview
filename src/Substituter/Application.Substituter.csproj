@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <EnableDefaultNoneItems>false</EnableDefaultNoneItems>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Antlr4 Include="Substituter.g4">
+      <Generator>MSBuild:Compile</Generator>
+      <CustomToolNamespace>Substituter</CustomToolNamespace>
+      <Listener>True</Listener>
+      <Visitor>True</Visitor>
+      <OutputType>CSharp</OutputType>
+      <Package>Substituter</Package>
+    </Antlr4>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.1" />
+    <PackageReference Include="Antlr4BuildTasks" Version="12.10.0" />
+  </ItemGroup>
+</Project>

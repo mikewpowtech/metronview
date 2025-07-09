@@ -127,7 +127,7 @@ export const UserLayout = ({ UserName }: iUser) => {
         <App>
             <Layout className="layout" style={{ minHeight: "100vh" }}>
                 {/* AppLogo on its own line */}
-                <div style={{ background: "#5a6a71", padding: "4px 0 2px 0", display: "flex", justifyContent: "flex-start" }}>
+                <div style={{ background: "#5a6a71", padding: "2px 0 1px 0", display: "flex", justifyContent: "flex-start" }}>
                     <AppLogo />
                 </div>
                 <Header

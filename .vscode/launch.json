@@ -38,6 +38,20 @@
         "uriFormat": "%s",
         "action": "openExternally"
       }
+    },
+    {
+      "name": "Launch AlarmServer",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/src/Presentation.AlarmServer/bin/Debug/net9.0/Presentation.AlarmServer.dll",
+      "cwd": "${workspaceFolder}/src/Presentation.AlarmServer",
+      "args": [],
+      "stopAtEntry": false,
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "console": "internalConsole"
     }
   ],
   "compounds": [

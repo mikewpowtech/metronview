@@ -32,7 +32,7 @@ namespace Infrastructure.Mapping
             TypeAdapterConfig<Sensor, SensorDb>.NewConfig();
             TypeAdapterConfig<SensorDb, Sensor>.NewConfig();
 
-            // Alarm mappings - prevent circular references  
+            // Alarm mappings - map triggers collection
             TypeAdapterConfig<AlarmDb, Alarm>.NewConfig()
                 .Map(dest => dest.Company, src => src.Company == null ? null : new Company
                 {
@@ -46,8 +46,8 @@ namespace Infrastructure.Mapping
                     CompanyId = src.RecipientSet.CompanyId,
                     Name = src.RecipientSet.Name
                 })
-                // Don't map Triggers collection to prevent circular reference
-                .Map(dest => dest.Triggers, src => new List<Trigger>());
+                // Map Triggers collection using MapWith to convert each TriggerDb to Trigger
+                .Map(dest => dest.Triggers, src => src.Triggers == null ? new List<Trigger>() : src.Triggers.Adapt<List<Trigger>>());
 
             TypeAdapterConfig<Alarm, AlarmDb>.NewConfig()
                 // Only map scalar properties, ignore navigation properties

@@ -28,6 +28,7 @@ namespace Infrastructure.Repositories
         {
             var dbList = await _context.Alarms
                 .Include(a => a.Triggers)
+                .ThenInclude(t => t.TriggerType)
                 .ToListAsync();
 
             return dbList.Adapt<List<Alarm>>();
