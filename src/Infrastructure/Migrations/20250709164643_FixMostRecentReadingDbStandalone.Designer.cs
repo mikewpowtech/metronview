@@ -4,6 +4,7 @@ using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250709164643_FixMostRecentReadingDbStandalone")]
+    partial class FixMostRecentReadingDbStandalone
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -165,40 +168,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("UnitId");
 
                     b.ToTable("MostRecentReadings", (string)null);
-                });
-
-            modelBuilder.Entity("Infrastructure.DbClasses.MostRecentUnitStatusDb", b =>
-                {
-                    b.Property<int>("UnitId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("AutoConfig")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("BatteryAlarm")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Carrier")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("DateReceivedUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("FailedCallout")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("Mip")
-                        .HasColumnType("bit");
-
-                    b.Property<float?>("Signal")
-                        .HasColumnType("real");
-
-                    b.Property<float?>("Temperature")
-                        .HasColumnType("real");
-
-                    b.HasKey("UnitId");
-
-                    b.ToTable("MostRecentUnitStatuses", (string)null);
                 });
 
             modelBuilder.Entity("Infrastructure.DbClasses.ReadingDb", b =>
@@ -507,7 +476,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("UnitId");
 
-                    b.ToTable("UnitStatuses");
+                    b.ToTable("UnitStatusDb");
                 });
 
             modelBuilder.Entity("Infrastructure.Identity.ApplicationUserDb", b =>
@@ -779,17 +748,6 @@ namespace Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Sensor");
-
-                    b.Navigation("Unit");
-                });
-
-            modelBuilder.Entity("Infrastructure.DbClasses.MostRecentUnitStatusDb", b =>
-                {
-                    b.HasOne("Infrastructure.DbClasses.UnitDb", "Unit")
-                        .WithMany()
-                        .HasForeignKey("UnitId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
 
                     b.Navigation("Unit");
                 });

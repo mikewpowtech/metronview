@@ -12,9 +12,13 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<UnitDb> Units { get; set; } = default!;
     public DbSet<SensorDb> Sensors { get; set; } = default!;
     public DbSet<ReadingDb> Readings { get; set; } = default!;
+    // Use new entity for MostRecentReadings
+    public DbSet<MostRecentReadingDb> MostRecentReadings { get; set; } = default!;
     public DbSet<UnitModelDb> UnitModels { get; set; } = default!; // Added for UnitModel support
     public DbSet<ConfigurationUploadDb> ConfigurationUploads { get; set; } = default!;
     public DbSet<UnitStatusDb> UnitStatuses { get; set; } = default!;
+    // Use new entity for MostRecentUnitStatuses
+    public DbSet<MostRecentUnitStatusDb> MostRecentUnitStatuses { get; set; } = default!;
     public DbSet<TriggerDb> Triggers { get; set; } = null!;
     public DbSet<TriggerTypeDb> TriggerTypes { get; set; } = null!;
     public DbSet<CommunicationModeDb> RecipientModes { get; set; } = null!;
@@ -137,6 +141,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 .IsRequired(false);
         });
 
+
+        // ReadingDb configuration (for Readings table)
         modelBuilder.Entity<ReadingDb>(entity =>
         {
             entity.HasKey(r => new { r.DateRecordedUtc, r.SensorId });
@@ -147,6 +153,22 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             // Optionally, configure relationships and properties here
         });
 
+        // MostRecentReadingDb configuration (for MostRecentReadings table)
+        modelBuilder.Entity<MostRecentReadingDb>(entity =>
+        {
+            entity.ToTable("MostRecentReadings");
+            entity.HasKey(r => new { r.SensorId });
+            entity.HasOne(r => r.Unit)
+                    .WithMany()
+                    .HasForeignKey(r => r.UnitId)
+                    .OnDelete(DeleteBehavior.NoAction);
+            entity.HasIndex(r => r.SensorId)
+                .IsUnique()
+                .HasDatabaseName("IX_MostRecentReadings_SensorId_Unique");
+            // Optionally, configure relationships and properties here
+        });
+
+
         modelBuilder.Entity<UnitStatusDb>(entity =>
         {
             entity.HasKey(r => new { r.DateReceivedUtc, r.UnitId });
@@ -155,6 +177,18 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                     .HasForeignKey(r => r.UnitId)
                     .OnDelete(DeleteBehavior.NoAction);
             // Optionally, configure relationships and properties here
+        });
+
+        // MostRecentUnitStatusDb configuration (for MostRecentUnitStatuses table)
+        modelBuilder.Entity<MostRecentUnitStatusDb>(entity =>
+        {
+            entity.ToTable("MostRecentUnitStatuses");
+            entity.HasKey(r => r.UnitId);
+            entity.HasOne(r => r.Unit)
+                .WithMany()
+                .HasForeignKey(r => r.UnitId)
+                .OnDelete(DeleteBehavior.NoAction);
+            // Add any additional property configs if needed
         });
 
         // UnitModelDb configuration (optional: add constraints if needed)
