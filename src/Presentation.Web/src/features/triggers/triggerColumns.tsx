@@ -36,7 +36,7 @@ export function getColumns(
                 const triggerType = triggerTypes.find(tt => tt.code === triggerTypeCode);
                 return (
                     <Tag color="blue">
-                        {triggerType ? triggerType.code : `Type ${triggerTypeCode}`}
+                        {triggerType ? triggerType.name : `Type ${triggerTypeCode}`}
                     </Tag>
                 );
             },
