@@ -1,4 +1,5 @@
 ﻿
+using Domain.Enums;
 using Presentation.AlarmServer.Alarms;
 using Presentation.AlarmServer.Enums;
 using System;
@@ -9,7 +10,7 @@ namespace Presentation.AlarmServer.Models;
 public class AlarmServerDto
 {
     public int SensorId { get; init; }
-    public AlarmType AlarmType { get; init; }
+    public TriggerTypeCode AlarmType { get; init; }
     public double AlarmValue { get; init; }
     public AlarmRecipientType RecipientMode { get; init; }
     public string AlarmSubject { get; init; }

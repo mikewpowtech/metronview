@@ -76,12 +76,12 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
     {
         var triggerTypes = new List<TriggerTypeDb>
         {
-            new TriggerTypeDb { Code = "U", Name = "rising past", Order = 1 },
-            new TriggerTypeDb { Code = "D", Name = "falling past", Order = 2 },
-            new TriggerTypeDb { Code = "A", Name = "above or equal to", Order = 3 },
-            new TriggerTypeDb { Code = "B", Name = "below or equal to", Order = 4 },
-            new TriggerTypeDb { Code = "C", Name = "rate of change", Order = 5 },
-            new TriggerTypeDb { Code = "S", Name = "not reported for (mins)", Order = 6 }
+            new TriggerTypeDb { Code = Domain.Enums.TriggerTypeCode.Rising, Name = "rising past", Order = 1 },
+            new TriggerTypeDb { Code = Domain.Enums.TriggerTypeCode.Falling, Name = "falling past", Order = 2 },
+            new TriggerTypeDb { Code = Domain.Enums.TriggerTypeCode.Above, Name = "above or equal to", Order = 3 },
+            new TriggerTypeDb { Code = Domain.Enums.TriggerTypeCode.Below, Name = "below or equal to", Order = 4 },
+            new TriggerTypeDb { Code = Domain.Enums.TriggerTypeCode.RateOfChange, Name = "rate of change", Order = 5 },
+            new TriggerTypeDb { Code = Domain.Enums.TriggerTypeCode.NotReportedForPeriod, Name = "not reported for (mins)", Order = 6 }
         };
 
         // Update existing trigger types or add new ones, don't remove

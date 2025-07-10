@@ -8,16 +8,20 @@ using System.Threading;
 using System;
 using Application.Alarms;
 using System.Threading.Tasks;
+using Application.Triggers;
+using Domain;
+using Domain.Enums;
 
 namespace Presentation.AlarmServer.ServiceWorkers;
 
 // us a primary constructor for brevity of code and consistency with other service workers
 public class NotReportedServiceWorker(ITelemetryDatabase telemetryDatabase,
-    ILoggerFactory loggerFactory, IOptions<WorkerOptions> workerOptions, IAlarmServerService alarmService, IAlarmRepository alarmRepository) 
+    ILoggerFactory loggerFactory, IOptions<WorkerOptions> workerOptions, IAlarmServerService alarmService, IAlarmRepository alarmRepository, ITriggerRepository triggerRepository) 
     : ServiceWorkerBase(telemetryDatabase, loggerFactory, workerOptions,alarmService
         )
 {
     private readonly IAlarmRepository alarmRepository = alarmRepository;
+    private readonly ITriggerRepository triggerRepository = triggerRepository;
 
     public override async void Run(CancellationToken cancellationToken)
     {
@@ -32,6 +36,7 @@ public class NotReportedServiceWorker(ITelemetryDatabase telemetryDatabase,
                 try
                 {
                     logger.LogDebug("Processing");
+                    var newalarmsToHandle = await triggerRepository.GetNotReportedBreachesAsync(TriggerTypeCode.NotReportedForPeriod);
                     var alarmsToHandle = telemetryDatabase.GetNotReportedReadingsWithAlarms();
                     ProcessAlarms(alarmsToHandle);
                     cancellationToken.WaitHandle.WaitOne(workerOptions.NotReportedPollInterval);

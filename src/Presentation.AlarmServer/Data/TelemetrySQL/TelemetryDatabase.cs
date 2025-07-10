@@ -12,6 +12,7 @@ using Presentation.AlarmServer.Email;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Domain.Enums;
 
 namespace Presentation.AlarmServer.Data.TelemetrySQL;
 
@@ -55,7 +56,7 @@ public class TelemetryDatabase(ISqlConnectionProvider sqlConnectionProvider, ILo
                     var newitem = new AlarmServerDto
                     {
                         SensorId = r.GetInt32(0),
-                        AlarmType = (AlarmType)r.GetChar(1),
+                        AlarmType = (TriggerTypeCode)r.GetChar(1),
                         AlarmValue = SqlHelper.DoubleOrNull(r, 2),
                         RecipientMode = RecipientModeHelper.FromString(r.GetString(3)),
                         AlarmSubject = SqlHelper.StringOrNull(r, 4),
@@ -415,7 +416,7 @@ public class TelemetryDatabase(ISqlConnectionProvider sqlConnectionProvider, ILo
                 {
                     SendAlarmForNotReported = true,
                     SensorId = r.GetInt32(0),
-                    AlarmType = (AlarmType)r.GetChar(1),
+                    AlarmType = (TriggerTypeCode)r.GetChar(1),
                     AlarmValue = SqlHelper.DoubleOrNull(r, 2),
                     RecipientMode = RecipientModeHelper.FromString(r.GetString(3)),
                     AlarmSubject = SqlHelper.StringOrNull(r, 4),

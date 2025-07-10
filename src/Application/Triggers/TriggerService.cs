@@ -1,4 +1,5 @@
 using Domain;
+using Domain.Enums;
 
 namespace Application.Triggers
 {
@@ -14,7 +15,7 @@ namespace Application.Triggers
         public Task<Trigger?> GetByIdAsync(int id) => _repository.GetByIdAsync(id);
         public Task<List<Trigger>> GetAllAsync() => _repository.GetAllAsync();
         public Task<List<Trigger>> GetByAlarmIdAsync(int alarmId) => _repository.GetByAlarmIdAsync(alarmId);
-        public Task<List<Trigger>> GetByTriggerTypeIdAsync(int triggerTypeId) => _repository.GetByTriggerTypeIdAsync(triggerTypeId);
+        public Task<List<Trigger>> GetByTriggerTypeCodeAsync(TriggerTypeCode triggerTypeCode) => _repository.GetByTriggerTypeCodeAsync(triggerTypeCode);
         public Task<List<Trigger>> GetByCommunicationModeIdAsync(int communicationModeId) => _repository.GetByCommunicationModeIdAsync(communicationModeId);
         public Task<Trigger> AddAsync(Trigger trigger) => _repository.AddAsync(trigger);
         public Task<bool> UpdateAsync(Trigger trigger) => _repository.UpdateAsync(trigger);

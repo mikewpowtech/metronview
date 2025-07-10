@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Application.Triggers;
 using Domain;
+using Domain.Enums;
 
 namespace Api.Controllers
 {
@@ -63,12 +64,12 @@ namespace Api.Controllers
             }
         }
 
-        [HttpGet("by-trigger-type/{triggerTypeId}")]
-        public async Task<IActionResult> GetByTriggerTypeId(int triggerTypeId)
+        [HttpGet("by-trigger-type/{triggerTypeCde}")]
+        public async Task<IActionResult> GetByTriggerTypeCode(TriggerTypeCode triggerTypeCode)
         {
             try
             {
-                var triggers = await _triggerService.GetByTriggerTypeIdAsync(triggerTypeId);
+                var triggers = await _triggerService.GetByTriggerTypeCodeAsync(triggerTypeCode);
                 return Ok(triggers);
             }
             catch (Exception ex)

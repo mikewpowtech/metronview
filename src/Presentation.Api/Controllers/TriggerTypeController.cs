@@ -53,7 +53,11 @@ namespace Api.Controllers
         {
             try
             {
-                var triggerType = await _triggerTypeService.GetByCodeAsync(code);
+                if (!Enum.TryParse<Domain.Enums.TriggerTypeCode>(code, true, out var triggerTypeCode))
+                {
+                    return BadRequest(new { error = $"Invalid trigger type code: {code}" });
+                }
+                var triggerType = await _triggerTypeService.GetByCodeAsync(triggerTypeCode);
 
                 if (triggerType == null)
                 {

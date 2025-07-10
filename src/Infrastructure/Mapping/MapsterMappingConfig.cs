@@ -70,16 +70,16 @@ namespace Infrastructure.Mapping
                     Name = src.Alarm.Name,
                     RecipientSetId = src.Alarm.RecipientSetId,
                     IsActive = src.Alarm.IsActive
-                    // Don't map Triggers collection to prevent circular reference
                 })
                 .Map(dest => dest.TriggerType, src => src.TriggerType)
-                .Map(dest => dest.CommunicationMode, src => src.CommunicationMode);
+                .Map(dest => dest.CommunicationMode, src => src.CommunicationMode)
+                .Map(dest => dest.TriggerTypeCode, src => src.TriggerTypeCode);
 
             TypeAdapterConfig<Trigger, TriggerDb>.NewConfig()
                 // Only map scalar properties, ignore navigation properties
                 .Map(dest => dest.Id, src => src.Id)
                 .Map(dest => dest.AlarmId, src => src.AlarmId)
-                .Map(dest => dest.TriggerTypeId, src => src.TriggerTypeId)
+                .Map(dest => dest.TriggerTypeCode, src => src.TriggerTypeCode)
                 .Map(dest => dest.TriggerValue, src => src.TriggerValue)
                 .Map(dest => dest.CommunicationModeId, src => src.CommunicationModeId)
                 .Map(dest => dest.Subject, src => src.Subject)

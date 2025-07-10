@@ -60,7 +60,7 @@ export async function fetchCommunicationModeById(
 export interface Trigger {
     id: number;
     alarmId: number;
-    triggerTypeId: number;
+    triggerTypeCode: string;
     triggerValue: number;
     communicationModeId: number;
     subject: string;

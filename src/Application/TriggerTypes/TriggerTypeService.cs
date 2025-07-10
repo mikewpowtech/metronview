@@ -1,4 +1,5 @@
 using Domain;
+using Domain.Enums;
 
 namespace Application.TriggerTypes
 {
@@ -12,7 +13,7 @@ namespace Application.TriggerTypes
         }
 
         public Task<TriggerType?> GetByIdAsync(int id) => _repository.GetByIdAsync(id);
-        public Task<TriggerType?> GetByCodeAsync(string code) => _repository.GetByCodeAsync(code);
+        public Task<TriggerType?> GetByCodeAsync(TriggerTypeCode code) => _repository.GetByCodeAsync(code);
         public Task<List<TriggerType>> GetAllAsync() => _repository.GetAllAsync();
         public Task<TriggerType> AddAsync(TriggerType triggerType) => _repository.AddAsync(triggerType);
         public Task<bool> UpdateAsync(TriggerType triggerType) => _repository.UpdateAsync(triggerType);

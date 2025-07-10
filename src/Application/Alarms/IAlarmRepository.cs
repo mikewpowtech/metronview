@@ -1,3 +1,4 @@
+using Application.Triggers;
 using Domain;
 
 namespace Application.Alarms

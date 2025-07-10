@@ -1,5 +1,6 @@
 using Application.Triggers;
 using Domain;
+using Domain.Enums;
 using Infrastructure.DbClasses;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
@@ -51,13 +52,13 @@ namespace Infrastructure.Repositories
             return dbList.Adapt<List<Trigger>>();
         }
 
-        public async Task<List<Trigger>> GetByTriggerTypeIdAsync(int triggerTypeId)
+        public async Task<List<Trigger>> GetByTriggerTypeCodeAsync(TriggerTypeCode triggerTypeCode)
         {
             var dbList = await _context.Triggers
                 .Include(t => t.Alarm)
                 .Include(t => t.TriggerType)
                 .Include(t => t.CommunicationMode)
-                .Where(t => t.TriggerTypeId == triggerTypeId)
+                .Where(t => t.TriggerTypeCode == triggerTypeCode)
                 .OrderBy(t => t.Id)
                 .ToListAsync();
 
@@ -95,7 +96,7 @@ namespace Infrastructure.Repositories
             var db = trigger.Adapt<TriggerDb>();
             _context.Triggers.Add(db);
             await _context.SaveChangesAsync();
-            
+
             // Reload with navigation properties
             var reloaded = await GetByIdAsync(db.Id);
             return reloaded!;
@@ -107,7 +108,7 @@ namespace Infrastructure.Repositories
             if (db == null) return false;
 
             db.AlarmId = trigger.AlarmId;
-            db.TriggerTypeId = trigger.TriggerTypeId;
+            db.TriggerTypeCode = trigger.TriggerTypeCode;
             db.TriggerValue = trigger.TriggerValue;
             db.CommunicationModeId = trigger.CommunicationModeId;
             db.Subject = trigger.Subject;
@@ -127,6 +128,44 @@ namespace Infrastructure.Repositories
             _context.Triggers.Remove(db);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        // sTriggerTypeId: the TriggerTypeId for 'S'
+        public async Task<List<BreachedTriggerDto>> GetNotReportedBreachesAsync(TriggerTypeCode triggerTypeCode)
+        {
+            var now = DateTime.UtcNow;
+
+            var query =
+                from sensor in _context.Sensors
+                join alarm in _context.Alarms on sensor.AlarmId equals alarm.Id
+                join trigger in _context.Triggers on alarm.Id equals trigger.AlarmId
+                join mostRecent in _context.MostRecentReadings on sensor.Id equals mostRecent.SensorId into readingJoin
+                from mostRecent in readingJoin.DefaultIfEmpty()
+                where trigger.IsEnabled
+                    && trigger.TriggerTypeCode == triggerTypeCode
+                    && (
+                        mostRecent == null ||
+                        mostRecent.DateRecordedUtc == null ||
+                        now.AddMinutes(trigger.TriggerValue * -1) > mostRecent.DateRecordedUtc
+                    )
+                select new BreachedTriggerDto
+                {
+                    SensorId = sensor.Id,
+                    TriggerTypeCode = trigger.TriggerTypeCode,
+                    TriggerValue = trigger.TriggerValue,
+                    CommunicationModeId = trigger.CommunicationModeId,
+                    Subject = trigger.Subject,
+                    Body = trigger.Body,
+                    Value = mostRecent.Value,
+                    IsAlarm = null, // MostRecentReadings.IsAlarm not present in schema, set as null or add if available
+                    DateRecordedUtc = mostRecent.DateRecordedUtc,
+                    PendingAlarmTriggerId = null, // No equivalent in EF, set as null
+                    AlarmSetId = alarm.Id, // Alarm is AlarmSet in this mapping
+                    TriggerId = trigger.Id,
+                    MinimumSendIntervalMinutes = trigger.MinimumSendIntervalMinutes
+                };
+
+            return await query.ToListAsync();
         }
     }
 }

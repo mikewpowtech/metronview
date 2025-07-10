@@ -1,4 +1,5 @@
 using Domain;
+using Domain.Enums;
 
 namespace Application.Triggers
 {
@@ -7,7 +8,7 @@ namespace Application.Triggers
         Task<Trigger?> GetByIdAsync(int id);
         Task<List<Trigger>> GetAllAsync();
         Task<List<Trigger>> GetByAlarmIdAsync(int alarmId);
-        Task<List<Trigger>> GetByTriggerTypeIdAsync(int triggerTypeId);
+        Task<List<Trigger>> GetByTriggerTypeCodeAsync(TriggerTypeCode triggerTypeCode);
         Task<List<Trigger>> GetByCommunicationModeIdAsync(int communicationModeId);
         Task<Trigger> AddAsync(Trigger trigger);
         Task<bool> UpdateAsync(Trigger trigger);

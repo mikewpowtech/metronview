@@ -29,14 +29,14 @@ export function getColumns(
         },
         {
             title: "Trigger Type",
-            dataIndex: "triggerTypeId",
-            key: "triggerTypeId",
+            dataIndex: "triggerTypeCode",
+            key: "triggerTypeCode",
             width: 150,
-            render: (triggerTypeId) => {
-                const triggerType = triggerTypes.find(tt => tt.id === triggerTypeId);
+            render: (triggerTypeCode) => {
+                const triggerType = triggerTypes.find(tt => tt.code === triggerTypeCode);
                 return (
                     <Tag color="blue">
-                        {triggerType ? triggerType.code : `Type ${triggerTypeId}`}
+                        {triggerType ? triggerType.code : `Type ${triggerTypeCode}`}
                     </Tag>
                 );
             },

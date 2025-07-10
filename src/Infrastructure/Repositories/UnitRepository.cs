@@ -8,12 +8,12 @@ namespace Infrastructure.Repositories;
 
 public class UnitRepository : IUnitRepository
 {
-    private readonly ApplicationDbContext _context;
+    private readonly ApplicationDbContext context;
     private readonly IMapper _mapper;
 
     public UnitRepository(ApplicationDbContext context, IMapper mapper)
     {
-        _context = context;
+        this.context = context;
         _mapper = mapper;
     }
 
@@ -21,7 +21,7 @@ public class UnitRepository : IUnitRepository
 
     public async Task<Unit?> GetByIdAsync(int id)
     {
-        var entity = await _context.Units
+        var entity = await context.Units
             .AsNoTracking()
             .FirstOrDefaultAsync(u => u.Id == id);
         return entity == null ? null : _mapper.Map<Unit>(entity);
@@ -29,7 +29,7 @@ public class UnitRepository : IUnitRepository
 
     public async Task<List<Unit>> GetAllAsync()
     {
-        var entities = await _context.Units
+        var entities = await context.Units
             .AsNoTracking()
             .ToListAsync();
         return _mapper.Map<List<Unit>>(entities);
@@ -39,28 +39,28 @@ public class UnitRepository : IUnitRepository
     {
         var entity = _mapper.Map<UnitDb>(unit);
 
-        _context.Units.Add(entity);
-        await _context.SaveChangesAsync();
+        context.Units.Add(entity);
+        await context.SaveChangesAsync();
         return _mapper.Map<Unit>(entity);
     }
 
     public async Task<bool> UpdateAsync(Unit unit)
     {
-        var existing = await _context.Units.FindAsync(unit.Id);
+        var existing = await context.Units.FindAsync(unit.Id);
         if (existing == null) return false;
 
         _mapper.Map(unit, existing);
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
         return true;
     }
 
     public async Task<bool> DeleteAsync(int id)
     {
-        var entity = await _context.Units.FindAsync(id);
+        var entity = await context.Units.FindAsync(id);
         if (entity == null) return false;
 
-        _context.Units.Remove(entity);
-        await _context.SaveChangesAsync();
+        context.Units.Remove(entity);
+        await context.SaveChangesAsync();
         return true;
     }
 }

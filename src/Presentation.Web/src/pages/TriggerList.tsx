@@ -168,7 +168,7 @@ const TriggerList: React.FC<TriggerListProps> = ({ alarmId }) => {
         form.resetFields();
         const formValues = {
             alarmId: record.alarmId,
-            triggerTypeId: record.triggerTypeId,
+            triggerTypeCode: record.triggerTypeCode,
             triggerValue: record.triggerValue,
             communicationModeId: record.communicationModeId,
             subject: record.subject ?? "",
@@ -349,7 +349,7 @@ const TriggerList: React.FC<TriggerListProps> = ({ alarmId }) => {
                 <div style={{ display: 'flex', gap: 8 }}>
                     <Form.Item
                         label="Trigger Type"
-                        name="triggerTypeId"
+                        name="triggerTypeCode"
                         rules={[{ required: true, message: "Please select a trigger type" }]}
                         style={{ marginBottom: 12, flex: 1 }}
                     >
@@ -363,7 +363,7 @@ const TriggerList: React.FC<TriggerListProps> = ({ alarmId }) => {
                             }
                         >
                             {triggerTypes.map(triggerType => (
-                                <Select.Option key={triggerType.id} value={triggerType.id}>
+                                <Select.Option key={triggerType.code} value={triggerType.code}>
                                     {triggerType.code} - {triggerType.name}
                                 </Select.Option>
                             ))}

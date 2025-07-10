@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Presentation.AlarmServer.Alarms;
+﻿namespace Domain.Enums;
 
 ///
 /// AlarmType type = AlarmType.Above;
@@ -8,7 +6,7 @@ namespace Presentation.AlarmServer.Alarms;
 /// AlarmType type = AlarmType.Above;
 ///string name = type.ToString(); // name == "Above"
 /// 
-public enum AlarmType
+public enum TriggerTypeCode
 {
     Above = 'A',
     Below = 'B',

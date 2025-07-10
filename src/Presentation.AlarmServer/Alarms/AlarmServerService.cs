@@ -10,6 +10,7 @@ using Presentation.AlarmServer.Enums;
 using System.Linq;
 using System.Collections.Generic;
 using System;
+using Domain.Enums;
 
 namespace Presentation.AlarmServer.Alarms;
 
@@ -30,25 +31,25 @@ public class AlarmServerService(ITelemetryDatabase telemetryDatabase, ILogger<Al
         bool? result = null;
         switch (alarm.AlarmType)
         {
-            case AlarmType.Above:
+            case TriggerTypeCode.Above:
                 logger.LogDebug("Is Reading {Value} above {AlarmValue}? ", alarm.Value, alarm.AlarmValue);
                 result = !double.IsNaN(alarm.Value) && !double.IsNaN(alarm.AlarmValue) && alarm.Value >= alarm.AlarmValue;
                 break;
-            case AlarmType.Below:
+            case TriggerTypeCode.Below:
                 logger.LogDebug("Is Reading {Value} below {AlarmValue}? ", alarm.Value, alarm.AlarmValue);
                 result = !double.IsNaN(alarm.Value) && !double.IsNaN(alarm.AlarmValue) && alarm.Value <= alarm.AlarmValue;
                 break;
-            case AlarmType.Falling:
+            case TriggerTypeCode.Falling:
                 result = IsFalling(alarm);
                 break;
-            case AlarmType.Rising:
+            case TriggerTypeCode.Rising:
                 result = IsRising(alarm);
                 break;
-            case AlarmType.RateOfChange:
+            case TriggerTypeCode.RateOfChange:
                 logger.LogDebug("Rate of change! {IsAlarm}", alarm.IsAlarm);
                 result = alarm.IsAlarm;
                 break;
-            case AlarmType.NotReportedForPeriod:
+            case TriggerTypeCode.NotReportedForPeriod:
                 logger.LogDebug("Not reported for {AlarmPeriod} minutes? {SendAlarmForNotReported}", alarm.AlarmValue, alarm.SendAlarmForNotReported);
                 result = alarm.SendAlarmForNotReported;
                 break;

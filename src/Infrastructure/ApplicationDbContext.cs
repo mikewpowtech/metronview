@@ -64,19 +64,40 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.HasKey(e => e.Id);
 
             entity.HasOne(e => e.Alarm)
-                .WithMany(a => a.Triggers) // or .WithMany(a => a.Triggers) if you have a collection in AlarmDb
+                .WithMany(a => a.Triggers)
                 .HasForeignKey(e => e.AlarmId)
                 .OnDelete(DeleteBehavior.NoAction);
 
+            // Use TriggerTypeCode as the foreign key to TriggerTypeDb.Code
             entity.HasOne(e => e.TriggerType)
                 .WithMany()
-                .HasForeignKey(e => e.TriggerTypeId)
+                .HasPrincipalKey(tt => tt.Code)
+                .HasForeignKey(e => e.TriggerTypeCode)
                 .OnDelete(DeleteBehavior.NoAction);
 
             entity.HasOne(e => e.CommunicationMode)
                 .WithMany()
                 .HasForeignKey(e => e.CommunicationModeId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            // Store TriggerTypeCode as char (string of length 1)
+            entity.Property(e => e.TriggerTypeCode)
+                .HasConversion(
+                    v => ((char)v).ToString(),
+                    v => (Domain.Enums.TriggerTypeCode)Convert.ToChar(v))
+                .HasColumnType("char(1)")
+                .IsRequired();
+        });
+
+        modelBuilder.Entity<TriggerTypeDb>(entity =>
+        {
+            // Store Code as char (string of length 1)
+            entity.Property(e => e.Code)
+                .HasConversion(
+                    v => ((char)v).ToString(),
+                    v => (Domain.Enums.TriggerTypeCode)Convert.ToChar(v))
+                .HasColumnType("char(1)")
+                .IsRequired();
         });
 
         modelBuilder.Entity<ConfigurationUploadDb>(entity =>

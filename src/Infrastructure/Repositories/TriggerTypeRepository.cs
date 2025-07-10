@@ -1,5 +1,6 @@
 using Application.TriggerTypes;
 using Domain;
+using Domain.Enums;
 using Infrastructure.DbClasses;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +24,8 @@ namespace Infrastructure.Repositories
             return db == null ? null : db.Adapt<TriggerType>();
         }
 
-        public async Task<TriggerType?> GetByCodeAsync(string code)
+
+        public async Task<TriggerType?> GetByCodeAsync(TriggerTypeCode code)
         {
             var db = await _context.TriggerTypes
                 .FirstOrDefaultAsync(tt => tt.Code == code);
