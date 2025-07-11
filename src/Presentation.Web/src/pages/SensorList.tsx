@@ -217,7 +217,7 @@ const SensorList: React.FC<SensorListProps> = ({ unitId, companyId, alarmId }) =
                     >
                         {companies.map(company => (
                             <Select.Option key={company.id} value={company.id}>
-                                {company.name}
+                                {company.name}h
                             </Select.Option>
                         ))}
                     </Select>

@@ -1,4 +1,6 @@
-﻿namespace Infrastructure.DbClasses;
+﻿using Domain.Enums;
+
+namespace Infrastructure.DbClasses;
 
 public class ConfigurationUploadDb
 {

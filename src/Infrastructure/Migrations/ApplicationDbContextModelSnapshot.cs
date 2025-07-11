@@ -49,7 +49,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("RecipientSetId");
 
-                    b.ToTable("Alarms");
+                    b.ToTable("Alarms", (string)null);
                 });
 
             modelBuilder.Entity("Infrastructure.DbClasses.CommunicationModeDb", b =>
@@ -73,7 +73,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RecipientModes");
+                    b.ToTable("RecipientModes", (string)null);
                 });
 
             modelBuilder.Entity("Infrastructure.DbClasses.CompanyDb", b =>
@@ -93,7 +93,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Companies");
+                    b.ToTable("Companies", (string)null);
                 });
 
             modelBuilder.Entity("Infrastructure.DbClasses.ConfigurationUploadDb", b =>
@@ -128,7 +128,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("UnitId");
 
-                    b.ToTable("ConfigurationUploads");
+                    b.ToTable("ConfigurationUploads", (string)null);
                 });
 
             modelBuilder.Entity("Infrastructure.DbClasses.MostRecentReadingDb", b =>
@@ -224,7 +224,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("UnitId");
 
-                    b.ToTable("Readings");
+                    b.ToTable("Readings", (string)null);
                 });
 
             modelBuilder.Entity("Infrastructure.DbClasses.RecipientDb", b =>
@@ -262,7 +262,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Recipients");
+                    b.ToTable("Recipients", (string)null);
                 });
 
             modelBuilder.Entity("Infrastructure.DbClasses.RecipientSetDb", b =>
@@ -282,7 +282,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RecipientSets");
+                    b.ToTable("RecipientSets", (string)null);
                 });
 
             modelBuilder.Entity("Infrastructure.DbClasses.SensorDb", b =>
@@ -328,7 +328,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("UnitId");
 
-                    b.ToTable("Sensors");
+                    b.ToTable("Sensors", (string)null);
                 });
 
             modelBuilder.Entity("Infrastructure.DbClasses.TriggerDb", b =>
@@ -372,7 +372,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("TriggerTypeCode");
 
-                    b.ToTable("Triggers");
+                    b.ToTable("Triggers", (string)null);
                 });
 
             modelBuilder.Entity("Infrastructure.DbClasses.TriggerTypeDb", b =>
@@ -396,7 +396,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TriggerTypes");
+                    b.ToTable("TriggerTypes", (string)null);
                 });
 
             modelBuilder.Entity("Infrastructure.DbClasses.UnitDb", b =>
@@ -445,7 +445,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("UnitTypeId");
 
-                    b.ToTable("Units");
+                    b.ToTable("Units", (string)null);
                 });
 
             modelBuilder.Entity("Infrastructure.DbClasses.UnitModelDb", b =>
@@ -472,7 +472,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UnitModels");
+                    b.ToTable("UnitModels", (string)null);
                 });
 
             modelBuilder.Entity("Infrastructure.DbClasses.UnitStatusDb", b =>
@@ -508,7 +508,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("UnitId");
 
-                    b.ToTable("UnitStatuses");
+                    b.ToTable("UnitStatuses", (string)null);
                 });
 
             modelBuilder.Entity("Infrastructure.Identity.ApplicationUserDb", b =>

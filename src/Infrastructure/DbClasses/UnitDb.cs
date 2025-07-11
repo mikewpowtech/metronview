@@ -1,3 +1,5 @@
+using Domain.Enums;
+
 namespace Infrastructure.DbClasses;
 
 public class UnitDb

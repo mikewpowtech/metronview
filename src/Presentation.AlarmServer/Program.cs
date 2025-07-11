@@ -15,6 +15,7 @@ using Application.Alarms;
 using Infrastructure.Repositories;
 using Mapster;
 using Infrastructure.Mapping;
+using Application.Triggers;
 
 
 Console.WriteLine($"ENV: {Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}");
@@ -54,6 +55,7 @@ var host = Host.CreateDefaultBuilder(args)
         services.AddTransient<IAlarmServerService,AlarmServerService>();
         services.AddTransient<ISensorServerService,SensorServerService>();
         services.AddTransient<IAlarmRepository,AlarmRepository>();
+                services.AddTransient<ITriggerRepository,TriggerRepository>();
         services.AddTransient<NotReportedServiceWorker>();
         services.AddTransient<AlarmServiceWorker>();
         services.AddTransient<HenkelServiceWorker>();
