@@ -11,7 +11,7 @@ export const login = async (email: string, password: string) => {
   }).catch((ex)=>{
     console.log(ex);
   });
-  return response?.data;
+  return response ? response.data : undefined;
 };
 
 export const refreshToken = async (data: {
@@ -21,7 +21,7 @@ export const refreshToken = async (data: {
   const response = await axios.post<iAppResponse<{ accessToken: string; refreshToken: string }>>(`${BASE_URL}/user/refreshToken`, data).catch((ex)=>{
     console.log(ex);
   });;
-  return response?.data;
+  return response ? response.data : undefined;
 };
 
 export const register = async (email: string, password: string) => {
@@ -34,7 +34,7 @@ export const register = async (email: string, password: string) => {
   ).catch((ex)=>{
     console.log(ex);
   });
-  return response?.data;
+  return response ? response.data : undefined;
 };
 
 export const logout = async () => {
@@ -43,17 +43,17 @@ export const logout = async () => {
   ).catch((ex)=>{
     console.log(ex);
   });;
-  return response?.data;
+  return response ? response.data : undefined;
 };
 export const profileApi = async () => {
   const response = await axios.post(`${BASE_URL}/user/profile`).catch((ex)=>{
     console.log(ex);
   });
-  return response?.data;
+  return response ? response.data : undefined;
 };
 export const usersApi = async () => {
     const response = await axios.get<iAppResponse<ApplicationUser[]>>(`${BASE_URL}/user/getall`).catch((ex)=>{
     console.log(ex);
   });
-  return response?.data;
+  return response ? response.data : undefined;
 };

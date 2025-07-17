@@ -7,11 +7,13 @@ const BASE_URL = import.meta.env.REACT_APP_API_URL as string;
  * @param data The data to echo (any JSON-serializable object)
  */
 export const echoApi = async (data: any) => {
-
-      const response = await axios.post(`${BASE_URL}/echo/echo`, data).catch((ex) => {
-          console.log(ex);
-      });;
-      return response?.data;
+    try {
+        const response = await axios.post(`${BASE_URL}/echo/echo`, data);
+        return response.data;
+    } catch (ex) {
+        console.log(ex);
+        return null;
+    }
 };
 
 /**
