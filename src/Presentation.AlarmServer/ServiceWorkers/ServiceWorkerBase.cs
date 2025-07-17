@@ -1,32 +1,37 @@
-﻿using Presentation.AlarmServer.Alarms;
-using Presentation.AlarmServer.Data.TelemetrySQL;
-using Presentation.AlarmServer.Options;
+﻿using Application.Alarms;
+using Application.Triggers;
+using Domain.Enums;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Presentation.AlarmServer.Models;
-using Presentation.AlarmServer.Enums;
-using System.Threading;
+using Presentation.AlarmServer.Options;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Presentation.AlarmServer.ServiceWorkers;
 
 public abstract class ServiceWorkerBase: IHostedServiceWorker
 {
-    protected readonly ILogger logger;
+    protected readonly ILogger<ServiceWorkerBase> logger;
     protected readonly ILoggerFactory loggerFactory;
-    private readonly IAlarmServerService alarmService;
+    private readonly ITriggerService triggerService;
+
+    //private readonly IAlarmServerService depreciatedAlarmService;
+    private readonly IAlarmService alarmService;
     protected readonly WorkerOptions workerOptions;
-    protected readonly ITelemetryDatabase telemetryDatabase;
+    //protected readonly ITelemetryDatabase telemetryDatabase;
     protected string className { get; init; }
 
-    public ServiceWorkerBase(ITelemetryDatabase telemetryDatabase, ILoggerFactory loggerFactory, IOptions<WorkerOptions> workerOptions, 
-                IAlarmServerService alarmService)
+    public ServiceWorkerBase(
+        ILoggerFactory loggerFactory, 
+        IOptions<WorkerOptions> workerOptions, 
+        IAlarmService alarmService,
+        ITriggerService triggerService)
     {
-        this.telemetryDatabase = telemetryDatabase;
-        this.loggerFactory = loggerFactory;
-        this.alarmService = alarmService;
+        //this.loggerFactory = loggerFactory;
+        this.triggerService = triggerService;
+        //this.depreciatedAlarmService = depreciatedAlarmService;
         this.workerOptions = workerOptions.Value;
-        logger = loggerFactory.CreateLogger<ServiceWorkerBase>();
+        this.logger = loggerFactory.CreateLogger<ServiceWorkerBase>();
         className = GetType().Name;
     }
 
@@ -35,27 +40,27 @@ public abstract class ServiceWorkerBase: IHostedServiceWorker
         logger.LogDebug("starting {0}......", className);
     }
 
-    public bool ProcessAlarms(IList<AlarmServerDto> alarmsToHandle)
+    public bool ProcessAlarms(IList<BreachedTriggerDto> alarmsToHandle)
     {
         foreach (var alarm in alarmsToHandle)
         {
-            using var logScope = logger.BeginScope("{AlarmId} {AlarmType}  {SensorId}", alarm.AlarmId, alarm.AlarmType, alarm.SensorId);
+            using var logScope = logger.BeginScope("{AlarmId} {AlarmType}  {SensorId}", alarm.TriggerId, alarm.TriggerType.Code, alarm.SensorId);
             logger.LogDebug("Processing");
             switch (alarmService.ShouldSendAlarmUnlessQuenched(alarm).Action)
             {
                 case SendAlarmAction.Send:
-                    var isQuenched = telemetryDatabase.IsQuenched(alarm);
+                    var isQuenched = triggerService.IsQuenched(alarm);
                     if (!isQuenched)
                     {
-                        logger.LogTrace("Sending alarm via {@RecipientMode}", alarm.RecipientMode);
+                        logger.LogTrace("Sending alarm via {@RecipientMode}", alarm.CommunicationMode);
                         alarmService.SendAlarm(alarm);
                     }
 
-                    telemetryDatabase.NoteAlarmTrigger(alarm, !isQuenched);
+                    triggerService.NoteAlarmTrigger(alarm, !isQuenched);
                     break;
                 case SendAlarmAction.DoNotSend:
 
-                    telemetryDatabase.NoteAlarmNotTriggered(alarm);
+                    triggerService.NoteAlarmNotTriggered(alarm);
                     break;
                 case SendAlarmAction.Skip:
                     break;
@@ -63,7 +68,7 @@ public abstract class ServiceWorkerBase: IHostedServiceWorker
 
             if (alarm.PendingAlarmTriggerId != int.MinValue)
             {
-                telemetryDatabase.AcknowledgeProcessing(alarm.PendingAlarmTriggerId);
+                triggerService.AcknowledgeProcessing(alarm.PendingAlarmTriggerId.Value);
             }
         }
 

@@ -1,8 +1,9 @@
-﻿using Presentation.AlarmServer.Models;
+﻿using Application.Triggers;
+using Presentation.AlarmServer.Models;
 
 namespace Presentation.AlarmServer.Alarms;
 public interface ISensorServerService
 {
-    object CalculateTemplatePlaceholderValue(AlarmServerDto alarm, string fieldName);
-    string Substitute(AlarmServerDto alarm, string templateSnippet);
+    object CalculateTemplatePlaceholderValue(BreachedTriggerDto alarm, string fieldName);
+    string Substitute(BreachedTriggerDto alarm, string templateSnippet);
 }

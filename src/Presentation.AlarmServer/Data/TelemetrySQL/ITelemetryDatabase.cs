@@ -1,6 +1,7 @@
-﻿using Presentation.AlarmServer.Email;
-using Presentation.AlarmServer.Enums;
-using Presentation.AlarmServer.Helpers;
+﻿using Application.CustomFields.Dtos;
+using Application.Triggers;
+using Domain.Enums;
+using Presentation.AlarmServer.Email;
 using Presentation.AlarmServer.Models;
 using Presentation.AlarmServer.Options;
 using System;
@@ -21,7 +22,7 @@ public interface ITelemetryDatabase
     Reading GetMostRecentReadingBefore(int sensorId, DateTime thisReadingDate);
     IList<AlarmServerDto> GetNewReadingsWithAlarms();
     IList<AlarmServerDto> GetNotReportedReadingsWithAlarms();
-    ICollection<SmsRecipientTemplates> GetSmsToAddresses(AlarmServerDto trigger);
+    ICollection<SmsRecipientTemplates> GetSmsToAddresses(BreachedTriggerDto trigger);
     bool IsQuenched(AlarmServerDto trigger);
     void NoteAlarmNotTriggered(AlarmServerDto trigger);
     void NoteAlarmTrigger(AlarmServerDto trigger, bool fired);

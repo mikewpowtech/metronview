@@ -472,3 +472,4 @@ Thumbs.db
 **/ClientApp/build/
 src/Presentation.Web/obj/Debug//package.g.props
 src/.DS_Store
+/src/Presentation.Web/tsconfig.app.tsbuildinfo

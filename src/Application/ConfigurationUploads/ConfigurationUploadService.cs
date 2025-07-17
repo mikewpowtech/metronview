@@ -1,3 +1,4 @@
+using Application.CustomFields.Dtos;
 using Domain;
 
 namespace Application.ConfigurationUploads;
@@ -18,4 +19,9 @@ public class ConfigurationUploadService : IConfigurationUploadService
     public Task<List<ConfigurationUpload>> GetByUnitIdAsync(int unitId) => _repository.GetByUnitIdAsync(unitId);
 
     public Task AddAsync(ConfigurationUpload upload) => _repository.AddAsync(upload);
+
+    public void AddConfigrationUpload(HenkelRtuStatus enabledRtu, string configuration)
+    {
+        throw new NotImplementedException();
+    }
 }

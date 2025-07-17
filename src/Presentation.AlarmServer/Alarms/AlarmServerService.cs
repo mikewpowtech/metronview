@@ -1,16 +1,16 @@
-using Microsoft.Extensions.Options;
-using Substituter;
-using System.Net.Mail;
+using Application.Alarms.Dtos;
+using Application.Triggers;
+using Domain.Enums;
 using Microsoft.Extensions.Logging;
-using Presentation.AlarmServer.Models;
+using Microsoft.Extensions.Options;
 using Presentation.AlarmServer.Data.TelemetrySQL;
 using Presentation.AlarmServer.Email;
 using Presentation.AlarmServer.Options;
-using Presentation.AlarmServer.Enums;
-using System.Linq;
-using System.Collections.Generic;
+using Substituter;
 using System;
-using Domain.Enums;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Mail;
 
 namespace Presentation.AlarmServer.Alarms;
 
@@ -26,18 +26,19 @@ public class AlarmServerService(ITelemetryDatabase telemetryDatabase, ILogger<Al
     /// </summary>
     /// <param name="cn"></param>
     /// <returns>true if the alarm is real (and should therefore be sent), false otherwise.</returns>
-    public AlarmSendingResult ShouldSendAlarmUnlessQuenched(AlarmServerDto alarm)
+    public AlarmSendingResult ShouldSendAlarmUnlessQuenched(BreachedTriggerDto alarm)
     {
         bool? result = null;
-        switch (alarm.AlarmType)
+
+        switch (alarm.TriggerType.Code)
         {
             case TriggerTypeCode.Above:
-                logger.LogDebug("Is Reading {Value} above {AlarmValue}? ", alarm.Value, alarm.AlarmValue);
-                result = !double.IsNaN(alarm.Value) && !double.IsNaN(alarm.AlarmValue) && alarm.Value >= alarm.AlarmValue;
+                logger.LogDebug("Is Reading {Value} above {AlarmValue}? ", alarm.Value, alarm.TriggerValue);
+                result = !double.IsNaN(alarm.Value) && !double.IsNaN(alarm.TriggerValue) && alarm.Value >= alarm.TriggerValue;
                 break;
             case TriggerTypeCode.Below:
-                logger.LogDebug("Is Reading {Value} below {AlarmValue}? ", alarm.Value, alarm.AlarmValue);
-                result = !double.IsNaN(alarm.Value) && !double.IsNaN(alarm.AlarmValue) && alarm.Value <= alarm.AlarmValue;
+                logger.LogDebug("Is Reading {Value} below {AlarmValue}? ", alarm.Value, alarm.TriggerValue);
+                result = !double.IsNaN(alarm.Value) && !double.IsNaN(alarm.TriggerValue) && alarm.Value <= alarm.TriggerValue;
                 break;
             case TriggerTypeCode.Falling:
                 result = IsFalling(alarm);
@@ -50,23 +51,25 @@ public class AlarmServerService(ITelemetryDatabase telemetryDatabase, ILogger<Al
                 result = alarm.IsAlarm;
                 break;
             case TriggerTypeCode.NotReportedForPeriod:
-                logger.LogDebug("Not reported for {AlarmPeriod} minutes? {SendAlarmForNotReported}", alarm.AlarmValue, alarm.SendAlarmForNotReported);
+                logger.LogDebug("Not reported for {AlarmPeriod} minutes? {SendAlarmForNotReported}", alarm.TriggerValue, alarm.SendAlarmForNotReported);
                 result = alarm.SendAlarmForNotReported;
                 break;
         }
+
         if (result.HasValue)
         {
-            logger.LogDebug("AlarmType {AlarmType}, result: {Result}", alarm.AlarmType, result);
+            logger.LogDebug("AlarmType {AlarmType}, result: {Result}", alarm.TriggerType.Code, result);
             return result.Value;
         }
-        logger.LogWarning("Cannot Process Alarm#{AlarmId}: {AlarmType} is an unknown alarm type", alarm.AlarmId, alarm.AlarmType);
+
+        logger.LogWarning("Cannot Process Alarm#{AlarmId}: {AlarmType} is an unknown alarm type", alarm.TriggerId, alarm.TriggerType.Code);
         return new AlarmSendingResult(SendAlarmAction.Skip);
     }
 
-    private bool IsFalling(AlarmServerDto alarm)
+    private bool IsFalling(BreachedTriggerDto alarm)
     {
-        logger.LogDebug("Is Reading {Value} falling below {AlarmValue}? ", alarm.Value, alarm.AlarmValue);
-        if (double.IsNaN(alarm.Value) || double.IsNaN(alarm.AlarmValue) || alarm.Value > alarm.AlarmValue)
+        logger.LogDebug("Is Reading {Value} falling below {AlarmValue}? ", alarm.Value, alarm.TriggerValue);
+        if (double.IsNaN(alarm.Value) || double.IsNaN(alarm.TriggerValue) || alarm.Value > alarm.TriggerValue)
             return false;
 
         var r = telemetryDatabase.GetMostRecentReadingBefore(alarm.SensorId, alarm.DateRecordedUtc);
@@ -75,67 +78,67 @@ public class AlarmServerService(ITelemetryDatabase telemetryDatabase, ILogger<Al
         // If there is no previous reading, we assume the value is falling and trigger the alarm.
         if (r == null) return true;
 
-        if (r.Value <= alarm.AlarmValue) return false;
+        if (r.Value <= alarm.TriggerValue) return false;
 
         return true;
     }
 
-    private bool IsRising(AlarmServerDto alarm)
+    private bool IsRising(BreachedTriggerDto alarm)
     {
-        logger.LogDebug("Is Reading {Value} rising past {AlarmValue}? ", alarm.Value, alarm.AlarmValue);
-        if (double.IsNaN(alarm.Value) || double.IsNaN(alarm.AlarmValue) || alarm.Value < alarm.AlarmValue)
+        logger.LogDebug("Is Reading {Value} rising past {AlarmValue}? ", alarm.Value, alarm.TriggerValue);
+        if (double.IsNaN(alarm.Value) || double.IsNaN(alarm.TriggerValue) || alarm.Value < alarm.TriggerValue)
             return false;
 
         var r = telemetryDatabase.GetMostRecentReadingBefore(alarm.SensorId, alarm.DateRecordedUtc);
         logger.LogDebug("Previous reading was {@PreviousReading}", r);
         if (r == null) return true;
-        if (r.Value >= alarm.AlarmValue) return false;
+        if (r.Value >= alarm.TriggerValue) return false;
         return true;
     }
 
-    public void SendAlarm(AlarmServerDto triggerDto)
+    public void SendAlarm(BreachedTriggerDto triggerDto)
     {
-        switch (triggerDto.RecipientMode)
+        switch (triggerDto.CommunicationMode.ToAlarmRecipientType())
         {
-            case Enums.AlarmRecipientType.SMS:
+            case AlarmRecipientType.SMS:
                 SendSms(triggerDto);
                 break;
-            case Enums.AlarmRecipientType.Email:
+            case AlarmRecipientType.Email:
                 SendEmail(triggerDto);
                 break;
-            case Enums.AlarmRecipientType.WebService:
+            case AlarmRecipientType.WebService:
                 SendWebService();
                 break;
-            case Enums.AlarmRecipientType.Unknown:
+            case AlarmRecipientType.Unknown:
             default:
                 break;
         }
     }
-    internal void NoteMessageSent(AlarmServerDto triggerDto)
+    internal void NoteMessageSent(BreachedTriggerDto triggerDto)
     {
-        switch (triggerDto.RecipientMode)
+        switch (triggerDto.CommunicationMode.ToAlarmRecipientType())
         {
-            case Enums.AlarmRecipientType.SMS:
+            case AlarmRecipientType.SMS:
                 NoteSmsSendCompleted();
                 break;
-            case Enums.AlarmRecipientType.Email:
+            case AlarmRecipientType.Email:
                 NoteSmtpSendCompleted();
                 break;
-            case Enums.AlarmRecipientType.WebService:
+            case AlarmRecipientType.WebService:
                 NoteWebServiceSendCompleted();
                 break;
-            case Enums.AlarmRecipientType.Unknown:
+            case AlarmRecipientType.Unknown:
             default:
                 break;
         }
     }
 
-    private void SendSms(AlarmServerDto triggerDto)
+    private void SendSms(BreachedTriggerDto triggerDto)
     {
         logger.LogDebug("Sending alarm via SMS");
         // There are two sets of substitutions going on here:
         // 1) Substitute the RTU/reading/... values into the alarm's body to produce {message} for the per-company SMS templates;
-        var substitutedAlarmBody = sensorService.Substitute(triggerDto, triggerDto.AlarmBody);
+        var substitutedAlarmBody = sensorService.Substitute(triggerDto, triggerDto.Body);
         var substitutes = new Dictionary<string, string> { { "message", substitutedAlarmBody } };
 
         // 2) Substitute {sms} and {message} into the per-company SMS templates and send the resulting message.
@@ -163,34 +166,34 @@ public class AlarmServerService(ITelemetryDatabase telemetryDatabase, ILogger<Al
             messengerService.SendSmsAsync(msg, triggerDto);
         }
     }
-    private void SendEmail(AlarmServerDto triggerDto)
+    private void SendEmail(BreachedTriggerDto triggerDto)
     {
-        logger.LogDebug("Sending alarm via Email");
-        var substitutedSubject = sensorService.Substitute(triggerDto, triggerDto.AlarmSubject);
-        var substitutedBody = sensorService.Substitute(triggerDto, triggerDto.AlarmBody);
-        var isBodyHtml = substitutedBody.ToLower().Contains("<html"); // TODO: Improve this rather unpleasant hack
-        var toAddresses = telemetryDatabase.GetEmailToAddresses(triggerDto);
+        //logger.LogDebug("Sending alarm via Email");
+        //var substitutedSubject = sensorService.Substitute(triggerDto, triggerDto.Subject);
+        //var substitutedBody = sensorService.Substitute(triggerDto, triggerDto.Body);
+        //var isBodyHtml = substitutedBody.ToLower().Contains("<html"); // TODO: Improve this rather unpleasant hack
+        //var toAddresses = telemetryDatabase.GetEmailToAddresses(triggerDto);
 
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug("Sending email to {@Recipients}", toAddresses.Select(_ => _.To));
-        }
+        //if (logger.IsEnabled(LogLevel.Debug))
+        //{
+        //    logger.LogDebug("Sending email to {@Recipients}", toAddresses.Select(_ => _.To));
+        //}
 
-        foreach (var toAddress in toAddresses)
-        {
-            logger.LogTrace("Send email: {Subject} to {ToAddress}", substitutedSubject, toAddress.To);
-            var msg = new MailMessage
-            {
-                From = new MailAddress(toAddress.From ?? smtpOptions.DefaultAlarmEmailFromAddress),
-                Subject = substitutedSubject,
-                Body = substitutedBody
-            };
-            if (null != toAddress.ReplyTo)
-                msg.ReplyToList.Add(toAddress.ReplyTo);
-            msg.IsBodyHtml = isBodyHtml;
-            msg.To.Add(toAddress.To);
-            messengerService.SendSmtpAsync(msg, triggerDto);
-        }
+        //foreach (var toAddress in toAddresses)
+        //{
+        //    logger.LogTrace("Send email: {Subject} to {ToAddress}", substitutedSubject, toAddress.To);
+        //    var msg = new MailMessage
+        //    {
+        //        From = new MailAddress(toAddress.From ?? smtpOptions.DefaultAlarmEmailFromAddress),
+        //        Subject = substitutedSubject,
+        //        Body = substitutedBody
+        //    };
+        //    if (null != toAddress.ReplyTo)
+        //        msg.ReplyToList.Add(toAddress.ReplyTo);
+        //    msg.IsBodyHtml = isBodyHtml;
+        //    msg.To.Add(toAddress.To);
+        //    messengerService.SendSmtpAsync(msg, triggerDto);
+        //}
     }
     // ReSharper disable once UnusedParameter.Local
     private void SendWebService()

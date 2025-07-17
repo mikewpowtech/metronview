@@ -8,17 +8,17 @@ namespace Presentation.Api.Controllers
     [Route("api/[controller]")]
     public class DashboardController : ControllerBase
     {
-        private readonly IDashboardService _dashboardService;
+        private readonly IDashboardService dashboardService;
 
         public DashboardController(IDashboardService dashboardService)
         {
-            _dashboardService = dashboardService;
+            this.dashboardService = dashboardService;
         }
 
         [HttpGet]
         public async Task<ActionResult<UnitSummary>> Get()
         {
-            var unitsummaries = await _dashboardService.GetDashboardAsync();
+            var unitsummaries = await dashboardService.GetDashboardAsync();
             return Ok(unitsummaries);
         }
     }

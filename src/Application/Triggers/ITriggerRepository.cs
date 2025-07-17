@@ -14,6 +14,7 @@ namespace Application.Triggers
         Task<bool> UpdateAsync(Trigger trigger);
         Task<bool> DeleteAsync(int id);
         Task<List<Trigger>> GetEnabledTriggersAsync();
-        Task<List<BreachedTriggerDto>> GetNotReportedBreachesAsync(TriggerTypeCode triggerTypeCode);
+        Task<List<BreachedTriggerDto>> GetNotReportedBreachesAsync();
+        Task<bool> IsQuenchedAsync(BreachedTriggerDto trigger);
     }
 }

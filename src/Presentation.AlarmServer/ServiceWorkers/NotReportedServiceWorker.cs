@@ -1,27 +1,25 @@
-﻿using Presentation.AlarmServer.Alarms;
-using Presentation.AlarmServer.Data.TelemetrySQL;
-using Presentation.AlarmServer.Email;
-using Presentation.AlarmServer.Options;
+﻿using Application.Alarms;
+using Application.Triggers;
+using Domain.Enums;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Threading;
+using Presentation.AlarmServer.Data.TelemetrySQL;
+using Presentation.AlarmServer.Options;
 using System;
-using Application.Alarms;
-using System.Threading.Tasks;
-using Application.Triggers;
-using Domain;
-using Domain.Enums;
+using System.Threading;
 
 namespace Presentation.AlarmServer.ServiceWorkers;
 
 // us a primary constructor for brevity of code and consistency with other service workers
-public class NotReportedServiceWorker(ITelemetryDatabase telemetryDatabase,
-    ILoggerFactory loggerFactory, IOptions<WorkerOptions> workerOptions, IAlarmServerService alarmService, IAlarmRepository alarmRepository, ITriggerRepository triggerRepository) 
-    : ServiceWorkerBase(telemetryDatabase, loggerFactory, workerOptions,alarmService
+public class NotReportedServiceWorker(
+    ILoggerFactory loggerFactory, 
+    IOptions<WorkerOptions> workerOptions, 
+    //IAlarmServerService depreciatedAlarmService, 
+    IAlarmService alarmService, ITriggerService triggerService)
+    : ServiceWorkerBase(loggerFactory,workerOptions, alarmService, triggerService
         )
 {
-    private readonly IAlarmRepository alarmRepository = alarmRepository;
-    private readonly ITriggerRepository triggerRepository = triggerRepository;
+    private readonly IAlarmService alarmService = alarmService;
 
     public override async void Run(CancellationToken cancellationToken)
     {
@@ -29,15 +27,15 @@ public class NotReportedServiceWorker(ITelemetryDatabase telemetryDatabase,
         if (workerOptions.NotReportedPollInterval == 0) { logger.LogTrace("NotReportedPollInterval=0, Exit Run()"); }
         else
         {
-            var st=await alarmRepository.GetAllAsync();
+            var st=await alarmService.GetAllAsync();
             logger.LogTrace("got alarm count {AlarmCount}", st.Count);
             logger.LogTrace("Enter Run()");
             while (!cancellationToken.IsCancellationRequested)
                 try
                 {
                     logger.LogDebug("Processing");
-                    var newalarmsToHandle = await triggerRepository.GetNotReportedBreachesAsync(TriggerTypeCode.NotReportedForPeriod);
-                    var alarmsToHandle = telemetryDatabase.GetNotReportedReadingsWithAlarms();
+                    var alarmsToHandle = await triggerService.GetNotReportedBreachesAsync(TriggerTypeCode.NotReportedForPeriod);
+                    //var alarmsToHandle = telemetryDatabase.GetNotReportedReadingsWithAlarms();
                     ProcessAlarms(alarmsToHandle);
                     cancellationToken.WaitHandle.WaitOne(workerOptions.NotReportedPollInterval);
                 }

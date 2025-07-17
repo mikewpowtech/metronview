@@ -1,0 +1,217 @@
+// Import Ant Design CSS reset first
+@import 'antd/dist/reset.css';
+
+// Import only necessary Bootstrap components
+@import "bootstrap/dist/css/bootstrap-reboot.min.css";
+@import "bootstrap/dist/css/bootstrap-utilities.min.css";
+
+// Main application styles
+@import './index.css';
+
+// Custom app-specific styles
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+// Override Ant Design theme colors
+:root {
+  --primary-color: #1890ff;
+  --header-bg: linear-gradient(to bottom, #5a6a71 0%, #3a4a99 100%);
+  --content-bg: #f0f2f5;
+  --sidebar-bg: #001529;
+}
+
+// Custom header styles
+.app-header {
+  background: var(--header-bg);
+  color: white;
+  
+  .ant-dropdown-trigger {
+    color: white;
+    
+    &:hover {
+      color: #1890ff;
+    }
+  }
+}
+
+// Custom menu styles
+.app-menu {
+  background: transparent;
+  border: none;
+  
+  .ant-menu-item {
+    color: white;
+    
+    &:hover {
+      color: #1890ff;
+      background: rgba(24, 144, 255, 0.1);
+    }
+    
+    &.ant-menu-item-selected {
+      color: #1890ff;
+      background: rgba(24, 144, 255, 0.1);
+    }
+  }
+}
+
+// Layout adjustments
+.ant-layout {
+  min-height: 100vh;
+  
+  .ant-layout-header {
+    height: 64px;
+    line-height: 64px;
+    padding: 0 24px;
+  }
+  
+  .ant-layout-content {
+    background: var(--content-bg);
+    padding: 24px;
+    margin: 0;
+    min-height: 280px;
+  }
+  
+  .ant-layout-footer {
+    background: var(--content-bg);
+    padding: 24px;
+    text-align: center;
+  }
+}
+
+// Logo styling
+.app-logo-header {
+  width: 100%;
+  height: 80px;
+  background: url('/metronview_header.svg') no-repeat left center;
+  background-size: contain;
+  display: block;
+  
+  @media (max-width: 768px) {
+    height: 60px;
+    background-size: auto 60px;
+  }
+}
+
+// Login card styling
+.login-card {
+  .ant-card {
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    
+    .ant-card-head {
+      background: var(--header-bg);
+      color: white;
+      border-bottom: none;
+      
+      .ant-card-head-title {
+        color: white;
+        text-align: center;
+      }
+    }
+  }
+}
+
+// Form styling
+.app-form {
+  .ant-form-item-label > label {
+    color: #000000d9;
+    font-weight: 500;
+  }
+  
+  .ant-btn-primary {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    
+    &:hover {
+      background: #40a9ff;
+      border-color: #40a9ff;
+    }
+  }
+}
+
+// Table styling
+.app-table {
+  .ant-table {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    
+    .ant-table-thead > tr > th {
+      background: #fafafa;
+      font-weight: 600;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .ant-layout-header {
+    padding: 0 16px;
+  }
+  
+  .ant-layout-content {
+    padding: 16px;
+  }
+  
+  .app-logo-header {
+    height: 60px;
+  }
+}
+
+// Loading overlay
+.ant-spin-nested-loading {
+  .ant-spin-container {
+    position: relative;
+  }
+  
+  .ant-spin-blur {
+    opacity: 0.5;
+    user-select: none;
+    pointer-events: none;
+  }
+}
+
+// Utility classes
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.full-height {
+  height: 100vh;
+}
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mt-1 { margin-top: 8px; }
+.mt-2 { margin-top: 16px; }
+.mt-3 { margin-top: 24px; }
+.mb-1 { margin-bottom: 8px; }
+.mb-2 { margin-bottom: 16px; }
+.mb-3 { margin-bottom: 24px; }
+.ml-1 { margin-left: 8px; }
+.ml-2 { margin-left: 16px; }
+.ml-3 { margin-left: 24px; }
+.mr-1 { margin-right: 8px; }
+.mr-2 { margin-right: 16px; }
+.mr-3 { margin-right: 24px; }

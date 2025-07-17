@@ -1,7 +1,5 @@
 ﻿
 using Domain.Enums;
-using Presentation.AlarmServer.Alarms;
-using Presentation.AlarmServer.Enums;
 using System;
 using System.Collections.Generic;
 

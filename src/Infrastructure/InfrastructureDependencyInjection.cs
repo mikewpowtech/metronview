@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Application.CustomFields;
 
 namespace Infrastructure
 {
@@ -29,7 +30,15 @@ namespace Infrastructure
             // Register DbContext
             var connectionStr = configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(connectionStr, x => x.MigrationsAssembly("Infrastructure")));
+                options.UseSqlServer(connectionStr, sqlOptions =>
+                {
+                    sqlOptions.MigrationsAssembly("Infrastructure");
+                    sqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: 3,
+                        maxRetryDelay: TimeSpan.FromSeconds(30),
+                        errorNumbersToAdd: null);
+                    sqlOptions.CommandTimeout(60); // Set command timeout to 60 seconds
+                }));
 
             // Register Identity
             services.AddIdentity<ApplicationUserDb, IdentityRole>()
@@ -60,6 +69,8 @@ namespace Infrastructure
             services.AddScoped<IRecipientService, RecipientService>();
             services.AddScoped<IRecipientSetRepository, RecipientSetRepository>();
             services.AddScoped<IRecipientSetService, RecipientSetService>();
+            services.AddScoped<ICustomFieldRepository, CustomFieldRepository>();
+            services.AddScoped<ICustomFieldService, CustomFieldService>();
 
             // Register DbContext Initializer
             services.AddScoped<ApplicationDbContextInitialiser>();

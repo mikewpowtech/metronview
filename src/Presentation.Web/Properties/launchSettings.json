@@ -1,0 +1,44 @@
+{
+  "profiles": {
+    "Development": {
+      "commandName": "npm",
+      "commandLineArgs": "run dev",
+      "workingDirectory": ".",
+      "launchBrowser": true,
+      "launchUrl": "http://localhost:3000",
+      "environmentVariables": {
+        "NODE_ENV": "development",
+        "BROWSER": "none"
+      }
+    },
+    "Development (No Browser)": {
+      "commandName": "npm",
+      "commandLineArgs": "run dev",
+      "workingDirectory": ".",
+      "launchBrowser": false,
+      "environmentVariables": {
+        "NODE_ENV": "development",
+        "BROWSER": "none"
+      }
+    },
+    "Build": {
+      "commandName": "npm",
+      "commandLineArgs": "run build",
+      "workingDirectory": ".",
+      "launchBrowser": false,
+      "environmentVariables": {
+        "NODE_ENV": "production"
+      }
+    },
+    "Preview": {
+      "commandName": "npm",
+      "commandLineArgs": "run preview",
+      "workingDirectory": ".",
+      "launchBrowser": true,
+      "launchUrl": "http://localhost:4173",
+      "environmentVariables": {
+        "NODE_ENV": "production"
+      }
+    }
+  }
+}

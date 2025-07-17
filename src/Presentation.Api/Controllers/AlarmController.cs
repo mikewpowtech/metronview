@@ -9,17 +9,17 @@ namespace Presentation.Api.Controllers;
 [Route("api/[controller]")]
 public class AlarmController : ControllerBase
 {
-    private readonly IAlarmService _alarmService;
+    private readonly IAlarmService alarmService;
 
     public AlarmController(IAlarmService alarmService)
     {
-        _alarmService = alarmService;
+        this.alarmService = alarmService;
     }
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<Alarm?>> GetById(int id)
     {
-        var alarm = await _alarmService.GetByIdAsync(id);
+        var alarm = await alarmService.GetByIdAsync(id);
         if (alarm == null)
             return NotFound();
         return Ok(alarm);
@@ -28,7 +28,7 @@ public class AlarmController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<Alarm>>> GetAll()
     {
-        var alarms = await _alarmService.GetAllAsync();
+        var alarms = await alarmService.GetAllAsync();
         return Ok(alarms);
     }
 
@@ -43,7 +43,7 @@ public class AlarmController : ControllerBase
             IsActive = alarmDto.IsActive
         };
         
-        var created = await _alarmService.AddAsync(alarm);
+        var created = await alarmService.AddAsync(alarm);
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
@@ -62,7 +62,7 @@ public class AlarmController : ControllerBase
             IsActive = alarmDto.IsActive
         };
 
-        var updated = await _alarmService.UpdateAsync(alarm);
+        var updated = await alarmService.UpdateAsync(alarm);
         if (!updated)
             return NotFound();
         return NoContent();
@@ -71,7 +71,7 @@ public class AlarmController : ControllerBase
     [HttpDelete("{id:int}")]
     public async Task<ActionResult> Delete(int id)
     {
-        var deleted = await _alarmService.DeleteAsync(id);
+        var deleted = await alarmService.DeleteAsync(id);
         if (!deleted)
             return NotFound();
         return NoContent();

@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { type PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { type RootState } from "../../app/store";
 import { jwtDecode } from "jwt-decode";
 import { logout } from "./authAPI";
 
@@ -19,11 +18,13 @@ export interface iAuthState {
 const initialState: iAuthState = {
   status: "idle",
 };
+
 export const logoutAsync = createAsyncThunk("user/logout", async () => {
   const response = await logout();
   // The value we return becomes the `fulfilled` action payload
   return response?.data;
 });
+
 export const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -36,11 +37,13 @@ export const authSlice = createSlice({
       state.accessToken = action.payload.accessToken;
       state.refreshToken = action.payload.refreshToken;
       state.user = jwtDecode<iUser>(action.payload.accessToken);
+      state.status = "idle"; // Ensure status is reset after successful token update
     },
     resetToken: (state) => {
       state.accessToken = undefined;
       state.refreshToken = undefined;
       state.user = undefined;
+      state.status = "idle"; // Ensure status is reset after token reset
     },
     setLoading: (state) => {
       state.status = "loading";
@@ -62,13 +65,27 @@ export const authSlice = createSlice({
       })
       .addCase(logoutAsync.rejected, (state) => {
         state.status = "failed";
+      })
+      // Handle Redux Persist rehydration
+      .addDefaultCase((state, action) => {
+        // Handle REHYDRATE action from Redux Persist
+        if (action.type === "persist/REHYDRATE") {
+          const rehydrateAction = action as any;
+          if (rehydrateAction.payload && rehydrateAction.payload.auth) {
+            const rehydratedAuth = rehydrateAction.payload.auth as iAuthState;
+            // Always reset status to idle after rehydration to prevent startup loading
+            state.status = "idle";
+            state.accessToken = rehydratedAuth.accessToken;
+            state.refreshToken = rehydratedAuth.refreshToken;
+            state.user = rehydratedAuth.user;
+          }
+        }
       });
   },
 });
 
 export const { updateToken, resetToken, setLoading, resetLoading } =
   authSlice.actions;
-export const selectAuth = (state: RootState) => state.auth;
 export default authSlice.reducer;
 
 export const updateProfileAsync = createAsyncThunk(

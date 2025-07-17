@@ -8,4 +8,7 @@ public class TriggerTypeDb
     public TriggerTypeCode Code { get; set; } // [Code] [char] or [int] depending on enum mapping
     public string Name { get; set; } = string.Empty; // [Description] [varchar](255) NOT NULL
     public int Order { get; set; } // [IsActive] [bit] NOT NULL, default value is true
+
+    // Navigation property - collection of triggers that use this type
+    //public ICollection<TriggerDb> Triggers { get; set; } = new List<TriggerDb>();
 }

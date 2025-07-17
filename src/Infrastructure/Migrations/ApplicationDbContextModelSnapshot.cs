@@ -49,7 +49,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("RecipientSetId");
 
-                    b.ToTable("Alarms", (string)null);
+                    b.ToTable("Alarms");
                 });
 
             modelBuilder.Entity("Infrastructure.DbClasses.CommunicationModeDb", b =>
@@ -73,7 +73,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RecipientModes", (string)null);
+                    b.ToTable("RecipientModes");
                 });
 
             modelBuilder.Entity("Infrastructure.DbClasses.CompanyDb", b =>
@@ -93,7 +93,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Companies", (string)null);
+                    b.ToTable("Companies");
                 });
 
             modelBuilder.Entity("Infrastructure.DbClasses.ConfigurationUploadDb", b =>
@@ -128,25 +128,69 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("UnitId");
 
-                    b.ToTable("ConfigurationUploads", (string)null);
+                    b.ToTable("ConfigurationUploads");
+                });
+
+            modelBuilder.Entity("Infrastructure.DbClasses.CustomFieldDb", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<int>("CustomFieldType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ForeignKeyId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ForeignKeyId", "CustomFieldType")
+                        .HasDatabaseName("IX_CustomFields_ForeignKeyId_CustomFieldType");
+
+                    b.ToTable("CustomFields");
+                });
+
+            modelBuilder.Entity("Infrastructure.DbClasses.MostRecentAlarmDb", b =>
+                {
+                    b.Property<int>("SensorId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AlarmId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("MostRecentSendUtc")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("SensorId", "AlarmId");
+
+                    b.HasIndex("AlarmId");
+
+                    b.ToTable("MostRecentAlarms");
                 });
 
             modelBuilder.Entity("Infrastructure.DbClasses.MostRecentReadingDb", b =>
                 {
                     b.Property<int>("SensorId")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SensorId"));
 
                     b.Property<DateTime>("DateReceivedUtc")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("DateRecordedUtc")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("SensorId1")
-                        .HasColumnType("int");
 
                     b.Property<int>("UnitId")
                         .HasColumnType("int");
@@ -159,8 +203,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("SensorId")
                         .IsUnique()
                         .HasDatabaseName("IX_MostRecentReadings_SensorId_Unique");
-
-                    b.HasIndex("SensorId1");
 
                     b.HasIndex("UnitId");
 
@@ -224,7 +266,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("UnitId");
 
-                    b.ToTable("Readings", (string)null);
+                    b.ToTable("Readings");
                 });
 
             modelBuilder.Entity("Infrastructure.DbClasses.RecipientDb", b =>
@@ -262,7 +304,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Recipients", (string)null);
+                    b.ToTable("Recipients");
                 });
 
             modelBuilder.Entity("Infrastructure.DbClasses.RecipientSetDb", b =>
@@ -282,7 +324,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RecipientSets", (string)null);
+                    b.ToTable("RecipientSets");
                 });
 
             modelBuilder.Entity("Infrastructure.DbClasses.SensorDb", b =>
@@ -328,7 +370,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("UnitId");
 
-                    b.ToTable("Sensors", (string)null);
+                    b.ToTable("Sensors");
                 });
 
             modelBuilder.Entity("Infrastructure.DbClasses.TriggerDb", b =>
@@ -357,9 +399,8 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Subject")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("TriggerTypeCode")
-                        .IsRequired()
-                        .HasColumnType("char(1)");
+                    b.Property<int>("TriggerTypeId")
+                        .HasColumnType("int");
 
                     b.Property<int>("TriggerValue")
                         .HasColumnType("int");
@@ -370,9 +411,9 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("CommunicationModeId");
 
-                    b.HasIndex("TriggerTypeCode");
+                    b.HasIndex("TriggerTypeId");
 
-                    b.ToTable("Triggers", (string)null);
+                    b.ToTable("Triggers");
                 });
 
             modelBuilder.Entity("Infrastructure.DbClasses.TriggerTypeDb", b =>
@@ -396,7 +437,10 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TriggerTypes", (string)null);
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("TriggerTypes");
                 });
 
             modelBuilder.Entity("Infrastructure.DbClasses.UnitDb", b =>
@@ -445,7 +489,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("UnitTypeId");
 
-                    b.ToTable("Units", (string)null);
+                    b.ToTable("Units");
                 });
 
             modelBuilder.Entity("Infrastructure.DbClasses.UnitModelDb", b =>
@@ -472,7 +516,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UnitModels", (string)null);
+                    b.ToTable("UnitModels");
                 });
 
             modelBuilder.Entity("Infrastructure.DbClasses.UnitStatusDb", b =>
@@ -508,7 +552,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("UnitId");
 
-                    b.ToTable("UnitStatuses", (string)null);
+                    b.ToTable("UnitStatuses");
                 });
 
             modelBuilder.Entity("Infrastructure.Identity.ApplicationUserDb", b =>
@@ -765,12 +809,31 @@ namespace Infrastructure.Migrations
                     b.Navigation("Unit");
                 });
 
+            modelBuilder.Entity("Infrastructure.DbClasses.MostRecentAlarmDb", b =>
+                {
+                    b.HasOne("Infrastructure.DbClasses.AlarmDb", "Alarm")
+                        .WithMany()
+                        .HasForeignKey("AlarmId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Infrastructure.DbClasses.SensorDb", "Sensor")
+                        .WithMany()
+                        .HasForeignKey("SensorId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Alarm");
+
+                    b.Navigation("Sensor");
+                });
+
             modelBuilder.Entity("Infrastructure.DbClasses.MostRecentReadingDb", b =>
                 {
                     b.HasOne("Infrastructure.DbClasses.SensorDb", "Sensor")
                         .WithMany()
-                        .HasForeignKey("SensorId1")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("SensorId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Infrastructure.DbClasses.UnitDb", "Unit")
@@ -800,7 +863,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Infrastructure.DbClasses.SensorDb", "Sensor")
                         .WithMany()
                         .HasForeignKey("SensorId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Infrastructure.DbClasses.UnitDb", "Unit")
@@ -853,9 +916,8 @@ namespace Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("Infrastructure.DbClasses.TriggerTypeDb", "TriggerType")
-                        .WithMany()
-                        .HasForeignKey("TriggerTypeCode")
-                        .HasPrincipalKey("Code")
+                        .WithMany("Triggers")
+                        .HasForeignKey("TriggerTypeId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
@@ -971,6 +1033,11 @@ namespace Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("Infrastructure.DbClasses.AlarmDb", b =>
+                {
+                    b.Navigation("Triggers");
+                });
+
+            modelBuilder.Entity("Infrastructure.DbClasses.TriggerTypeDb", b =>
                 {
                     b.Navigation("Triggers");
                 });

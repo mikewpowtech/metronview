@@ -1,25 +1,31 @@
-﻿using Presentation.AlarmServer.Alarms;
-using Presentation.AlarmServer.Data.TelemetrySQL;
-using Presentation.AlarmServer.Email;
-using Presentation.AlarmServer.Options;
+﻿using Application.Alarms;
+using Application.ConfigurationUploads;
+using Application.CustomFields;
+using Application.CustomFields.Dtos;
+using Application.Triggers;
+using Domain.Enums;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Presentation.AlarmServer.Models;
 using Presentation.AlarmServer.Data.SpiderScope;
 using Presentation.AlarmServer.Helpers;
-using Presentation.AlarmServer.Enums;
-using System.Collections.Generic;
+using Presentation.AlarmServer.Models;
+using Presentation.AlarmServer.Options;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
 namespace Presentation.AlarmServer.ServiceWorkers;
 
 //using primary constructor
-public class HenkelServiceWorker(ITelemetryDatabase telemetryDatabase, ILoggerFactory loggerFactory,
-    IOptions<WorkerOptions> workerOptions, ISpiderScopeApi spiderScopeApi, IAlarmServerService alarmService) 
-    : ServiceWorkerBase(telemetryDatabase, loggerFactory, workerOptions, alarmService)
+public class HenkelServiceWorker(ILoggerFactory loggerFactory,
+    IOptions<WorkerOptions> workerOptions, ISpiderScopeApi spiderScopeApi, IAlarmService alarmService, 
+    ITriggerService triggerService, ICustomFieldService customFieldService, IConfigurationUploadService configurationUploadService   ) 
+    : ServiceWorkerBase(loggerFactory, workerOptions, alarmService, triggerService)
 {
+    private readonly ICustomFieldService customFieldService = customFieldService;
+    private readonly IConfigurationUploadService configurationUploadService = configurationUploadService;
+
     /// <summary>
     /// Poll the spiderscope API for Henkel RTU status and configuration changes.
     /// Transition from OK to OK : do nothing.
@@ -48,7 +54,8 @@ public class HenkelServiceWorker(ITelemetryDatabase telemetryDatabase, ILoggerFa
                     logger.LogInformation($"Spiderscope returned: {response.Count} items");
                     if (response?.Count > 0)
                     {
-                        var enabledRtus = telemetryDatabase.GetEnabledCustomFieldValues(workerOptions);
+                        var enabledRtus = customFieldService.GetEnabledCustomFieldValues
+                            (workerOptions.HenkelUseSpiderScopeStatusCustomFieldName, workerOptions.HenkelUseSpiderScopeStatusCustomFieldName);
                         logger.LogInformation($"GetEnabledCustomFieldValues returned: {enabledRtus.Count} items");
                         if (enabledRtus.Count > 0)
                         {
@@ -105,9 +112,9 @@ public class HenkelServiceWorker(ITelemetryDatabase telemetryDatabase, ILoggerFa
             {
                 //queue a configuration
                 logger.LogInformation($"Processing, setting configuration - {configuration}");
-                telemetryDatabase.AddConfigrationUpload(enabledRtu, configuration);
+                configurationUploadService.AddConfigrationUpload(enabledRtu, configuration);
                 //update the status
-                telemetryDatabase.SetHenkelStatusCustomFieldValueCache(enabledRtu, rtuResponse.Status, workerOptions);
+                customFieldService.SetHenkelStatusCustomFieldValueCache(enabledRtu, rtuResponse.Status, workerOptions.HenkelSpiderScopeStatusCustomFieldName);
             }
 
         }

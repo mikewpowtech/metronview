@@ -3,6 +3,7 @@ import { useState, useRef } from "react";
 import { useAppDispatch } from "../../app/hooks";
 import { login } from "./authAPI";
 import { updateToken, resetLoading, setLoading } from "./authSlice";
+import { UserOutlined, LockOutlined } from "@ant-design/icons";
 
 interface LoginFormProps {
     onLoginSuccess?: () => void;
@@ -19,11 +20,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, loading })
         setSubmitting(true);
         dispatch(setLoading());
         try {
-            // Use login API (same as LoginModal)
             const data = await login(values.username, values.password);
             dispatch(resetLoading());
             if (data?.isSucceed && data?.data) {
-                message.success("Login is successful.");
+                message.success("Login successful!");
                 dispatch(updateToken(data.data));
                 if (onLoginSuccess) {
                     onLoginSuccess();
@@ -40,13 +40,16 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, loading })
                     ]);
                 }
                 if (data?.messages?.login) {
-                    message.error("Login failed.");
+                    message.error("Invalid username or password");
+                } else {
+                    message.error("Login failed. Please check your credentials.");
                 }
             } else {
-                message.error("Login failed.");
+                message.error("Login failed. Please try again.");
             }
         } catch (err: any) {
-            message.error(err?.message || "Login failed");
+            dispatch(resetLoading());
+            message.error(err?.message || "Network error. Please try again.");
         } finally {
             setSubmitting(false);
         }
@@ -58,28 +61,43 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, loading })
             ref={formRef}
             layout="vertical"
             onFinish={handleFinish}
-            style={{ maxWidth: 320 }}
+            className="app-form"
+            size="large"
         >
             <Form.Item
                 label="Username"
                 name="username"
                 rules={[{ required: true, message: "Please enter your username" }]}
             >
-                <Input autoFocus />
+                <Input 
+                    prefix={<UserOutlined />}
+                    placeholder="Enter your username"
+                    autoFocus 
+                />
             </Form.Item>
             <Form.Item
                 label="Password"
                 name="password"
                 rules={[{ required: true, message: "Please enter your password" }]}
             >
-                <Input.Password />
+                <Input.Password 
+                    prefix={<LockOutlined />}
+                    placeholder="Enter your password"
+                />
             </Form.Item>
-            <Form.Item>
+            <Form.Item style={{ marginBottom: 0 }}>
                 <Button
                     type="primary"
                     htmlType="submit"
                     loading={loading || submitting}
                     block
+                    size="large"
+                    style={{
+                        height: "48px",
+                        fontSize: "16px",
+                        fontWeight: "500",
+                        marginTop: "16px"
+                    }}
                 >
                     Log In
                 </Button>

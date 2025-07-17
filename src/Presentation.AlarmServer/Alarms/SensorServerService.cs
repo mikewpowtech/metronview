@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Application.Triggers;
+using Microsoft.Extensions.Logging;
 using Presentation.AlarmServer.Data.TelemetrySQL;
 using Presentation.AlarmServer.Models;
 using Substituter;
@@ -19,7 +20,7 @@ public class SensorServerService(ITelemetryDatabase telemetryDatabase, ILogger<S
     /// </summary>
     /// <param name="templateSnippet"></param>
     /// <returns></returns>
-    public string Substitute(AlarmServerDto trigger, string templateSnippet)
+    public string Substitute(BreachedTriggerDto trigger, string templateSnippet)
     {
         if (string.IsNullOrWhiteSpace(templateSnippet))
             return templateSnippet;
@@ -41,26 +42,26 @@ public class SensorServerService(ITelemetryDatabase telemetryDatabase, ILogger<S
         return outputBuilder.ToString();
     }
 
-    public object? CalculateTemplatePlaceholderValue(AlarmServerDto alarm, string fieldName)
+    public object? CalculateTemplatePlaceholderValue(BreachedTriggerDto alarm, string fieldName)
     {
         if (!alarm.KnownValues.ContainsKey(fieldName))
             CalculateAlarmKnownValue(alarm, fieldName);
         return alarm.KnownValues[fieldName];
     }
-    internal void CalculateAlarmKnownValue(AlarmServerDto alarm, string key)
+    internal void CalculateAlarmKnownValue(BreachedTriggerDto alarm, string key)
     {
         logger.LogDebug("Calculate value for template variable {Key}", key);
         // First try to get a calculator that does this by its name
         if (CalculateSensor_KEYS.Contains(key.ToLower()))
         {
             logger.LogDebug("Calculate value for template variable {Key} using CalculateSensor", key);
-            telemetryDatabase.CalculateSensor(alarm);
+         //   telemetryDatabase.CalculateSensor(alarm);
             return;
         }
         if (CalculateRtu_KEYS.Contains(key.ToLower()))
         {
             logger.LogDebug("Calculate value for template variable {Key} using CalculateRtu", key);
-            telemetryDatabase.CalculateRtu(alarm);
+           // telemetryDatabase.CalculateRtu(alarm);
             return;
         }
 
@@ -73,7 +74,7 @@ public class SensorServerService(ITelemetryDatabase telemetryDatabase, ILogger<S
             return;
         }
 
-        CalculateCustomDataForSensor(alarm);
+       // CalculateCustomDataForSensor(alarm);
 
         alarm.KnownValuesSet = true;
 

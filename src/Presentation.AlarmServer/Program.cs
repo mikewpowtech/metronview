@@ -52,10 +52,12 @@ var host = Host.CreateDefaultBuilder(args)
         services.AddSingleton<ITelemetryDatabase,TelemetryDatabase>();
         var sp=services.BuildServiceProvider();
         services.AddTransient<IMessengerService,MessengerService>();
-        services.AddTransient<IAlarmServerService,AlarmServerService>();
-        services.AddTransient<ISensorServerService,SensorServerService>();
+        //services.AddTransient<IAlarmServerService,AlarmServerService>();
+        //services.AddTransient<ISensorServerService,SensorServerService>();
         services.AddTransient<IAlarmRepository,AlarmRepository>();
-                services.AddTransient<ITriggerRepository,TriggerRepository>();
+        services.AddTransient<ITriggerRepository,TriggerRepository>();
+        services.AddTransient<IAlarmService, AlarmService>();
+        services.AddTransient<ITriggerService, TriggerService>();
         services.AddTransient<NotReportedServiceWorker>();
         services.AddTransient<AlarmServiceWorker>();
         services.AddTransient<HenkelServiceWorker>();

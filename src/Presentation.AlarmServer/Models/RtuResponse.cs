@@ -1,4 +1,4 @@
-﻿using Presentation.AlarmServer.Enums;
+﻿using Domain.Enums;
 using System;
 using System.Text.Json.Serialization;
 

@@ -1,3 +1,5 @@
+using Application.Alarms.Dtos;
+using Application.Triggers;
 using Domain;
 
 namespace Application.Alarms
@@ -9,5 +11,8 @@ namespace Application.Alarms
         Task<Alarm> AddAsync(Alarm alarm);
         Task<bool> UpdateAsync(Alarm alarm);
         Task<bool> DeleteAsync(int id);
+        AlarmSendingResult ShouldSendAlarmUnlessQuenched(BreachedTriggerDto alarm);
+        Task<List<BreachedTriggerDto>> GetNotReportedBreachesAsync();
+        void SendAlarm(BreachedTriggerDto alarm);
     }
 }

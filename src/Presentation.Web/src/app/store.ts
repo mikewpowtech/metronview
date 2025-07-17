@@ -18,17 +18,12 @@ import {
 const authPersistConfig = {
   key: "auth",
   storage: storage,  
-  debug: true,
+  debug: process.env.NODE_ENV === "development", // Only debug in development
 };
 
 const rootReducer = combineReducers({
   auth: persistReducer(authPersistConfig, authReducer),
 });
-
-export const selectAuth = (state: RootState) => {
-    console.log("Redux state:", state);
-    return state.auth;
-};
 
 export const store = configureStore({
     reducer: rootReducer,
@@ -45,3 +40,16 @@ export const persister = persistStore(store);
 export type AppDispatch = typeof store.dispatch;
 export type RootState = ReturnType<typeof store.getState>;
 export type AppThunk<ReturnType = void> = ThunkAction<ReturnType,RootState,unknown,Action<string>>;
+
+// Move this selector after the store is defined to avoid circular dependency
+export const selectAuth = (state: RootState) => {
+    // Only log in development and reduce console noise
+    if (process.env.NODE_ENV === "development") {
+        console.log("Auth state:", {
+            status: state.auth.status,
+            hasUser: !!state.auth.user,
+            hasTokens: !!(state.auth.accessToken && state.auth.refreshToken)
+        });
+    }
+    return state.auth;
+};

@@ -8,8 +8,8 @@ export interface Sensor {
     lowValue?: number | null;
     highValue?: number | null;
     engineeringUnits?: string | null;
-    unitId?: string;
-    companyID?: number | null;
+    unitId: number; // Changed from string to number
+    companyId?: number | null; // Changed from companyID to companyId
     alarmId?: number | null;
     // Add other properties as needed
 }
@@ -75,10 +75,23 @@ export async function addSensor(
     return response.data;
 }
 
-// Update an existing sensor
+// Interface for creating/updating sensors (similar to TriggerRequest)
+export interface SensorRequest {
+    name?: string; // Made optional since it can be null
+    channel: number;
+    channelType?: number | null;
+    lowValue?: number | null;
+    highValue?: number | null;
+    engineeringUnits?: string; // Made optional since it can be null
+    unitId: number;
+    companyId?: number | null; // Changed from companyId to match backend
+    alarmId?: number | null;
+}
+
+// Update an existing sensor (matching the updateTrigger pattern)
 export async function updateSensor(
     id: number,
-    sensor: Sensor,//Omit<Sensor, "id">,
+    sensor: SensorRequest & { id: number },
     token?: string
 ): Promise<void> {
     await axios.put(

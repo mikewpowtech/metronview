@@ -1,3 +1,4 @@
+using Application.Triggers;
 using Domain;
 
 namespace Application.Units;
@@ -9,4 +10,5 @@ public interface IUnitRepository
     Task<Unit> AddAsync(Unit unit);
     Task<bool> UpdateAsync(Unit unit);
     Task<bool> DeleteAsync(int id);
+    Task CalculateRtuAsync(BreachedTriggerDto alarmTriggerTemplateValues);
 }

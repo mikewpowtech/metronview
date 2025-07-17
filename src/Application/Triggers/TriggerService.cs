@@ -5,21 +5,46 @@ namespace Application.Triggers
 {
     public class TriggerService : ITriggerService
     {
-        private readonly ITriggerRepository _repository;
+        private readonly ITriggerRepository repository;
 
         public TriggerService(ITriggerRepository repository)
         {
-            _repository = repository;
+            this.repository = repository;
         }
 
-        public Task<Trigger?> GetByIdAsync(int id) => _repository.GetByIdAsync(id);
-        public Task<List<Trigger>> GetAllAsync() => _repository.GetAllAsync();
-        public Task<List<Trigger>> GetByAlarmIdAsync(int alarmId) => _repository.GetByAlarmIdAsync(alarmId);
-        public Task<List<Trigger>> GetByTriggerTypeCodeAsync(TriggerTypeCode triggerTypeCode) => _repository.GetByTriggerTypeCodeAsync(triggerTypeCode);
-        public Task<List<Trigger>> GetByCommunicationModeIdAsync(int communicationModeId) => _repository.GetByCommunicationModeIdAsync(communicationModeId);
-        public Task<Trigger> AddAsync(Trigger trigger) => _repository.AddAsync(trigger);
-        public Task<bool> UpdateAsync(Trigger trigger) => _repository.UpdateAsync(trigger);
-        public Task<bool> DeleteAsync(int id) => _repository.DeleteAsync(id);
-        public Task<List<Trigger>> GetEnabledTriggersAsync() => _repository.GetEnabledTriggersAsync();
+        public Task<Trigger?> GetByIdAsync(int id) => repository.GetByIdAsync(id);
+        public Task<List<Trigger>> GetAllAsync() => repository.GetAllAsync();
+        public Task<List<Trigger>> GetByAlarmIdAsync(int alarmId) => repository.GetByAlarmIdAsync(alarmId);
+        public Task<List<Trigger>> GetByTriggerTypeCodeAsync(TriggerTypeCode triggerTypeCode) => repository.GetByTriggerTypeCodeAsync(triggerTypeCode);
+        public Task<List<Trigger>> GetByCommunicationModeIdAsync(int communicationModeId) => repository.GetByCommunicationModeIdAsync(communicationModeId);
+        public Task<Trigger> AddAsync(Trigger trigger) => repository.AddAsync(trigger);
+        public Task<bool> UpdateAsync(Trigger trigger) => repository.UpdateAsync(trigger);
+        public Task<bool> DeleteAsync(int id) => repository.DeleteAsync(id);
+        public Task<List<Trigger>> GetEnabledTriggersAsync() => repository.GetEnabledTriggersAsync();
+
+        public bool IsQuenched(BreachedTriggerDto alarm)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void NoteAlarmTrigger(BreachedTriggerDto alarm, bool v)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void NoteAlarmNotTriggered(BreachedTriggerDto alarm)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AcknowledgeProcessing(int value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<BreachedTriggerDto>> GetNotReportedBreachesAsync(TriggerTypeCode notReportedForPeriod)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

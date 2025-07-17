@@ -1,6 +1,6 @@
+using Application.Triggers;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Presentation.AlarmServer.Models;
 using Presentation.AlarmServer.Options;
 using System;
 using System.Net.Mail;
@@ -20,19 +20,19 @@ public class MessengerService:IMessengerService
         DefaultFromEmailAddress = this.options.DefaultAlarmEmailFromAddress;
     }
 
-    public void SendSmsAsync(MailMessage msg, AlarmServerDto alarmTrigger)
+    public void SendSmsAsync(MailMessage msg, BreachedTriggerDto alarmTrigger)
     {
         // Note that there's no need to retain an explicit reference to the client;
         // it'll be referenced by a stack frame somewhere until the async call completes, at which point we trash it.
 
         SendMessageAsync(msg, alarmTrigger);
     }
-    public void SendSmtpAsync(MailMessage msg, AlarmServerDto alarmTrigger)
+    public void SendSmtpAsync(MailMessage msg, BreachedTriggerDto alarmTrigger)
     {
         SendMessageAsync(msg, alarmTrigger);
     }
 
-    private void SendMessageAsync(MailMessage msg, AlarmServerDto alarm)
+    private void SendMessageAsync(MailMessage msg, BreachedTriggerDto alarm)
     {
         var smtpClient = new SmtpClient(options.Host, options.Port);
         smtpClient.SendCompleted += (_, args) =>

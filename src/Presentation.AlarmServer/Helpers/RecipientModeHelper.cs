@@ -1,5 +1,5 @@
-﻿using System;
-using Presentation.AlarmServer.Enums;
+﻿using Domain.Enums;
+using System;
 
 namespace Presentation.AlarmServer.Helpers;
 

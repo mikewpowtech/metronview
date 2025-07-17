@@ -1,3 +1,4 @@
+using Application.Triggers;
 using Domain;
 
 namespace Application.Readings;
@@ -31,4 +32,9 @@ public class ReadingService : IReadingService
 
     public Task<bool> DeleteAsync(DateTime dateRecordedUtc, int sensorId)
         => _readingRepository.DeleteAsync(dateRecordedUtc, sensorId);
+
+    public IList<BreachedTriggerDto> GetNewReadingsWithAlarms()
+    {
+        throw new NotImplementedException();
+    }
 }

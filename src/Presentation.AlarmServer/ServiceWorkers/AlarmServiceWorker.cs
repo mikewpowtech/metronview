@@ -1,8 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Application.Alarms;
+using Application.Readings;
+using Application.Triggers;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Presentation.AlarmServer.Alarms;
-using Presentation.AlarmServer.Data.TelemetrySQL;
-using Presentation.AlarmServer.Email;
 using Presentation.AlarmServer.Options;
 using System;
 using System.Threading;
@@ -10,10 +10,13 @@ using System.Threading;
 namespace Presentation.AlarmServer.ServiceWorkers;
 
 //using a primary constructor
-public class AlarmServiceWorker(ITelemetryDatabase telemetryDatabase, ILoggerFactory loggerFactory,
-                IAlarmServerService alarmTriggerService,  IOptions<WorkerOptions> workerOptions) 
-    : ServiceWorkerBase(telemetryDatabase, loggerFactory, workerOptions, alarmTriggerService)
+public class AlarmServiceWorker(ILoggerFactory loggerFactory,
+                IAlarmService alarmService,ITriggerService triggerService,  
+                IOptions<WorkerOptions> workerOptions, IReadingService readingService) 
+    : ServiceWorkerBase(loggerFactory, workerOptions, alarmService, triggerService)
 {
+    private readonly IReadingService readingService = readingService;
+
     public override void Run(CancellationToken cancellationToken)
     {
         base.Run(cancellationToken);
@@ -25,7 +28,7 @@ public class AlarmServiceWorker(ITelemetryDatabase telemetryDatabase, ILoggerFac
                 try
                 {
                     logger.LogTrace("running {0}....", className);
-                    ProcessAlarms(telemetryDatabase.GetNewReadingsWithAlarms());
+                    ProcessAlarms(readingService.GetNewReadingsWithAlarms());
                     cancellationToken.WaitHandle.WaitOne(workerOptions.AlarmPollerInterval);
                 }
                 catch (Exception ex)

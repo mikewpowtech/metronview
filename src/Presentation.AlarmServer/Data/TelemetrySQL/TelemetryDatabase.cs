@@ -1,18 +1,18 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Application.CustomFields.Dtos;
+using Application.Triggers;
+using Domain.Enums;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Data;
-using System.Net.Mail;
-using Presentation.AlarmServer.Models;
-using Presentation.AlarmServer.Alarms;
-using Presentation.AlarmServer.Helpers;
-using Presentation.AlarmServer.Options;
-using Presentation.AlarmServer.Enums;
 using Presentation.AlarmServer.Email;
+using Presentation.AlarmServer.Helpers;
+using Presentation.AlarmServer.Models;
+using Presentation.AlarmServer.Options;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
-using Domain.Enums;
+using System.Net.Mail;
 
 namespace Presentation.AlarmServer.Data.TelemetrySQL;
 
@@ -150,7 +150,7 @@ public class TelemetryDatabase(ISqlConnectionProvider sqlConnectionProvider, ILo
             cmd.ExecuteNonQuery();
         }
     }
-    public void CalculateSensor(AlarmServerDto triggerDto)
+    public void CalculateSensor(BreachedTriggerDto triggerDto)
     {
         using var cn = sqlConnectionProvider.GetOpenConnection();
         using (var cmd = cn.CreateCommand())
@@ -558,4 +558,29 @@ public class TelemetryDatabase(ISqlConnectionProvider sqlConnectionProvider, ILo
             cmd.ExecuteNonQuery();
         }
     }
+
+    public void CalculateSensor(AlarmServerDto triggerDto)
+    {
+        throw new NotImplementedException();
+    }
+
+    public ICollection<SmsRecipientTemplates> GetSmsToAddresses(BreachedTriggerDto trigger)
+    {
+        throw new NotImplementedException();
+    }
+
+    //public void AddConfigrationUpload(HenkelRtuStatus enabledRtu, string configuration)
+    //{
+    //    throw new NotImplementedException();
+    //}
+
+    //IList<HenkelRtuStatus> ITelemetryDatabase.GetEnabledCustomFieldValues(WorkerOptions workerOptions)
+    //{
+    //    throw new NotImplementedException();
+    //}
+
+    //public void SetHenkelStatusCustomFieldValueCache(HenkelRtuStatus rtuCustomField, HenkelStatusType newStatus, WorkerOptions workerOptions)
+    //{
+    //    throw new NotImplementedException();
+    //}
 }

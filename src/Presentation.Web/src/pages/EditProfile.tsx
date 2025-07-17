@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Form, Input, Button, Spin, message } from "antd";
 import { useAppSelector, useAppDispatch } from "../app/hooks";
-import { selectAuth, updateProfileAsync } from "../features/user/authSlice";
+import { selectAuth } from "../app/store";
+import { updateProfileAsync } from "../features/user/authSlice";
 
 export const EditProfile: React.FC = () => {
   const dispatch = useAppDispatch();

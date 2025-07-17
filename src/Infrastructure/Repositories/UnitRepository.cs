@@ -1,3 +1,4 @@
+using Application.Triggers;
 using Application.Units;
 using Domain;
 using Infrastructure.DbClasses;
@@ -62,5 +63,32 @@ public class UnitRepository : IUnitRepository
         context.Units.Remove(entity);
         await context.SaveChangesAsync();
         return true;
+    }
+
+    //TODO refactor ewwwwww hate this overloading parameters
+    public async Task CalculateRtuAsync(BreachedTriggerDto alarmTriggerTemplateValues)
+    {
+        var unitInfo = await context.Sensors
+            .AsNoTracking()
+            .Where(s => s.Id == alarmTriggerTemplateValues.SensorId)
+            .Join(context.Units,
+                sensor => sensor.UnitId,
+                unit => unit.Id,
+                (sensor, unit) => new
+                {
+                    RtuId = unit.Id,
+                    PhoneNumber = unit.PhoneNumber,
+                    ManufacturerId = unit.ManufacturerCode,
+                    ClientId = unit.UnitCode
+                })
+            .FirstOrDefaultAsync();
+
+        if (unitInfo != null)
+        {
+            alarmTriggerTemplateValues.SetKnownValue("rtuid", unitInfo.RtuId);
+            alarmTriggerTemplateValues.SetKnownValue("phonenumber", unitInfo.PhoneNumber);
+            alarmTriggerTemplateValues.SetKnownValue("manufacturerid", unitInfo.ManufacturerId);
+            alarmTriggerTemplateValues.SetKnownValue("clientid", unitInfo.ClientId);
+        }
     }
 }

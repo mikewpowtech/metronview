@@ -10,24 +10,24 @@ namespace Presentation.Api.Controllers;
 [Authorize]
 public class CompanyController : ControllerBase
 {
-    private readonly ICompanyService _companyService;
+    private readonly ICompanyService companyService;
 
     public CompanyController(ICompanyService companyService)
     {
-        _companyService = companyService;
+        this.companyService = companyService;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Company>>> GetCompanies()
     {
-        var companies = await _companyService.GetAllAsync();
+        var companies = await companyService.GetAllAsync();
         return Ok(companies);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<Company>> GetCompany(int id)
     {
-        var company = await _companyService.GetByIdAsync(id);
+        var company = await companyService.GetByIdAsync(id);
         if (company == null)
             return NotFound();
         return Ok(company);
@@ -41,7 +41,7 @@ public class CompanyController : ControllerBase
             return BadRequest("Company name is required.");
         }
 
-        var createdCompany = await _companyService.AddAsync(company);
+        var createdCompany = await companyService.AddAsync(company);
         return CreatedAtAction(nameof(GetCompany), new { id = createdCompany.Id }, createdCompany);
     }
 
@@ -51,7 +51,7 @@ public class CompanyController : ControllerBase
         if (id != company.Id)
             return BadRequest("ID mismatch.");
 
-        var success = await _companyService.UpdateAsync(company);
+        var success = await companyService.UpdateAsync(company);
         if (!success)
             return NotFound();
 
@@ -61,7 +61,7 @@ public class CompanyController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteCompany(int id)
     {
-        var success = await _companyService.DeleteAsync(id);
+        var success = await companyService.DeleteAsync(id);
         if (!success)
             return NotFound();
 

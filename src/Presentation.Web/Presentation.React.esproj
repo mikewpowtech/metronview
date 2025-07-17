@@ -3,17 +3,26 @@
     <StartupCommand>npm run dev</StartupCommand>
     <JavaScriptTestRoot>src\</JavaScriptTestRoot>
     <JavaScriptTestFramework>Vitest</JavaScriptTestFramework>
-    <!-- Allows the build (or compile) script located on package.json to run on Build -->
+    <!-- Allow build script to run but control when -->
     <ShouldRunBuildScript>false</ShouldRunBuildScript>
+    <!-- Enable npm install to ensure dependencies are available -->
+    <ShouldRunNpmInstall>true</ShouldRunNpmInstall>
+    <!-- Set as development project -->
+    <IsDeployProject>false</IsDeployProject>
     <!-- Folder where production build objects will be placed -->
     <BuildOutputFolder>$(MSBuildProjectDirectory)\dist</BuildOutputFolder>
+    <!-- Remove problematic configurations -->
+    <JSProjectOutputVerbosity>Normal</JSProjectOutputVerbosity>
+    <!-- Enable proper startup behavior -->
+    <LaunchBrowser>true</LaunchBrowser>
+    <LaunchUrl>http://localhost:3000</LaunchUrl>
   </PropertyGroup>
   <ItemGroup>
     <None Remove=".vite\**" />
     <None Remove=".vscode\**" />
-    <None Remove="src\features\NewFolder\**" />
+    <None Remove="node_modules\**" />
+    <None Remove="dist\**" />
     <TypeScriptConfiguration Remove=".vite\**" />
     <TypeScriptConfiguration Remove=".vscode\**" />
-    <TypeScriptConfiguration Remove="src\features\NewFolder\**" />
   </ItemGroup>
 </Project>

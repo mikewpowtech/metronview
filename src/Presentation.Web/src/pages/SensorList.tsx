@@ -95,7 +95,7 @@ const SensorList: React.FC<SensorListProps> = ({ unitId, companyId, alarmId }) =
             highValue: record.highValue,
             engineeringUnits: record.engineeringUnits ?? "",
             unitId: record.unitId ?? "",
-            companyID: record.companyID ?? "",
+            companyId: record.companyId ?? "",    // Changed from companyID
             alarmId: record.alarmId ?? "",
         });
         setShowModal(true);
@@ -119,17 +119,33 @@ const SensorList: React.FC<SensorListProps> = ({ unitId, companyId, alarmId }) =
         try {
             setModalLoading(true);
             const values = await form.validateFields();
+            
+            // Normalize values to handle null/undefined
+            const normalizedValues = {
+                ...values,
+                unitId: Number(values.unitId) || null,
+                companyId: values.companyId || null,
+                alarmId: values.alarmId || null,
+                channelType: values.channelType || null,
+                lowValue: values.lowValue || null,
+                highValue: values.highValue || null,
+            };
+            
             if (isEdit && editingId !== null) {
-                values.UnitId = editingId;
-                await updateSensor(editingId, values, token);
+                const sensorData = {
+                    ...normalizedValues,
+                    id: editingId
+                };
+                
+                await updateSensor(editingId, sensorData, token);
                 setSensors(prev =>
                     prev.map(s =>
-                        s.id === editingId ? { ...s, ...values } : s
+                        s.id === editingId ? { ...s, ...normalizedValues } : s
                     )
                 );
                 message.success("Sensor updated");
             } else {
-                const added = await addSensor(values, token);
+                const added = await addSensor(normalizedValues, token);
                 setSensors(prev => [...prev, added]);
                 message.success("Sensor added");
             }
@@ -137,7 +153,7 @@ const SensorList: React.FC<SensorListProps> = ({ unitId, companyId, alarmId }) =
             setEditingId(null);
             form.resetFields();
         } catch (err: any) {
-            if (err.errorFields) return; // Form validation error
+            if (err.errorFields) return;
             message.error(err.message || "Failed to save sensor");
         } finally {
             setModalLoading(false);
@@ -152,13 +168,79 @@ const SensorList: React.FC<SensorListProps> = ({ unitId, companyId, alarmId }) =
 
     const MainModal: React.FC = () => (
         <Modal
-            title={isEdit ? "Edit Sensor" : "Add Sensor"}
+            title={
+                <div style={{
+                    fontSize: '16px',
+                    fontWeight: 600,
+                    color: '#ffffff',
+                    padding: '4px 0',
+                    marginBottom: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                }}>
+                    <div style={{
+                        width: '24px',
+                        height: '24px',
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, #1890ff 0%, #40a9ff 100%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        fontSize: '12px',
+                        fontWeight: 'bold'
+                    }}>
+                        {isEdit ? "E" : "S"}
+                    </div>
+                    {isEdit ? "Edit Sensor" : "Add Sensor"}
+                </div>
+            }
             open={showModal}
             onCancel={handleModalCancel}
             onOk={handleModalOk}
             okText="Save"
             confirmLoading={modalLoading}
             destroyOnHidden={true}
+            styles={{
+                header: {
+                    background: '#1890ff',
+                    borderRadius: '8px 8px 0 0',
+                    padding: '16px 24px',
+                    border: '2px solid #1890ff',
+                    borderBottom: 'none',
+                    marginBottom: '0'
+                },
+                body: {
+                    background: '#ffffff',
+                    padding: '16px 24px',
+                    border: '2px solid #1890ff',
+                    borderTop: 'none',
+                    borderBottom: 'none',
+                    marginTop: '0'
+                },
+                footer: {
+                    background: '#ffffff',
+                    padding: '16px 24px',
+                    border: '2px solid #1890ff',
+                    borderTop: 'none',
+                    borderRadius: '0 0 8px 8px',
+                    marginTop: '0'
+                },
+                content: {
+                    padding: '0',
+                    overflow: 'hidden',
+                    borderRadius: '8px',
+                    border: 'none'
+                }
+            }}
+            closeIcon={
+                <span style={{
+                    color: 'white',
+                    fontWeight: 'bold',
+                    fontSize: '16px'
+                }}>×</span>
+            }
         >
             <Form
                 layout="vertical"
@@ -171,7 +253,7 @@ const SensorList: React.FC<SensorListProps> = ({ unitId, companyId, alarmId }) =
                     highValue: undefined,
                     engineeringUnits: "",
                     unitId: "",
-                    companyID: "",
+                    companyId: "",
                     alarmId: "",
                 }}
             >
@@ -179,32 +261,71 @@ const SensorList: React.FC<SensorListProps> = ({ unitId, companyId, alarmId }) =
                     label="Name"
                     name="name"
                     rules={[{ required: true, message: "Please enter a name" }]}
+                    style={{ marginBottom: '16px' }}
                 >
                     <Input placeholder="Sensor Name" />
                 </Form.Item>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                    <Form.Item
+                        label="Channel"
+                        name="channel"
+                        rules={[{ required: true, message: "Please enter a channel" }]}
+                        style={{ marginBottom: 0 }}
+                    >
+                        <InputNumber min={0} style={{ width: "100%" }} placeholder="Channel" />
+                    </Form.Item>
+                    <Form.Item 
+                        label="Channel Type" 
+                        name="channelType"
+                        style={{ marginBottom: 0 }}
+                    >
+                        <InputNumber min={0} style={{ width: "100%" }} placeholder="Channel Type" />
+                    </Form.Item>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                    <Form.Item 
+                        label="Low Value" 
+                        name="lowValue"
+                        style={{ marginBottom: 0 }}
+                    >
+                        <InputNumber style={{ width: "100%" }} placeholder="Low Value" />
+                    </Form.Item>
+                    <Form.Item 
+                        label="High Value" 
+                        name="highValue"
+                        style={{ marginBottom: 0 }}
+                    >
+                        <InputNumber style={{ width: "100%" }} placeholder="High Value" />
+                    </Form.Item>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                    <Form.Item
+                        label="Unit ID"
+                        name="unitId"
+                        rules={[{ required: true, message: "Please select a unit" }]}
+                        style={{ marginBottom: 0 }}
+                    >
+                        <InputNumber min={0} style={{ width: "100%" }} placeholder="Unit ID" />
+                    </Form.Item>
+                    
+                    <Form.Item 
+                        label="Engineering Units" 
+                        name="engineeringUnits"
+                        style={{ marginBottom: 0 }}
+                    >
+                        <Input placeholder="Engineering Units" />
+                    </Form.Item>
+                </div>
+
                 <Form.Item
-                    label="Channel"
-                    name="channel"
-                    rules={[{ required: true, message: "Please enter a channel" }]}
+                    label="Company"
+                    name="companyId"
+                    rules={[{ required: true, message: "Please select a company" }]}
+                    style={{ marginBottom: '16px' }}
                 >
-                    <InputNumber min={0} style={{ width: "100%" }} placeholder="Channel" />
-                </Form.Item>
-                <Form.Item label="Channel Type" name="channelType">
-                    <InputNumber min={0} style={{ width: "100%" }} placeholder="Channel Type" />
-                </Form.Item>
-                <Form.Item label="Low Value" name="lowValue">
-                    <InputNumber style={{ width: "100%" }} placeholder="Low Value" />
-                </Form.Item>
-                <Form.Item label="High Value" name="highValue">
-                    <InputNumber style={{ width: "100%" }} placeholder="High Value" />
-                </Form.Item>
-                <Form.Item label="Engineering Units" name="engineeringUnits">
-                    <Input placeholder="Engineering Units" />
-                </Form.Item>
-                <Form.Item label="Unit ID" name="unitId">
-                    <Input placeholder="Unit ID" />
-                </Form.Item>
-                <Form.Item label="Company ID" name="companyID">
                     <Select
                         showSearch
                         allowClear
@@ -217,12 +338,18 @@ const SensorList: React.FC<SensorListProps> = ({ unitId, companyId, alarmId }) =
                     >
                         {companies.map(company => (
                             <Select.Option key={company.id} value={company.id}>
-                                {company.name}h
+                                {company.name}
                             </Select.Option>
                         ))}
                     </Select>
                 </Form.Item>
-                <Form.Item label="Alarm ID" name="alarmId">
+
+                <Form.Item
+                    label="Alarm"
+                    name="alarmId"
+                    rules={[{ required: true, message: "Please select an alarm" }]}
+                    style={{ marginBottom: 0 }}
+                >
                     <Select
                         showSearch
                         allowClear

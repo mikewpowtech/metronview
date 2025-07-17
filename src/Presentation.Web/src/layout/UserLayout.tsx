@@ -52,8 +52,7 @@ export const UserLayout = ({ UserName }: iUser) => {
         {
             key: "/dashboard",
             label: "Home",
-            items: [
-            ],
+            items: [],
         },
         {
             key: "/units",
@@ -75,7 +74,6 @@ export const UserLayout = ({ UserName }: iUser) => {
                     key: "/unitmodelconfigs",
                     label: <span onClick={() => handleClick("/unitmodels")}>Model Configurations</span>,
                 },
-                // Add more submenu items here if needed
             ],
         },
         {
@@ -84,7 +82,7 @@ export const UserLayout = ({ UserName }: iUser) => {
             items: [
                 {
                     key: "/alarms",
-                    label: <span onClick={() => handleClick("/alarmhistory")}>History</span>,
+                    label: <span onClick={() => handleClick("/alarms")}>History</span>,
                 },
                 {
                     key: "/triggers",
@@ -100,26 +98,23 @@ export const UserLayout = ({ UserName }: iUser) => {
                 },
                 {
                     key: "/senderoptions",
-                    label: <span onClick={() => handleClick("/senderoptions")}>SenderOptions</span>,
+                    label: <span onClick={() => handleClick("/senderoptions")}>Sender Options</span>,
                 },
                 {
                     key: "/alarminstructions",
                     label: <span onClick={() => handleClick("/alarminstructions")}>Instructions</span>,
                 },
-                // Add more submenu items here if needed
             ],
         },
         {
             key: "/companies",
             label: "Companies",
-            items: [
-            ],
+            items: [],
         },
         {
             key: "/users",
             label: "Logins",
-            items: [
-            ],
+            items: [],
         },
     ];
 
@@ -127,70 +122,77 @@ export const UserLayout = ({ UserName }: iUser) => {
         <App>
             <Layout className="layout" style={{ minHeight: "100vh" }}>
                 {/* AppLogo on its own line */}
-                <div style={{ background: "#5a6a71", padding: "2px 0 1px 0", display: "flex", justifyContent: "flex-start" }}>
+                <div style={{ 
+                    background: "#5a6a71", 
+                    padding: "2px 0 1px 0", 
+                    display: "flex", 
+                    justifyContent: "flex-start" 
+                }}>
                     <AppLogo />
                 </div>
-                <Header
-                    style={{
-                        display: "flex",
-                        alignItems: "center",
-                        background: "linear-gradient(to bottom, #5a6a71 0%, #3a4a99 100%)",
-                        minHeight: 40,
-                        height: 40,
-                        padding: "0 40px",
-                    }}
-                >
-                    <div style={{ minWidth: "400px", display: "flex" }}>
-                        {menuDropdowns.map(menu => (
-                            <Dropdown
-                                key={menu.key}
-                                menu={{ items: menu.items }}
-                                trigger={["hover"]}
-                            >
+                <Header className="app-header">
+                    <div className="flex-between" style={{ width: "100%" }}>
+                        <div className="app-menu" style={{ display: "flex" }}>
+                            {menuDropdowns.map(menu => (
+                                <Dropdown
+                                    key={menu.key}
+                                    menu={{ items: menu.items }}
+                                    trigger={["hover"]}
+                                    placement="bottomLeft"
+                                >
+                                    <span
+                                        className={`menu-item ${current === menu.key ? 'active' : ''}`}
+                                        style={{
+                                            color: current === menu.key ? "#1890ff" : "#fff",
+                                            fontWeight: 500,
+                                            cursor: "pointer",
+                                            marginRight: 24,
+                                            userSelect: "none",
+                                            padding: "0 12px",
+                                            lineHeight: "60px",
+                                            fontSize: 15,
+                                            borderBottom: current === menu.key ? "2px solid #1890ff" : "none",
+                                            transition: "all 0.3s",
+                                        }}
+                                        onClick={() => handleClick(menu.key)}
+                                    >
+                                        {menu.label}
+                                    </span>
+                                </Dropdown>
+                            ))}
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center" }}>
+                            <Dropdown menu={userMenu} trigger={["click"]} placement="bottomRight">
                                 <span
                                     style={{
-                                        color: current === menu.key ? "#1890ff" : "#fff",
+                                        color: "#fff",
                                         fontWeight: 500,
                                         cursor: "pointer",
-                                        marginRight: 16,
                                         userSelect: "none",
-                                        padding: "0 8px",
-                                        lineHeight: "36px",
                                         fontSize: 15,
-                                        borderBottom: current === menu.key ? "2px solid #1890ff" : "none",
+                                        padding: "0 12px",
+                                        lineHeight: "60px",
+                                        transition: "color 0.3s",
                                     }}
-                                    onClick={() => handleClick(menu.key)}
                                 >
-                                    {menu.label}
+                                    {UserName}
                                 </span>
                             </Dropdown>
-                        ))}
-                    </div>
-                    <div style={{ marginLeft: "auto", display: "flex", alignItems: "center" }}>
-                        <Dropdown menu={userMenu} trigger={["click"]}>
-                            <span
-                                style={{
-                                    marginLeft: 10,
-                                    color: "#fff",
-                                    fontWeight: 500,
-                                    cursor: "pointer",
-                                    userSelect: "none",
-                                    fontSize: 15,
-                                }}
-                            >
-                                {UserName}
-                            </span>
-                        </Dropdown>
+                        </div>
                     </div>
                 </Header>
                 <Content style={{ 
-                    padding: "20px 0", 
+                    padding: "24px", 
                     flex: 1, 
-                    minHeight: 0
+                    minHeight: 0,
+                    background: "#f0f2f5"
                 }}>
                     <div style={{ 
-                        width: "100%", 
-                        padding: "0 10px"
+                        background: "#fff",
+                        padding: "24px",
+                        borderRadius: "8px",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                        minHeight: "calc(100vh - 200px)"
                     }}>
                         <Outlet />
                     </div>

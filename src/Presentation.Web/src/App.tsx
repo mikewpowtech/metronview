@@ -1,10 +1,8 @@
-import "bootstrap/dist/css/bootstrap-reboot.min.css";
-import "bootstrap/dist/css/bootstrap-utilities.min.css";
-import { Route, Routes, useParams } from "react-router";
-import '@ant-design/v5-patch-for-react-19';
+import { useEffect, useState } from "react";
+import "./App.scss";
+import { Route, Routes, useParams } from "react-router-dom";
 import { DefaultLayout } from "./layout/DefaultLayout";
 import { RegisterPage } from "./pages/RegisterPage";
-/*import { LoginPage } from "./pages/LoginPage";*/
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { useAppSelector } from "./app/hooks";
 import { selectAuth } from "./app/store";
@@ -19,12 +17,13 @@ import AlarmInstructions from "./pages/AlarmInstructions";
 import CompanyList from "./pages/CompanyList";
 import SensorList from "./pages/SensorList";
 import ReadingsList from "./pages/ReadingsList";
-import UnitModelList from "./pages/UnitModelList"; // <-- Import the page
+import UnitModelList from "./pages/UnitModelList";
 import Dashboard from "./pages/Dashboard";
 import ConfigurationUploads from "./pages/ConfigurationUploads";
 import RecipientList from "./pages/RecipientList";
 import RecipientSetList from "./pages/RecipientSetList";
 import TriggerList from "./pages/TriggerList";
+import { LoginPage } from "./pages/LoginPage";
 
 // Wrapper component for readings with sensor parameter
 const ReadingsWithSensor = () => {
@@ -38,25 +37,59 @@ const ReadingsWithUnit = () => {
     return <ReadingsList unitId={unitId ? parseInt(unitId, 10) : undefined} />;
 };
 
-export const App = () => {
+const App = () => {
     const auth = useAppSelector(selectAuth);
+    const [isInitialized, setIsInitialized] = useState(false);
+    
+    // Handle initial app load - don't show spinner during startup
+    useEffect(() => {
+        // Give a brief moment for Redux Persist to rehydrate
+        const timer = setTimeout(() => {
+            setIsInitialized(true);
+        }, 100);
+        
+        return () => clearTimeout(timer);
+    }, []);
+    
+    // Only show loading spinner during actual authentication operations
+    // Not during initial app load or when already authenticated
+    const shouldShowLoadingSpinner: boolean = isInitialized && 
+        auth.status === "loading" && 
+        // Don't show spinner if we're just starting up
+        !!(auth.accessToken || auth.refreshToken || auth.user);
+    
     if (!auth.user) {
         return (
-            <Spin spinning={auth.status == "loading"}>
-                <Routes>
-                    <Route path="/" element={<DefaultLayout />}>
-                        <Route index element={<SystemStatus />} />
-                        <Route path="register" element={<RegisterPage />} />
-                        {/*<Route path="login" element={<LoginPage />} />*/}
-                        <Route path="*" element={<NotFoundPage />} />
-                    </Route>
-                </Routes>
-            </Spin>
+            <div className="app-container">
+                {shouldShowLoadingSpinner ? (
+                    <div>
+                        <Spin size="large" tip="Loading...">
+                            <div style={{ padding: '50px' }} />
+                        </Spin>
+                    </div>
+                ) : (
+                    <Routes>
+                        <Route path="/" element={<DefaultLayout />}>
+                            <Route index element={<LoginPage />} />
+                            <Route path="login" element={<LoginPage />} />
+                            <Route path="system-status" element={<SystemStatus />} />
+                            <Route path="register" element={<RegisterPage />} />
+                            <Route path="*" element={<NotFoundPage />} />
+                        </Route>
+                    </Routes>
+                )}
+            </div>
         );
     } else {
         return (
-            <>
-                <Spin spinning={auth.status == "loading"}>
+            <div className="app-container">
+                {shouldShowLoadingSpinner ? (
+                    <div>
+                        <Spin size="large" tip="Loading...">
+                            <div style={{ padding: '50px' }} />
+                        </Spin>
+                    </div>
+                ) : (
                     <Routes>
                         <Route path="/" element={<UserLayout {...auth.user} />}>
                             <Route index element={<Dashboard />} />
@@ -80,8 +113,8 @@ export const App = () => {
                             <Route path="*" element={<NotFoundPage />} />
                         </Route>
                     </Routes>
-                </Spin>
-            </>
+                )}
+            </div>
         );
     }
 };

@@ -1,6 +1,7 @@
 using Application.Companies;
 using Domain;
 using Infrastructure.DbClasses;
+using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,7 +22,9 @@ public class CompanyRepository(ApplicationDbContext context, IMapper mapper) : I
         var entities = await context.Companies
             .AsNoTracking()
             .ToListAsync();
-        return mapper.Map<List<Company>>(entities);
+
+        var response = entities.Adapt<List<Company>>();
+        return response;
     }
 
     public async Task<Company> AddAsync(Company company)

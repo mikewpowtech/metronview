@@ -14,5 +14,10 @@ namespace Application.Triggers
         Task<bool> UpdateAsync(Trigger trigger);
         Task<bool> DeleteAsync(int id);
         Task<List<Trigger>> GetEnabledTriggersAsync();
+        bool IsQuenched(BreachedTriggerDto alarm);
+        void NoteAlarmTrigger(BreachedTriggerDto alarm, bool v);
+        void NoteAlarmNotTriggered(BreachedTriggerDto alarm);
+        void AcknowledgeProcessing(int value);
+        Task<List<BreachedTriggerDto>> GetNotReportedBreachesAsync(TriggerTypeCode notReportedForPeriod);
     }
 }

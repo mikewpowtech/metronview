@@ -1,3 +1,4 @@
+using Application.Triggers;
 using Domain;
 
 namespace Application.Sensors;
@@ -12,4 +13,5 @@ public interface ISensorService
     Task<Sensor> AddAsync(Sensor sensor);
     Task<bool> UpdateAsync(Sensor sensor);
     Task<bool> DeleteAsync(int id);
+    Task CalculateSensorAsync(BreachedTriggerDto triggerDto);
 }
