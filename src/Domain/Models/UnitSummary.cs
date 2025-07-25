@@ -14,7 +14,7 @@ public class UnitSummary
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
     public string? UnitCode { get; set; }
-    public int? CompanyID { get; set; }
+    public int? CompanyId { get; set; }
     public string? Company { get; set; }
     
     // Additional fields for better dashboard information

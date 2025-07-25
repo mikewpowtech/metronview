@@ -12,7 +12,7 @@ public class Unit
     public string? ClientCode { get; set; } // varchar(100), NULL
     public string? Secret { get; set; } // varchar(100), NULL
     public UnitStatusType Status { get; set; } // char(1), NOT NULL
-    public int? CompanyID { get; set; } // Now required (non-nullable)
+    public int? CompanyId { get; set; } // Now required (non-nullable)
     public Company? Company { get; set; }
     public int? DaysBeforeNotReported { get; set; } // int, NULL
     public string? CustomFieldValues { get; set; } // nvarchar(max), NULL

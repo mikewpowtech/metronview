@@ -4,6 +4,7 @@ using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250717172133_AddIsAlarmToMostRecentReadings")]
+    partial class AddIsAlarmToMostRecentReadings
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -80,73 +83,20 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("CompanyId");
+                        .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AlarmEmailFromAddress")
-                        .HasMaxLength(254)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(254)");
-
-                    b.Property<string>("AlarmEmailReplyToAddress")
-                        .HasMaxLength(254)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(254)");
-
-                    b.Property<string>("AlarmSmsBodyTemplate")
-                        .HasMaxLength(2147483647)
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("AlarmSmsSubjectTemplate")
-                        .HasMaxLength(2147483647)
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("AlarmSmsToAddressTemplate")
-                        .HasMaxLength(254)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(254)");
-
-                    b.Property<string>("CustomFieldDefinitions")
-                        .HasMaxLength(2147483647)
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Dashboard")
-                        .HasMaxLength(2147483647)
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("DaysBeforeRTUDataDeletion")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("DefaultDaysBeforeNotReported")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("DefaultDaysHistory")
-                        .HasColumnType("int");
-
-                    b.Property<string>("HostHeader")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)")
-                        .HasColumnName("CompanyName");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("ParentCompanyId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique()
-                        .HasDatabaseName("Two companies cannot have the same name");
-
-                    b.HasIndex("ParentCompanyId");
-
-                    b.ToTable("Companies", (string)null);
+                    b.ToTable("Companies");
                 });
 
             modelBuilder.Entity("Infrastructure.DbClasses.ConfigurationUploadDb", b =>
@@ -507,7 +457,7 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("CompanyId")
+                    b.Property<int?>("CompanyID")
                         .HasColumnType("int");
 
                     b.Property<string>("CustomFieldValues")
@@ -541,7 +491,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CompanyId");
+                    b.HasIndex("CompanyID");
 
                     b.HasIndex("UnitTypeId");
 
@@ -586,12 +536,11 @@ namespace Infrastructure.Migrations
                     b.Property<bool>("AutoConfig")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("BattAlarm")
+                    b.Property<bool>("BatteryAlarm")
                         .HasColumnType("bit");
 
                     b.Property<string>("Carrier")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("FailedCallout")
                         .HasColumnType("bit");
@@ -609,7 +558,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("UnitId");
 
-                    b.ToTable("UnitStatuses", (string)null);
+                    b.ToTable("UnitStatuses");
                 });
 
             modelBuilder.Entity("Infrastructure.Identity.ApplicationUserDb", b =>
@@ -855,17 +804,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("RecipientSet");
                 });
 
-            modelBuilder.Entity("Infrastructure.DbClasses.CompanyDb", b =>
-                {
-                    b.HasOne("Infrastructure.DbClasses.CompanyDb", "ParentCompany")
-                        .WithMany("ManagedCompanies")
-                        .HasForeignKey("ParentCompanyId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("Cannot delete a company that manages other companies");
-
-                    b.Navigation("ParentCompany");
-                });
-
             modelBuilder.Entity("Infrastructure.DbClasses.ConfigurationUploadDb", b =>
                 {
                     b.HasOne("Infrastructure.DbClasses.UnitDb", "Unit")
@@ -1000,7 +938,7 @@ namespace Infrastructure.Migrations
                 {
                     b.HasOne("Infrastructure.DbClasses.CompanyDb", "Company")
                         .WithMany()
-                        .HasForeignKey("CompanyId")
+                        .HasForeignKey("CompanyID")
                         .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("Infrastructure.DbClasses.UnitModelDb", "UnitType")
@@ -1103,11 +1041,6 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Infrastructure.DbClasses.AlarmDb", b =>
                 {
                     b.Navigation("Triggers");
-                });
-
-            modelBuilder.Entity("Infrastructure.DbClasses.CompanyDb", b =>
-                {
-                    b.Navigation("ManagedCompanies");
                 });
 
             modelBuilder.Entity("Infrastructure.DbClasses.UnitDb", b =>

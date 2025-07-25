@@ -32,6 +32,19 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     {
         base.OnConfiguring(optionsBuilder);
         
+        // Only configure if not already configured (to avoid overriding DI configuration)
+        if (!optionsBuilder.IsConfigured)
+        {
+            // This is a fallback configuration - prefer configuring in DI container
+            optionsBuilder.UseSqlServer(options => 
+            {
+                options.EnableRetryOnFailure(
+                    maxRetryCount: 3,
+                    maxRetryDelay: TimeSpan.FromSeconds(30),
+                    errorNumbersToAdd: null);
+            });
+        }
+        
         // Suppress the pending model changes warning
         // This is a temporary solution until the migration issue is resolved
         // The warning indicates that the EF model doesn't match the database schema
@@ -43,6 +56,50 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+
+        modelBuilder.Entity<UnitStatusDb>(entity =>
+        {
+            entity.HasKey(r => new { r.DateReceivedUtc, r.UnitId });
+            // Map to the correct table name
+            entity.ToTable("UnitStatuses");
+
+            // Configure properties
+            entity.Property(s => s.UnitId)
+                .IsRequired();
+
+            entity.Property(s => s.DateReceivedUtc)
+                .IsRequired();
+
+            entity.Property(s => s.Mip)
+                .IsRequired();
+
+            entity.Property(s => s.FailedCallout)
+                .IsRequired();
+
+            entity.Property(s => s.BattAlarm)
+                .IsRequired();
+
+            entity.Property(s => s.AutoConfig)
+                .IsRequired();
+
+            entity.Property(s => s.Temperature)
+                .IsRequired(false);
+
+            entity.Property(s => s.Carrier)
+                .HasMaxLength(100)
+                .IsRequired(false);
+
+            entity.Property(s => s.Signal)
+                .IsRequired(false);
+
+            // Foreign key relationship to Units
+            entity.HasOne(s => s.Unit)
+                .WithMany()
+                .HasForeignKey(s => s.UnitId)
+                .OnDelete(DeleteBehavior.NoAction);
+            // Optionally, configure relationships and properties here
+        });
 
         modelBuilder.Entity<AlarmDb>(entity =>
         {
@@ -171,7 +228,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
             entity.HasOne(u => u.Company)
             .WithMany()
-            .HasForeignKey(u => u.CompanyID)
+            .HasForeignKey(u => u.CompanyId)
             .OnDelete(DeleteBehavior.NoAction)
                 .IsRequired(false);
         });
@@ -216,17 +273,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.HasIndex(r => r.SensorId)
                 .IsUnique()
                 .HasDatabaseName("IX_MostRecentReadings_SensorId_Unique");
-        });
-
-
-        modelBuilder.Entity<UnitStatusDb>(entity =>
-        {
-            entity.HasKey(r => new { r.DateReceivedUtc, r.UnitId });
-            entity.HasOne(r => r.Unit)
-                    .WithMany()
-                    .HasForeignKey(r => r.UnitId)
-                    .OnDelete(DeleteBehavior.NoAction);
-            // Optionally, configure relationships and properties here
         });
 
         // MostRecentUnitStatusDb configuration (for MostRecentUnitStatuses table)
@@ -294,6 +340,89 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             // Create index for better query performance
             entity.HasIndex(e => new { e.ForeignKeyId, e.CustomFieldType })
                 .HasDatabaseName("IX_CustomFields_ForeignKeyId_CustomFieldType");
+        });
+
+        modelBuilder.Entity<CompanyDb>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            
+            // Map to the correct table name
+            entity.ToTable("Companies");
+            
+            // Map the primary key to CompanyID column
+            entity.Property(e => e.Id)
+                .HasColumnName("CompanyId") // Changed from "CompanyID" to match migration
+                .ValueGeneratedOnAdd();
+            
+            // Configure CompanyName with constraints
+            entity.Property(e => e.Name)
+                .HasColumnName("CompanyName")
+                .HasMaxLength(256)
+                .IsRequired();
+            
+            // Create unique constraint on CompanyName
+            entity.HasIndex(e => e.Name)
+                .IsUnique()
+                .HasDatabaseName("Two companies cannot have the same name");
+            
+            // Configure ManagingCompanyID
+            entity.Property(e => e.ParentCompanyId)
+                .IsRequired(false);
+            
+            // Configure other properties with proper column names and constraints
+            entity.Property(e => e.HostHeader)
+                .HasMaxLength(255)
+                .IsRequired(false);
+            
+            entity.Property(e => e.DefaultDaysHistory)
+                .IsRequired(false);
+            
+            entity.Property(e => e.DefaultDaysBeforeNotReported)
+                .IsRequired(false);
+            
+            entity.Property(e => e.AlarmEmailFromAddress)
+                .HasMaxLength(254)
+                .IsUnicode(false) // varchar
+                .IsRequired(false);
+            
+            entity.Property(e => e.AlarmEmailReplyToAddress)
+                .HasMaxLength(254)
+                .IsUnicode(false) // varchar
+                .IsRequired(false);
+            
+            entity.Property(e => e.AlarmSmsToAddressTemplate)
+                .HasMaxLength(254)
+                .IsUnicode(false) // varchar
+                .IsRequired(false);
+            
+            entity.Property(e => e.AlarmSmsSubjectTemplate)
+                .HasMaxLength(int.MaxValue) // nvarchar(max)
+                .IsRequired(false);
+            
+            entity.Property(e => e.AlarmSmsBodyTemplate)
+                .HasMaxLength(int.MaxValue) // nvarchar(max)
+                .IsRequired(false);
+            
+            entity.Property(e => e.DaysBeforeRTUDataDeletion)
+                .IsRequired(false);
+            
+            entity.Property(e => e.CustomFieldDefinitions)
+                .HasMaxLength(int.MaxValue) // nvarchar(max)
+                .IsRequired(false);
+            
+            entity.Property(e => e.Dashboard)
+                .HasMaxLength(int.MaxValue) // nvarchar(max)
+                .IsRequired(false);
+            
+            // Self-referencing foreign key relationship
+            entity.HasOne(e => e.ParentCompany)
+                .WithMany(e => e.ManagedCompanies)
+                .HasForeignKey(e => e.ParentCompanyId)
+                .HasConstraintName("Cannot delete a company that manages other companies")
+                .OnDelete(DeleteBehavior.NoAction);
+            
+            // Check constraints (these will be handled by database constraints, 
+            // but you can add custom validation in your domain logic)
         });
     }
 }

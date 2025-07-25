@@ -1,11 +1,9 @@
 ﻿using Application.Alarms;
+using Application.Options;
 using Application.Readings;
 using Application.Triggers;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Presentation.AlarmServer.Options;
-using System;
-using System.Threading;
 
 namespace Presentation.AlarmServer.ServiceWorkers;
 
@@ -17,7 +15,7 @@ public class AlarmServiceWorker(ILoggerFactory loggerFactory,
 {
     private readonly IReadingService readingService = readingService;
 
-    public override void Run(CancellationToken cancellationToken)
+    public override async void Run(CancellationToken cancellationToken)
     {
         base.Run(cancellationToken);
         if (workerOptions.AlarmPollerInterval == 0) { logger.LogTrace("{0} workerOptions.AlarmPollerInterval=0, exiting Run()...", className); }
@@ -28,7 +26,7 @@ public class AlarmServiceWorker(ILoggerFactory loggerFactory,
                 try
                 {
                     logger.LogTrace("running {0}....", className);
-                    ProcessAlarms(readingService.GetNewReadingsWithAlarms());
+                    await ProcessAlarmsAsync(readingService.GetNewReadingsWithAlarms());
                     cancellationToken.WaitHandle.WaitOne(workerOptions.AlarmPollerInterval);
                 }
                 catch (Exception ex)

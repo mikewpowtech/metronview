@@ -14,7 +14,7 @@ public class UnitDb
     public string? UnitCode { get; set; } // varchar(100), NULL
     public string? Secret { get; set; } // varchar(100), NULL
     public UnitStatusType Status { get; set; }
-    public int? CompanyID { get; set; }// Now required (non-nullable)
+    public int? CompanyId { get; set; }// Now required (non-nullable)
     
     // Foreign key navigation property
     public CompanyDb? Company { get; set; }

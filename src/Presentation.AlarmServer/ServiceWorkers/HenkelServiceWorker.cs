@@ -2,18 +2,13 @@
 using Application.ConfigurationUploads;
 using Application.CustomFields;
 using Application.CustomFields.Dtos;
+using Application.Options;
 using Application.Triggers;
 using Domain.Enums;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Presentation.AlarmServer.Data.SpiderScope;
-using Presentation.AlarmServer.Helpers;
 using Presentation.AlarmServer.Models;
 using Presentation.AlarmServer.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 
 namespace Presentation.AlarmServer.ServiceWorkers;
 

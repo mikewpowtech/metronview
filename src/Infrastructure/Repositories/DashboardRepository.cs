@@ -32,7 +32,7 @@ namespace Infrastructure.Repositories
                         UnitCode = u.UnitCode,
                         UnitType = u.UnitType.Name ?? "Unknown",
                         Company = u.Company.Name ?? "Unknown",
-                        CompanyID = u.CompanyID,
+                        CompanyId = u.CompanyId,
                         SensorCount = u.Sensors.Count(),
                         // Add other properties as needed with simpler logic
                     })

@@ -9,7 +9,8 @@ public class MostRecentReadingDb
     public int UnitId { get; set; } // FK to UnitDb.Id, NOT NULL
     public DateTime DateRecordedUtc { get; set; } // NOT NULL
     public DateTime DateReceivedUtc { get; set; } // NOT NULL
-    public double? Value { get; set; }
+    public double Value { get; set; } // NOT NULL
+    public bool IsAlarm { get; set; } // NOT NULL
 
     // Navigation properties
     public SensorDb? Sensor { get; set; }

@@ -1,21 +1,18 @@
-using Presentation.AlarmServer.Data.TelemetrySQL;
-using Presentation.AlarmServer.Data.SpiderScope;
-using Presentation.AlarmServer.Options;
-using Presentation.AlarmServer.Email;
-using Presentation.AlarmServer.Alarms;
-using Presentation.AlarmServer.ServiceWorkers;
-using System;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using System.IO;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Infrastructure;
 using Application.Alarms;
+using Application.Messaging;
+using Application.Options;
+using Application.Recipients;
+using Application.Sensors;
+using Application.Triggers;
+using Application.Units;
+using Infrastructure;
+using Infrastructure.Mapping;
 using Infrastructure.Repositories;
 using Mapster;
-using Infrastructure.Mapping;
-using Application.Triggers;
+using Microsoft.EntityFrameworkCore;
+using Presentation.AlarmServer.Data.SpiderScope;
+using Presentation.AlarmServer.Options;
+using Presentation.AlarmServer.ServiceWorkers;
 
 
 Console.WriteLine($"ENV: {Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}");
@@ -48,12 +45,15 @@ var host = Host.CreateDefaultBuilder(args)
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
-        services.AddSingleton<ISqlConnectionProvider, SqlConnectionProvider>();
-        services.AddSingleton<ITelemetryDatabase,TelemetryDatabase>();
+        //services.AddSingleton<ISqlConnectionProvider, SqlConnectionProvider>();
+        //services.AddSingleton<ITelemetryDatabase,TelemetryDatabase>();
         var sp=services.BuildServiceProvider();
+        services.AddTransient<IRecipientService, RecipientService>();
+        services.AddTransient<IRecipientRepository, RecipientRepository>();
+        services.AddTransient<IUnitRepository, UnitRepository>();
+        services.AddTransient<ISensorService, SensorService>();
+        services.AddTransient<ISensorRepository, SensorRepository>();
         services.AddTransient<IMessengerService,MessengerService>();
-        //services.AddTransient<IAlarmServerService,AlarmServerService>();
-        //services.AddTransient<ISensorServerService,SensorServerService>();
         services.AddTransient<IAlarmRepository,AlarmRepository>();
         services.AddTransient<ITriggerRepository,TriggerRepository>();
         services.AddTransient<IAlarmService, AlarmService>();

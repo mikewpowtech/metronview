@@ -12,6 +12,7 @@ using Application.Units;
 using Mapster;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Application.Messaging;
 
 namespace Application
 {
@@ -28,6 +29,7 @@ namespace Application
             services.AddScoped<IReadingService, ReadingService>();
             services.AddScoped<IDashboardService, DashboardService>();
             services.AddScoped<IConfigurationUploadService, ConfigurationUploadService>();
+            services.AddScoped<IMessengerService, MessengerService>();
             services.AddScoped<IAlarmService, AlarmService>();
             services.AddScoped<ITriggerTypeService, TriggerTypeService>();
             services.AddScoped<ICommunicationModeService, CommunicationModeService>();

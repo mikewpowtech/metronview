@@ -12,6 +12,20 @@
     <MinVerTagPrefix>alarm-server/v</MinVerTagPrefix>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Data\DepreciatedTelemetrySQL\**" />
+    <Compile Remove="DepreciatedAlarms\**" />
+    <Compile Remove="DepreciatedEmail\**" />
+    <Content Remove="Data\DepreciatedTelemetrySQL\**" />
+    <Content Remove="DepreciatedAlarms\**" />
+    <Content Remove="DepreciatedEmail\**" />
+    <EmbeddedResource Remove="Data\DepreciatedTelemetrySQL\**" />
+    <EmbeddedResource Remove="DepreciatedAlarms\**" />
+    <EmbeddedResource Remove="DepreciatedEmail\**" />
+    <None Remove="Data\DepreciatedTelemetrySQL\**" />
+    <None Remove="DepreciatedAlarms\**" />
+    <None Remove="DepreciatedEmail\**" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="../Infrastructure/Infrastructure.csproj" />
     <ProjectReference Include="..\Substituter\Application.Substituter.csproj" />
   </ItemGroup>

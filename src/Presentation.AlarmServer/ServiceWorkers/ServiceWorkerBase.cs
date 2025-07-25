@@ -14,11 +14,8 @@ public abstract class ServiceWorkerBase: IHostedServiceWorker
     protected readonly ILogger<ServiceWorkerBase> logger;
     protected readonly ILoggerFactory loggerFactory;
     private readonly ITriggerService triggerService;
-
-    //private readonly IAlarmServerService depreciatedAlarmService;
     private readonly IAlarmService alarmService;
     protected readonly WorkerOptions workerOptions;
-    //protected readonly ITelemetryDatabase telemetryDatabase;
     protected string className { get; init; }
 
     public ServiceWorkerBase(
@@ -27,10 +24,9 @@ public abstract class ServiceWorkerBase: IHostedServiceWorker
         IAlarmService alarmService,
         ITriggerService triggerService)
     {
-        //this.loggerFactory = loggerFactory;
         this.triggerService = triggerService;
-        //this.depreciatedAlarmService = depreciatedAlarmService;
         this.workerOptions = workerOptions.Value;
+        this.alarmService = alarmService;
         this.logger = loggerFactory.CreateLogger<ServiceWorkerBase>();
         className = GetType().Name;
     }
@@ -40,38 +36,39 @@ public abstract class ServiceWorkerBase: IHostedServiceWorker
         logger.LogDebug("starting {0}......", className);
     }
 
-    public bool ProcessAlarms(IList<BreachedTriggerDto> alarmsToHandle)
+    public async Task<bool> ProcessAlarmsAsync(IList<BreachedTriggerDto> triggersToHandle)
     {
-        foreach (var alarm in alarmsToHandle)
+        foreach (var trigger in triggersToHandle)
         {
-            using var logScope = logger.BeginScope("{AlarmId} {AlarmType}  {SensorId}", alarm.TriggerId, alarm.TriggerType.Code, alarm.SensorId);
+            using var logScope = logger.BeginScope("{AlarmId} {AlarmType} {SensorId}", trigger.TriggerId, trigger.TriggerType.Code, trigger.SensorId);
             logger.LogDebug("Processing");
-            switch (alarmService.ShouldSendAlarmUnlessQuenched(alarm).Action)
+            var result= alarmService.ShouldSendAlarmUnlessQuenched(trigger);
+            switch (result.Action)
             {
                 case SendAlarmAction.Send:
-                    var isQuenched = triggerService.IsQuenched(alarm);
+                    var isQuenched = await triggerService.IsQuenchedAsync(trigger);
                     if (!isQuenched)
                     {
-                        logger.LogTrace("Sending alarm via {@RecipientMode}", alarm.CommunicationMode);
-                        alarmService.SendAlarm(alarm);
+                        logger.LogTrace("Sending alarm via {@RecipientMode}", trigger.CommunicationMode);
+                        alarmService.SendAlarm(trigger);
                     }
 
-                    triggerService.NoteAlarmTrigger(alarm, !isQuenched);
+                    triggerService.NoteAlarmTrigger(trigger, !isQuenched);
                     break;
                 case SendAlarmAction.DoNotSend:
 
-                    triggerService.NoteAlarmNotTriggered(alarm);
+                    triggerService.NoteAlarmNotTriggered(trigger);
                     break;
                 case SendAlarmAction.Skip:
                     break;
             }
 
-            if (alarm.PendingAlarmTriggerId != int.MinValue)
+            if (trigger.PendingAlarmTriggerId != int.MinValue)
             {
-                triggerService.AcknowledgeProcessing(alarm.PendingAlarmTriggerId.Value);
+                triggerService.AcknowledgeProcessing(trigger.PendingAlarmTriggerId.Value);
             }
         }
 
-        return alarmsToHandle.Count > 0;
+        return triggersToHandle.Count > 0;
     }
 }

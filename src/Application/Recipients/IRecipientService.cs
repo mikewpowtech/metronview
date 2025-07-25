@@ -1,3 +1,4 @@
+using Application.Triggers;
 using Domain;
 
 namespace Application.Recipients
@@ -9,5 +10,6 @@ namespace Application.Recipients
         Task<Recipient> AddAsync(Recipient recipient);
         Task<bool> UpdateAsync(Recipient recipient);
         Task<bool> DeleteAsync(int id);
+        Task<IEnumerable<RecipientTemplates>> GetRecipientTemplatesAsync(BreachedTriggerDto triggerDto);
     }
 }

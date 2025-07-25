@@ -1,19 +1,15 @@
 ﻿using Application.Alarms;
+using Application.Options;
 using Application.Triggers;
-using Domain.Enums;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Presentation.AlarmServer.Data.TelemetrySQL;
 using Presentation.AlarmServer.Options;
-using System;
-using System.Threading;
 
 namespace Presentation.AlarmServer.ServiceWorkers;
 
 // us a primary constructor for brevity of code and consistency with other service workers
 public class NotReportedServiceWorker(
     ILoggerFactory loggerFactory, 
-    IOptions<WorkerOptions> workerOptions, 
+    IOptions<WorkerOptions> workerOptions,
     //IAlarmServerService depreciatedAlarmService, 
     IAlarmService alarmService, ITriggerService triggerService)
     : ServiceWorkerBase(loggerFactory,workerOptions, alarmService, triggerService
@@ -27,16 +23,16 @@ public class NotReportedServiceWorker(
         if (workerOptions.NotReportedPollInterval == 0) { logger.LogTrace("NotReportedPollInterval=0, Exit Run()"); }
         else
         {
-            var st=await alarmService.GetAllAsync();
-            logger.LogTrace("got alarm count {AlarmCount}", st.Count);
+            //var st=await alarmService.GetAllAsync();
+            //logger.LogTrace("got alarm count {AlarmCount}", st.Count);
             logger.LogTrace("Enter Run()");
             while (!cancellationToken.IsCancellationRequested)
                 try
                 {
                     logger.LogDebug("Processing");
-                    var alarmsToHandle = await triggerService.GetNotReportedBreachesAsync(TriggerTypeCode.NotReportedForPeriod);
+                    var alarmsToHandle = await triggerService.GetNotReportedBreachesAsync();
                     //var alarmsToHandle = telemetryDatabase.GetNotReportedReadingsWithAlarms();
-                    ProcessAlarms(alarmsToHandle);
+                    await ProcessAlarmsAsync(alarmsToHandle);
                     cancellationToken.WaitHandle.WaitOne(workerOptions.NotReportedPollInterval);
                 }
                 catch (Exception ex)

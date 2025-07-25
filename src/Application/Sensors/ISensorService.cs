@@ -14,4 +14,5 @@ public interface ISensorService
     Task<bool> UpdateAsync(Sensor sensor);
     Task<bool> DeleteAsync(int id);
     Task CalculateSensorAsync(BreachedTriggerDto triggerDto);
+    string Substitute(BreachedTriggerDto trigger, string templateSnippet);
 }

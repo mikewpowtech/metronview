@@ -1,11 +1,10 @@
-namespace Infrastructure.DbClasses;
+namespace Domain;
 
-public class UnitStatusDb
+public class UnitStatus
 {
-    // Compound primary key: RTUID + DateReceived
     public int UnitId { get; set; }
     public DateTime DateReceivedUtc { get; set; }
-
+    
     public bool Mip { get; set; }
     public bool FailedCallout { get; set; }
     public bool BattAlarm { get; set; }
@@ -13,7 +12,7 @@ public class UnitStatusDb
     public float? Temperature { get; set; }
     public string? Carrier { get; set; }
     public float? Signal { get; set; }
-
-    // Navigation property to RTU/Unit
-    public UnitDb? Unit { get; set; }
+    
+    // Navigation property to Unit domain entity
+    public Unit? Unit { get; set; }
 }

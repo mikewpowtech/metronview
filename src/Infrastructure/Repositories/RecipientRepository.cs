@@ -1,4 +1,5 @@
 using Application.Recipients;
+using Application.Triggers;
 using Domain;
 using Infrastructure.DbClasses;
 using Mapster;
@@ -6,51 +7,69 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories
 {
-    public class RecipientRepository : IRecipientRepository
+    public class RecipientRepository(ApplicationDbContext context) : IRecipientRepository
     {
-        private readonly ApplicationDbContext _context;
-
-        public RecipientRepository(ApplicationDbContext context)
-        {
-            _context = context;
-        }
-
         public async Task<Recipient?> GetByIdAsync(int id)
         {
-            var db = await _context.Set<RecipientDb>().FirstOrDefaultAsync(r => r.Id == id);
+            var db = await context.Set<RecipientDb>().FirstOrDefaultAsync(r => r.Id == id);
             return db == null ? null : db.Adapt<Recipient>();
         }
 
         public async Task<List<Recipient>> GetAllAsync()
         {
-            var dbList = await _context.Set<RecipientDb>().ToListAsync();
+            var dbList = await context.Set<RecipientDb>().ToListAsync();
             return dbList.Adapt<List<Recipient>>();
         }
 
         public async Task<Recipient> AddAsync(Recipient recipient)
         {
             var db = recipient.Adapt<RecipientDb>();
-            _context.Set<RecipientDb>().Add(db);
-            await _context.SaveChangesAsync();
+            context.Set<RecipientDb>().Add(db);
+            await context.SaveChangesAsync();
             return db.Adapt<Recipient>();
         }
 
         public async Task<bool> UpdateAsync(Recipient recipient)
         {
-            var db = await _context.Set<RecipientDb>().FindAsync(recipient.Id);
+            var db = await context.Set<RecipientDb>().FindAsync(recipient.Id);
             if (db == null) return false;
             recipient.Adapt(db);
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return true;
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var db = await _context.Set<RecipientDb>().FindAsync(id);
+            var db = await context.Set<RecipientDb>().FindAsync(id);
             if (db == null) return false;
-            _context.Set<RecipientDb>().Remove(db);
-            await _context.SaveChangesAsync();
+            context.Set<RecipientDb>().Remove(db);
+            await context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<IEnumerable<RecipientTemplates>> GetRecipientTemplatesAsync(BreachedTriggerDto triggerDto)
+        {
+            var query = from alarm in context.Alarms
+                        join recipientSet in context.RecipientSets on alarm.RecipientSetId equals recipientSet.Id
+                        from recipient in recipientSet.Recipients  // Use navigation property
+                        join company in context.Companies on recipient.CompanyId equals company.Id
+                        where alarm.Id == triggerDto.AlarmSetId
+                              && recipient.Sms != null
+                              && recipient.IsEnabled
+                        select new RecipientTemplates
+                        {
+                            Sms = recipient.Sms,
+                            Email = recipient.Email,
+                            ToAddressTemplate = company.AlarmSmsToAddressTemplate,
+                            SubjectTemplate = company.AlarmSmsSubjectTemplate,
+                            BodyTemplate = company.AlarmSmsBodyTemplate,
+                            FromAddress = company.AlarmEmailFromAddress,
+                            ReplyToAddress = company.AlarmEmailReplyToAddress,
+                            CompanyId = recipient.CompanyId,
+                            RecipientId = recipient.Id
+                        };
+
+            return await query.ToListAsync();
         }
     }
 }

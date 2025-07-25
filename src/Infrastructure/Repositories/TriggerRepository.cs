@@ -138,10 +138,12 @@ namespace Infrastructure.Repositories
         {
             var now = DateTime.UtcNow;
 
+
             var query =
                 from sensor in context.Sensors
                 join alarm in context.Alarms on sensor.AlarmId equals alarm.Id
                 join trigger in context.Triggers on alarm.Id equals trigger.AlarmId
+                join recipientMode in context.RecipientModes on trigger.CommunicationModeId equals recipientMode.Id
                 join mostRecent in context.MostRecentReadings on sensor.Id equals mostRecent.SensorId into readingJoin
                 from mostRecent in readingJoin.DefaultIfEmpty()
                 where trigger.IsEnabled
@@ -155,19 +157,32 @@ namespace Infrastructure.Repositories
                     SensorId = sensor.Id,
                     TriggerTypeId = trigger.TriggerTypeId,
                     TriggerValue = trigger.TriggerValue,
+                    TriggerType = trigger.TriggerType.Adapt<TriggerType>(),
+                    CommunicationMode = recipientMode.Adapt<CommunicationMode>(),
                     CommunicationModeId = trigger.CommunicationModeId,
                     Subject = trigger.Subject,
                     Body = trigger.Body,
-                    Value = mostRecent.Value.HasValue?mostRecent.Value.Value:0,
+                    Value = mostRecent != null ? mostRecent.Value : 0,
                     IsAlarm = false, // MostRecentReadings.IsAlarm not present in schema, set as null or add if available
-                    DateRecordedUtc = mostRecent.DateRecordedUtc,
+                    DateRecordedUtc = mostRecent != null ? mostRecent.DateRecordedUtc : now,
                     PendingAlarmTriggerId = null, // No equivalent in EF, set as null
                     AlarmSetId = alarm.Id, // Alarm is AlarmSet in this mapping
                     TriggerId = trigger.Id,
-                    MinimumSendIntervalMinutes = trigger.MinimumSendIntervalMinutes
+                    MinimumSendIntervalMinutes = trigger.MinimumSendIntervalMinutes,
+                    SendAlarmForNotReported =true //always true for this
                 };
 
-            return await query.ToListAsync();
+            var result=new List<BreachedTriggerDto>();
+            try
+            {
+                result = await query.ToListAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return result;
         }
 
         /// <returns>true if this alarm has already been sent within its quench period; false otherwise</returns>
@@ -181,8 +196,8 @@ namespace Infrastructure.Repositories
             if (mostRecentAlarm.HasValue)
             {
                 var minutesSinceLastSend = (DateTime.UtcNow - mostRecentAlarm.Value).TotalMinutes;
-                logger.LogDebug("Is quenched? {MinutesSinceLastSend} {MinimumSendIntervalMinutes}", 
-                    minutesSinceLastSend, trigger.MinimumSendIntervalMinutes);
+                logger.LogDebug("Should send every(mins) {MinimumSendIntervalMinutes}, last sent(mins) {MinutesSinceLastSend}",
+                    trigger.MinimumSendIntervalMinutes, minutesSinceLastSend);
                 return minutesSinceLastSend < trigger.MinimumSendIntervalMinutes;
             }
 
