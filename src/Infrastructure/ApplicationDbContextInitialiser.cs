@@ -17,7 +17,7 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
             if (context.Database.IsSqlServer())
             {
                 // Check if database exists, if not create it
-                await context.Database.EnsureCreatedAsync();
+                //await context.Database.EnsureCreatedAsync();
                 
                 // Try to apply migrations, but handle IDENTITY property conflicts
                 try
