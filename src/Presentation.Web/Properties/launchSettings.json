@@ -5,7 +5,7 @@
       "commandLineArgs": "run dev",
       "workingDirectory": ".",
       "launchBrowser": true,
-      "launchUrl": "http://localhost:3000",
+      "launchUrl": "http://localhost:1000",
       "environmentVariables": {
         "NODE_ENV": "development",
         "BROWSER": "none"

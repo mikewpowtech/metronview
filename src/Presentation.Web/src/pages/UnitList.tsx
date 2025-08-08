@@ -67,7 +67,7 @@ const UnitList: React.FC = () => {
             unitCode: record.unitCode ?? "",
             secret: record.secret ?? "",
             status: record.status ?? 0,
-            companyID: record.companyID ?? undefined,
+            companyID: record.companyId ?? undefined,
             daysBeforeNotReported: record.daysBeforeNotReported,
             customFieldValues: record.customFieldValues ?? "",
         });
@@ -152,8 +152,34 @@ const UnitList: React.FC = () => {
 
     // Sensors table as a ReactNode (function that takes sensors and unit)
     const getSensorsTable = (unit: Unit): React.ReactNode => {
-        return(<SensorList unitId={unit.id}></SensorList>);
+        return(<SensorList unitId={unit.id}/>);
     };
+
+    //const getSensorsTable = (unit: Unit): React.ReactNode => {
+    //    return (
+    //        <div style={{
+    //            position: 'relative',
+    //            width: '100%',
+    //            maxWidth: '100%',
+    //            height: '200px', // Fixed height instead of minHeight
+    //            padding: '16px',
+    //            backgroundColor: '#fafafa',
+    //            boxSizing: 'border-box',
+    //            overflow: 'hidden' // Prevent content from expanding
+    //        }}>
+    //            <div style={{
+    //                position: 'absolute',
+    //                top: '16px',
+    //                left: '16px',
+    //                right: '16px',
+    //                bottom: '16px',
+    //                overflow: 'auto' // Allow scrolling within fixed bounds
+    //            }}>
+    //                <SensorList unitId={unit.id} />
+    //            </div>
+    //        </div>
+    //    );
+    //};
 
     const UnitListModal: React.FC = () => {
         const statusValue = Form.useWatch('status', form) || 0;
@@ -376,9 +402,7 @@ const UnitList: React.FC = () => {
                 onDelete={handleDelete}
                 customActions={customActions}
                 expandable={{
-                    expandedRowRender: (unit: Unit) => {
-                        return getSensorsTable(unit);
-                    },
+                    expandedRowRender: getSensorsTable,
                     expandedRowKeys,
                     onExpand: (_, record) => handleExpandRow(record),
                     showExpandColumn: false
@@ -387,6 +411,47 @@ const UnitList: React.FC = () => {
             />
         </div>
     );
+
+    //return (
+    //    <div style={{
+    //        padding: "12px 0 12px 30px",
+    //        width: '100%',
+    //        maxWidth: '100%',
+    //        overflow: 'hidden'
+    //    }}>
+    //        <UnitListModal />
+    //        <div style={{
+    //            width: '100%',
+    //            maxWidth: '100%',
+    //            overflow: 'auto'
+    //        }}>
+    //            <ExtendedAntDTable<Unit>
+    //                data={units}
+    //                tableColumns={unitListColumns}
+    //                title="Units"
+    //                onAdd={handleAdd}
+    //                onEdit={handleEdit}
+    //                onDelete={handleDelete}
+    //                customActions={customActions}
+    //                expandable={{
+    //                    expandedRowRender: (unit: Unit) => getSensorsTable(unit),
+    //                    expandedRowKeys,
+    //                    onExpand: (_, record) => handleExpandRow(record),
+    //                    showExpandColumn: false,
+    //                    indentSize: 0
+    //                }}
+    //                loading={loading}
+    //                scroll={{ x: true, y: 400 }} // Change scroll behavior
+    //                size="small"
+    //                style={{
+    //                    width: '100%',
+    //                    maxWidth: '100%',
+    //                    tableLayout: 'fixed'
+    //                }}
+    //            />
+    //        </div>
+    //    </div>
+    //);
 };
 
 export default UnitList;

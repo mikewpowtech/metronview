@@ -335,7 +335,7 @@ const AlarmList: React.FC = () => {
     );
 
     const getTriggersTable = (alarm: Alarm): React.ReactNode => {
-        return (<TriggerList alarmId={alarm.id}></TriggerList>);
+        return (<TriggerList alarmId={alarm.id}/>);
     };
     const handleExpandRow = (record: Alarm) => {
         setExpandedRowKeys(keys =>

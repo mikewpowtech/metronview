@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Input, Form, InputNumber, message, Select } from "antd";
+import { Modal, Input, Form, InputNumber, message, Select, Button } from "antd";
 import {
     fetchSensors,
     addSensor,
@@ -16,6 +16,7 @@ import { useAppSelector } from "../app/hooks";
 import { selectAuth } from "../app/store";
 import { ExtendedAntDTable } from "../components/NewExtendedAntDTable";
 import { getSensorColumns } from "../features/sensors/sensorColumns";
+import { PlusOutlined } from "@ant-design/icons";
 
 export interface SensorListProps {
     unitId?: number;
@@ -372,6 +373,38 @@ const SensorList: React.FC<SensorListProps> = ({ unitId, companyId, alarmId }) =
     );
 
     if (error) return <div style={{ color: "red" }}>Error: {error}</div>;
+
+    // If no triggers and this is for a specific alarm, show a compact message
+    if (!loading && sensors.length === 0 && unitId) {
+        return (
+            <div style={{
+                padding: "16px",
+                textAlign: "center",
+                backgroundColor: "#fafafa",
+                border: "1px solid #f0f0f0",
+                borderRadius: "4px",
+                margin: "8px 0"
+            }}>
+                <div style={{
+                    color: "#666",
+                    fontStyle: "italic",
+                    fontSize: "14px",
+                    marginBottom: "12px"
+                }}>
+                    No sensors configured for this alarm
+                </div>
+                <Button
+                    type="primary"
+                    size="small"
+                    icon={<PlusOutlined />}
+                    onClick={handleAdd}
+                >
+                    Add Sensor
+                </Button>
+                <MainModal />
+            </div>
+        );
+    }
 
     return (
         <div style={{ padding: "12px 0 12px 30px" }} >

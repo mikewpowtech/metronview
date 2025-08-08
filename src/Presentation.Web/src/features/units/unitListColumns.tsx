@@ -38,8 +38,8 @@ export const getUnitListColumns = ({ companies, unitModels }: UnitListColumnProp
             return {
                 ...col,
                 render: (_: never, record: Unit) => {
-                    if (!record.companyID) return "";
-                    const company = companies.find(c => c.id === record.companyID);
+                    if (!record.companyId) return "";
+                    const company = companies.find(c => c.id === record.companyId);
                     return company?.name ?? "";
                 }
             };

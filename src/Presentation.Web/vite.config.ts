@@ -30,7 +30,7 @@ export default defineConfig(({ mode }) => {
             jsx: 'automatic'
         },
         server: {
-            port: 3000,
+            port: 1000, // Reverted back to 3000
             host: true,
             open: false,
             strictPort: true,

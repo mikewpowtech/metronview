@@ -357,6 +357,9 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
 
         // Default communication modes
         await SeedCommunicationModesAsync();
+
+        // Default company
+        await SeedCompanyAsync();
     }
 
     private async Task SeedTriggerTypesAsync()
@@ -422,5 +425,23 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
         }
 
         await context.SaveChangesAsync();
+    }
+
+    private async Task SeedCompanyAsync()
+    {
+        // Check if PowTechnology company exists
+        var powTech = await context.Companies
+            .FirstOrDefaultAsync(c => c.Name == "PowTechnology");
+
+        if (powTech == null)
+        {
+            context.Companies.Add(new CompanyDb
+            {
+                Name = "PowTechnology",
+                ParentCompanyId = null
+                // Set other required properties as needed, or leave as default/null
+            });
+            await context.SaveChangesAsync();
+        }
     }
 }
