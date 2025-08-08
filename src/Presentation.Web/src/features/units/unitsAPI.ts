@@ -11,7 +11,7 @@ export interface Unit {
     unitCode?: string | null;
     secret?: string | null;
     status: number;
-    companyID?: number | null;
+    companyId?: number | null;
     daysBeforeNotReported?: number | null;
     customFieldValues?: string | null;
 }
