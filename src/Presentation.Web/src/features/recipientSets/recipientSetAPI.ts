@@ -66,3 +66,19 @@ export async function deleteRecipientSet(
         }
     );
 }
+
+// Fetch recipient sets by alarm
+export const fetchRecipientSetByAlarm = async (alarmId: number, token: string | undefined): Promise<RecipientSet[]> => {
+    const response = await fetch(`/api/alarms/${alarmId}/recipientset`, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch recipient sets for alarm: ${response.statusText}`);
+    }
+
+    return response.json();
+};

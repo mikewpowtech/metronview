@@ -7,11 +7,11 @@ namespace Presentation.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AlarmController : ControllerBase
+public class AlarmsController : ControllerBase
 {
     private readonly IAlarmService alarmService;
 
-    public AlarmController(IAlarmService alarmService)
+    public AlarmsController(IAlarmService alarmService)
     {
         this.alarmService = alarmService;
     }
@@ -26,10 +26,38 @@ public class AlarmController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<Alarm>>> GetAll()
+    public async Task<ActionResult<List<Alarm>>> GetAll([FromQuery] int? recipientSetId = null)
     {
-        var alarms = await alarmService.GetAllAsync();
+        List<Alarm> alarms;
+        
+        if (recipientSetId.HasValue)
+        {
+            alarms = await alarmService.GetAlarmsByRecipientSetIdAsync(recipientSetId.Value);
+        }
+        else
+        {
+            alarms = await alarmService.GetAllAsync();
+        }
+        
         return Ok(alarms);
+    }
+
+    [HttpGet("{alarmId}/recipientset")]
+    public async Task<ActionResult<RecipientSet>> GetAlarmRecipientSets(int alarmId)
+    {
+        try
+        {
+            var recipientSets = await alarmService.GetRecipientSetByAlarmIdAsync(alarmId);
+            return Ok(recipientSets);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest($"Failed to fetch recipient set for alarm {alarmId}: {ex.Message}");
+        }
     }
 
     [HttpPost]

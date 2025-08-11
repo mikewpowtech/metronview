@@ -9,5 +9,6 @@ namespace Application.RecipientSets
         Task<RecipientSet> AddAsync(RecipientSet recipientSet);
         Task<bool> UpdateAsync(RecipientSet recipientSet);
         Task<bool> DeleteAsync(int id);
+        Task<List<Recipient>> GetRecipientsByRecipientSetIdAsync(int recipientSetId);
     }
 }

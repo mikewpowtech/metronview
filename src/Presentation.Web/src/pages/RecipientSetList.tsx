@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Modal, Input, Form, message, Select } from "antd";
 import {
     fetchRecipientSets,
+    fetchRecipientSetByAlarm, // New function for alarm-specific recipient sets
     addRecipientSet,
     updateRecipientSet,
     deleteRecipientSet,
@@ -18,7 +19,11 @@ const allColumnDefs = [
     { title: "Company", dataIndex: "companyId", key: "companyId", width: 150 },
 ];
 
-const RecipientSetList: React.FC = () => {
+interface RecipientSetListProps {
+    alarmId?: number; // Optional alarmId prop
+}
+
+const RecipientSetList: React.FC<RecipientSetListProps> = ({ alarmId }) => {
     const auth = useAppSelector(selectAuth);
     const token = auth?.accessToken;
     const [recipientSets, setRecipientSets] = useState<RecipientSet[]>([]);
@@ -39,12 +44,21 @@ const RecipientSetList: React.FC = () => {
             .then(setCompanies)
             .catch(() => setCompanies([]));
         // eslint-disable-next-line
-    }, [token]);
+    }, [token, alarmId]); // Add alarmId to dependencies
 
     const loadRecipientSets = async () => {
         setLoading(true);
         try {
-            const data = await fetchRecipientSets(token);
+            let data: RecipientSet[];
+            
+            if (alarmId) {
+                // Fetch recipient sets for specific alarm
+                data = await fetchRecipientSetByAlarm(alarmId, token);
+            } else {
+                // Fetch all recipient sets
+                data = await fetchRecipientSets(token);
+            }
+            
             setRecipientSets(data);
             setError(null);
         } catch (err: any) {
@@ -56,6 +70,12 @@ const RecipientSetList: React.FC = () => {
     };
 
     const handleAdd = () => {
+        // Only show add functionality if not filtering by alarm
+        if (alarmId) {
+            message.info("Adding recipient sets is only available in the main recipient sets view");
+            return;
+        }
+        
         setIsEdit(false);
         setEditingId(null);
         form.resetFields();
@@ -63,6 +83,12 @@ const RecipientSetList: React.FC = () => {
     };
 
     const handleEdit = (record: RecipientSet) => {
+        // Only show edit functionality if not filtering by alarm
+        if (alarmId) {
+            message.info("Editing recipient sets is only available in the main recipient sets view");
+            return;
+        }
+        
         setIsEdit(true);
         setEditingId(record.id);
         form.setFieldsValue({
@@ -73,6 +99,12 @@ const RecipientSetList: React.FC = () => {
     };
 
     const handleDelete = async (record: RecipientSet) => {
+        // Only show delete functionality if not filtering by alarm
+        if (alarmId) {
+            message.info("Deleting recipient sets is only available in the main recipient sets view");
+            return;
+        }
+        
         try {
             if (record.id) {
                 await deleteRecipientSet(record.id, token);
@@ -188,17 +220,25 @@ const RecipientSetList: React.FC = () => {
     if (loading) return <div>Loading recipient sets...</div>;
     if (error) return <div style={{ color: "red" }}>{error}</div>;
 
+    // Determine the title based on whether filtering by alarm
+    const tableTitle = alarmId 
+        ? `Recipient Sets for Alarm ${alarmId}` 
+        : "Recipient Sets";
+
     return (
-        <div style={{ padding: "12px 0 12px 30px" }} >
-            <MainModal />
+        <div style={{ 
+            padding: alarmId ? "8px" : "12px 0 12px 30px" // Less padding when embedded
+        }}>
+            {!alarmId && <MainModal />} {/* Only show modal for main view */}
             <ExtendedAntDTable<RecipientSet>
                 data={recipientSets}
                 tableColumns={allColumnDefs}
-                title="Recipient Sets"
-                onAdd={handleAdd}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
+                title={tableTitle}
+                onAdd={alarmId ? undefined : handleAdd} // Disable add when filtering by alarm
+                onEdit={alarmId ? undefined : handleEdit} // Disable edit when filtering by alarm
+                onDelete={alarmId ? undefined : handleDelete} // Disable delete when filtering by alarm
                 columnMapper={columnMapper}
+                size={alarmId ? "small" : undefined} // Smaller table when embedded
             />
         </div>
     );

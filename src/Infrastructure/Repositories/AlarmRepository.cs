@@ -133,5 +133,27 @@ namespace Infrastructure.Repositories
             await context.SaveChangesAsync();
             return true;
         }
+
+        public async Task<RecipientSet?> GetRecipientSetByAlarmIdAsync(int alarmId)
+        {
+            var recipientSetEntity = await context.Alarms
+                .AsNoTracking()
+                .Where(a => a.Id == alarmId)
+                .Include(a => a.RecipientSet)
+                    .ThenInclude(rs => rs.Recipients)
+                .Select(a => a.RecipientSet)
+                .FirstOrDefaultAsync();
+
+            return recipientSetEntity?.Adapt<RecipientSet>();
+        }
+
+        public async Task<List<Alarm>> GetAlarmsByRecipientSetIdAsync(int recipientSetId)
+        {
+            var dbList = await context.Alarms
+                .Where(a => a.RecipientSetId == recipientSetId)
+                .ToListAsync();
+
+            return dbList.Adapt<List<Alarm>>();
+        }
     }
 }

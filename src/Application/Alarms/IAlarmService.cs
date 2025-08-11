@@ -14,5 +14,7 @@ namespace Application.Alarms
         AlarmSendingResult ShouldSendAlarmUnlessQuenched(BreachedTriggerDto alarm);
         Task<List<BreachedTriggerDto>> GetNotReportedBreachesAsync();
         void SendAlarm(BreachedTriggerDto alarm);
+        Task<RecipientSet> GetRecipientSetByAlarmIdAsync(int alarmId);
+        Task<List<Alarm>> GetAlarmsByRecipientSetIdAsync(int recipientSetId);
     }
 }

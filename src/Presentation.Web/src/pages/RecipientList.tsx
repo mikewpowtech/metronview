@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Modal, Input, Form, message, Switch, InputNumber, Select } from "antd";
 import {
     fetchRecipients,
+    fetchRecipientsByRecipientSet, // New function for filtering
     addRecipient,
     updateRecipient,
     deleteRecipient,
@@ -22,7 +23,11 @@ const allColumnDefs = [
     { title: "Enabled", dataIndex: "isEnabled", key: "isEnabled", width: 80 },
 ];
 
-const RecipientList: React.FC = () => {
+interface RecipientListProps {
+    recipientSetId?: number; // Optional recipientSetId prop
+}
+
+const RecipientList: React.FC<RecipientListProps> = ({ recipientSetId }) => {
     const auth = useAppSelector(selectAuth);
     const token = auth?.accessToken;
     const [recipients, setRecipients] = useState<Recipient[]>([]);
@@ -43,12 +48,21 @@ const RecipientList: React.FC = () => {
             .then(setCompanies)
             .catch(() => setCompanies([]));
         // eslint-disable-next-line
-    }, [token]);
+    }, [token, recipientSetId]); // Add recipientSetId to dependencies
 
     const loadRecipients = async () => {
         setLoading(true);
         try {
-            const data = await fetchRecipients(token);
+            let data: Recipient[];
+            
+            if (recipientSetId) {
+                // Fetch recipients for specific recipient set
+                data = await fetchRecipientsByRecipientSet(recipientSetId, token);
+            } else {
+                // Fetch all recipients
+                data = await fetchRecipients(token);
+            }
+            
             setRecipients(data);
             setError(null);
         } catch (err: any) {
@@ -60,6 +74,12 @@ const RecipientList: React.FC = () => {
     };
 
     const handleAdd = () => {
+        // Only show add functionality if not filtering by recipient set
+        if (recipientSetId) {
+            message.info("Adding recipients is only available in the main recipients view");
+            return;
+        }
+        
         setIsEdit(false);
         setEditingId(null);
         form.resetFields();
@@ -67,6 +87,12 @@ const RecipientList: React.FC = () => {
     };
 
     const handleEdit = (record: Recipient) => {
+        // Only show edit functionality if not filtering by recipient set
+        if (recipientSetId) {
+            message.info("Editing recipients is only available in the main recipients view");
+            return;
+        }
+        
         setIsEdit(true);
         setEditingId(record.id);
         form.setFieldsValue({
@@ -75,13 +101,18 @@ const RecipientList: React.FC = () => {
             sms: record.sms ?? "",
             webServiceRoot: record.webServiceRoot ?? "",
             companyId: record.companyId ?? "",
-            unitId: record.unitId ?? "",
             isEnabled: record.isEnabled ?? true,
         });
         setShowModal(true);
     };
 
     const handleDelete = async (record: Recipient) => {
+        // Only show delete functionality if not filtering by recipient set
+        if (recipientSetId) {
+            message.info("Deleting recipients is only available in the main recipients view");
+            return;
+        }
+        
         try {
             if (record.id) {
                 await deleteRecipient(record.id, token);
@@ -241,17 +272,25 @@ const RecipientList: React.FC = () => {
     if (loading) return <div>Loading recipients...</div>;
     if (error) return <div style={{ color: "red" }}>{error}</div>;
 
+    // Determine the title based on whether filtering by recipient set
+    const tableTitle = recipientSetId 
+        ? `Recipients for Recipient Set ${recipientSetId}` 
+        : "Recipients";
+
     return (
-        <div style={{ padding: "12px 0 12px 30px" }} >
-            <MainModal />
+        <div style={{ 
+            padding: recipientSetId ? "8px" : "12px 0 12px 30px" // Less padding when embedded
+        }}>
+            {!recipientSetId && <MainModal />} {/* Only show modal for main view */}
             <ExtendedAntDTable<Recipient>
                 data={recipients}
                 tableColumns={allColumnDefs}
-                title="Recipients"
-                onAdd={handleAdd}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
+                title={tableTitle}
+                onAdd={recipientSetId ? undefined : handleAdd} // Disable add when filtering
+                onEdit={recipientSetId ? undefined : handleEdit} // Disable edit when filtering
+                onDelete={recipientSetId ? undefined : handleDelete} // Disable delete when filtering
                 columnMapper={columnMapper}
+                size={recipientSetId ? "small" : undefined} // Smaller table when embedded
             />
         </div>
     );

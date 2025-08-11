@@ -24,6 +24,19 @@ namespace Application.Alarms
         public Task<Alarm> AddAsync(Alarm alarm) => repository.AddAsync(alarm);
         public Task<bool> UpdateAsync(Alarm alarm) => repository.UpdateAsync(alarm);
         public Task<bool> DeleteAsync(int id) => repository.DeleteAsync(id);
+        public async Task<RecipientSet> GetRecipientSetByAlarmIdAsync(int alarmId)
+        {
+            var recipientSet = await repository.GetRecipientSetByAlarmIdAsync(alarmId);
+
+            if (recipientSet == null)
+            {
+                throw new InvalidOperationException($"No recipient set found for alarm with ID {alarmId}");
+            }
+
+            return recipientSet;
+        }
+        public Task<List<Alarm>> GetAlarmsByRecipientSetIdAsync(int recipientSetId) =>
+            repository.GetAlarmsByRecipientSetIdAsync(recipientSetId);
 
         public AlarmSendingResult ShouldSendAlarmUnlessQuenched(BreachedTriggerDto alarm)
         {

@@ -1,4 +1,3 @@
-using Application.Triggers;
 using Domain;
 
 namespace Application.Alarms
@@ -10,5 +9,7 @@ namespace Application.Alarms
         Task<Alarm> AddAsync(Alarm alarm);
         Task<bool> UpdateAsync(Alarm alarm);
         Task<bool> DeleteAsync(int id);
+        Task<RecipientSet?> GetRecipientSetByAlarmIdAsync(int alarmId);
+        Task<List<Alarm>> GetAlarmsByRecipientSetIdAsync(int recipientSetId);
     }
 }

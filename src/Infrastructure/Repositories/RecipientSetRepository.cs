@@ -56,5 +56,16 @@ namespace Infrastructure.Repositories
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public async Task<List<Recipient>> GetRecipientsByRecipientSetIdAsync(int recipientSetId)
+        {
+            var recipients = await _context.RecipientSets
+                .AsNoTracking()
+                .Where(rs => rs.Id == recipientSetId)
+                .SelectMany(rs => rs.Recipients)
+                .ToListAsync();
+
+            return recipients.Adapt<List<Recipient>>();
+        }
     }
 }

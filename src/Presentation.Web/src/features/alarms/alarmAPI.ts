@@ -19,9 +19,24 @@ export interface AlarmRequest {
     isActive: boolean;
 }
 
-// Fetch all alarms
-export async function fetchAlarms(token?: string): Promise<Alarm[]> {
-    const response = await axios.get<Alarm[]>(`${BASE_URL}/api/alarm`, {
+// Fetch all alarms with optional filtering by recipientSetId
+export async function fetchAlarms(token?: string, recipientSetId?: number): Promise<Alarm[]> {
+    const params = new URLSearchParams();
+    if (recipientSetId !== undefined) {
+        params.append('recipientSetId', recipientSetId.toString());
+    }
+    
+    const url = `${BASE_URL}/api/alarms${params.toString() ? `?${params.toString()}` : ''}`;
+    
+    const response = await axios.get<Alarm[]>(url, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    });
+    return response.data;
+}
+
+// Fetch alarms by recipient set ID (alternative endpoint approach)
+export async function fetchAlarmsByRecipientSet(recipientSetId: number, token?: string): Promise<Alarm[]> {
+    const response = await axios.get<Alarm[]>(`${BASE_URL}/api/recipientsets/${recipientSetId}/alarms`, {
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     });
     return response.data;
@@ -33,7 +48,7 @@ export async function addAlarm(
     token?: string
 ): Promise<Alarm> {
     const response = await axios.post<Alarm>(
-        `${BASE_URL}/api/alarm`,
+        `${BASE_URL}/api/alarms`,
         alarm,
         {
             headers: {
@@ -52,7 +67,7 @@ export async function updateAlarm(
     token?: string
 ): Promise<void> {
     await axios.put(
-        `${BASE_URL}/api/alarm/${id}`,
+        `${BASE_URL}/api/alarms/${id}`,
         alarm,
         {
             headers: {
@@ -69,7 +84,7 @@ export async function deleteAlarm(
     token?: string
 ): Promise<void> {
     await axios.delete(
-        `${BASE_URL}/api/alarm/${id}`,
+        `${BASE_URL}/api/alarms/${id}`,
         {
             headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         }

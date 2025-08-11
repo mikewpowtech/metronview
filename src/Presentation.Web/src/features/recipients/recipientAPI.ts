@@ -20,14 +20,28 @@ export async function fetchRecipients(token?: string): Promise<Recipient[]> {
     return response.data;
 }
 
+export const fetchRecipientsByRecipientSet = async (recipientSetId: number, token: string | undefined): Promise<Recipient[]> => {
+    const response = await fetch(`/api/recipientsets/${recipientSetId}/recipients`, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch recipients for recipient set: ${response.statusText}`);
+    }
+
+    return response.json();
+};
+
 // Add a new recipient
 export async function addRecipient(
     recipient: Omit<Recipient, "id">,
     token?: string
 ): Promise<Recipient> {
     const payload = {
-        ...recipient,
-        unitId: !recipient.unitId ? null : recipient.unitId,
+        ...recipient
     };
     const response = await axios.post<Recipient>(
         `${BASE_URL}/api/recipient`,
