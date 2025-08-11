@@ -5,7 +5,6 @@ const BASE_URL = import.meta.env.REACT_APP_API_URL as string;
 export interface Recipient {
     id: number;
     companyId: number;
-    unitId?: number | null;
     name: string;
     email: string;
     sms: string;

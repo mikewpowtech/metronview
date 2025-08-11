@@ -19,7 +19,6 @@ const allColumnDefs = [
     { title: "SMS", dataIndex: "sms", key: "sms", width: 120 },
     { title: "Web Service Root", dataIndex: "webServiceRoot", key: "webServiceRoot", width: 180 },
     { title: "Company", dataIndex: "companyId", key: "companyId", width: 120 },
-    { title: "Unit ID", dataIndex: "unitId", key: "unitId", width: 100 },
     { title: "Enabled", dataIndex: "isEnabled", key: "isEnabled", width: 80 },
 ];
 
