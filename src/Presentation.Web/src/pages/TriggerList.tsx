@@ -149,7 +149,7 @@ const TriggerList: React.FC<TriggerListProps> = ({ alarmId }) => {
         form.resetFields();
         // Set default alarm if specified and default enabled state
         const defaultValues: any = {
-            isEnabled: false // Default new triggers to disabled so user must explicitly enable
+            isEnabled: false
         };
         if (alarmId) {
             defaultValues.alarmId = alarmId;

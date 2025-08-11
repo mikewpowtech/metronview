@@ -48,6 +48,23 @@ public class RecipientSetController : ControllerBase
         }
     }
 
+
+    [HttpPost("{recipientSetId}/recipients/{recipientId}")]
+    public async Task<ActionResult> AddRecipientToSet(int recipientSetId, int recipientId)
+    {
+        try
+        {
+            var success = await recipientSetService.AddRecipientToSetAsync(recipientSetId, recipientId);
+            if (!success)
+                return NotFound("Recipient set or recipient not found");
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest($"Failed to add recipient to recipient set: {ex.Message}");
+        }
+    }
+
     [HttpGet]
     public async Task<ActionResult<List<RecipientSet>>> GetAll()
     {
@@ -81,5 +98,21 @@ public class RecipientSetController : ControllerBase
         if (!deleted)
             return NotFound();
         return NoContent();
+    }
+
+    [HttpDelete("{recipientSetId}/recipients/{recipientId}")]
+    public async Task<ActionResult> RemoveRecipientFromSet(int recipientSetId, int recipientId)
+    {
+        try
+        {
+            var success = await recipientSetService.RemoveRecipientFromSetAsync(recipientSetId, recipientId);
+            if (!success)
+                return NotFound("Recipient set or recipient not found");
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest($"Failed to remove recipient from recipient set: {ex.Message}");
+        }
     }
 }

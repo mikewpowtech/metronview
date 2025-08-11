@@ -16,6 +16,7 @@ namespace Application.RecipientSets
         public Task<RecipientSet> AddAsync(RecipientSet recipientSet) => recipientSetRepository.AddAsync(recipientSet);
         public Task<bool> UpdateAsync(RecipientSet recipientSet) => recipientSetRepository.UpdateAsync(recipientSet);
         public Task<bool> DeleteAsync(int id) => recipientSetRepository.DeleteAsync(id);
+        
         public async Task<List<Recipient>> GetRecipientsByRecipientSetIdAsync(int recipientSetId)
         {
             var recipients = await recipientSetRepository.GetRecipientsByRecipientSetIdAsync(recipientSetId);
@@ -29,5 +30,10 @@ namespace Application.RecipientSets
             return recipients;
         }
 
+        public Task<bool> AddRecipientToSetAsync(int recipientSetId, int recipientId) => 
+            recipientSetRepository.AddRecipientToSetAsync(recipientSetId, recipientId);
+
+        public Task<bool> RemoveRecipientFromSetAsync(int recipientSetId, int recipientId) => 
+            recipientSetRepository.RemoveRecipientFromSetAsync(recipientSetId, recipientId);
     }
 }

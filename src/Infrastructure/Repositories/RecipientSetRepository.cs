@@ -67,5 +67,41 @@ namespace Infrastructure.Repositories
 
             return recipients.Adapt<List<Recipient>>();
         }
+
+        public async Task<bool> AddRecipientToSetAsync(int recipientSetId, int recipientId)
+        {
+            var recipientSet = await _context.RecipientSets
+                .Include(rs => rs.Recipients)
+                .FirstOrDefaultAsync(rs => rs.Id == recipientSetId);
+
+            if (recipientSet == null) return false;
+
+            var recipient = await _context.Recipients.FindAsync(recipientId);
+            if (recipient == null) return false;
+
+            // Check if recipient is already in the set
+            if (recipientSet.Recipients.Any(r => r.Id == recipientId))
+                return true; // Already exists, consider it success
+
+            recipientSet.Recipients.Add(recipient);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> RemoveRecipientFromSetAsync(int recipientSetId, int recipientId)
+        {
+            var recipientSet = await _context.RecipientSets
+                .Include(rs => rs.Recipients)
+                .FirstOrDefaultAsync(rs => rs.Id == recipientSetId);
+
+            if (recipientSet == null) return false;
+
+            var recipient = recipientSet.Recipients.FirstOrDefault(r => r.Id == recipientId);
+            if (recipient == null) return false;
+
+            recipientSet.Recipients.Remove(recipient);
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

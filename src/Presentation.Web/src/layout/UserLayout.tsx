@@ -59,6 +59,10 @@ export const UserLayout = ({ UserName }: iUser) => {
             label: "Units",
             items: [
                 {
+                    key: "/units",
+                    label: <span onClick={() => handleClick("/units")}>Units</span>,
+                },
+                {
                     key: "/readings",
                     label: <span onClick={() => handleClick("/readings")}>Readings</span>,
                 },
@@ -82,15 +86,7 @@ export const UserLayout = ({ UserName }: iUser) => {
             items: [
                 {
                     key: "/alarms",
-                    label: <span onClick={() => handleClick("/alarms")}>History</span>,
-                },
-                {
-                    key: "/triggers",
-                    label: <span onClick={() => handleClick("/triggers")}>Triggers</span>,
-                },
-                {
-                    key: "/recipients",
-                    label: <span onClick={() => handleClick("/recipients")}>Contacts</span>,
+                    label: <span onClick={() => handleClick("/alarms")}>Alarms</span>,
                 },
                 {
                     key: "/recipientsets",

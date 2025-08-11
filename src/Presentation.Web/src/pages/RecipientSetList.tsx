@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Modal, Input, Form, message, Select } from "antd";
+import { Modal, Input, Form, message, Select, Tooltip, Button } from "antd";
+import { DownOutlined, RightOutlined, PlusOutlined } from "@ant-design/icons";
 import {
     fetchRecipientSets,
-    fetchRecipientSetByAlarm, // New function for alarm-specific recipient sets
+    fetchRecipientSetByAlarm, // Keep existing function
     addRecipientSet,
     updateRecipientSet,
     deleteRecipientSet,
@@ -11,7 +12,8 @@ import {
 import { fetchCompanies, type Company } from "../features/companies/companyAPI";
 import { useAppSelector } from "../app/hooks";
 import { selectAuth } from "../app/store";
-import { ExtendedAntDTable } from "../components/ExtendedAntDTable";
+import { ExtendedAntDTable } from "../components/NewExtendedAntDTable";
+import RecipientList from "./RecipientList"; // Import the RecipientList component
 
 const allColumnDefs = [
     { title: "ID", dataIndex: "id", key: "id", width: 80 },
@@ -34,6 +36,7 @@ const RecipientSetList: React.FC<RecipientSetListProps> = ({ alarmId }) => {
     const [editingId, setEditingId] = useState<number | null>(null);
     const [form] = Form.useForm();
     const [modalLoading, setModalLoading] = useState(false);
+    const [expandedRowKeys, setExpandedRowKeys] = useState<React.Key[]>([]);
 
     // Companies for company selection
     const [companies, setCompanies] = useState<Company[]>([]);
@@ -152,28 +155,120 @@ const RecipientSetList: React.FC<RecipientSetListProps> = ({ alarmId }) => {
         form.resetFields();
     };
 
+    //table functionality
+    const handleExpandRow = (record: RecipientSet) => {
+        setExpandedRowKeys(keys =>
+            keys.includes(record.id)
+                ? keys.filter(key => key !== record.id)
+                : [...keys, record.id]
+        );
+    };
+
+    const getRecipientsTable = (recipientSet: RecipientSet): React.ReactNode => {
+        return (
+            <div style={{
+                minHeight: '120px',
+                width: '100%',
+                maxWidth: '100%',
+                padding: '16px',
+                backgroundColor: '#fafafa',
+                boxSizing: 'border-box'
+            }}>
+                <RecipientList recipientSetId={recipientSet.id} />
+            </div>
+        );
+    };
+
+    const customActions = (record: RecipientSet) => (
+        <Tooltip title={expandedRowKeys.includes(record.id) ? "Hide Recipients" : "Recipients"}>
+            <Button
+                icon={expandedRowKeys.includes(record.id) ? <DownOutlined /> : <RightOutlined />}
+                size="small"
+                style={{ marginLeft: 4, padding: 0, minWidth: 0, width: 28, height: 28 }}
+                onClick={() => handleExpandRow(record)}
+            />
+        </Tooltip>
+    );
+
     const MainModal: React.FC = () => (
         <Modal
-            title={isEdit ? "Edit Recipient Set" : "Add Recipient Set"}
+            title={
+                <div style={{
+                    fontSize: '16px',
+                    fontWeight: 600,
+                    color: '#ffffff',
+                    padding: '4px 0',
+                    marginBottom: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                }}>
+                    <PlusOutlined style={{ color: '#ffffff' }} />
+                    {isEdit ? "Edit Recipient Set" : "Add Recipient Set"}
+                </div>
+            }
             open={showModal}
             onCancel={handleModalCancel}
             onOk={handleModalOk}
             okText="Save"
             confirmLoading={modalLoading}
-            destroyOnClose
+            destroyOnHidden={true}
+            width={530}
+            styles={{
+                header: {
+                    background: '#1890ff',
+                    borderRadius: '8px 8px 0 0',
+                    padding: '16px 24px',
+                    border: '2px solid #1890ff',
+                    borderBottom: 'none',
+                    marginBottom: '0'
+                },
+                body: {
+                    background: '#ffffff',
+                    padding: '16px 24px',
+                    border: '2px solid #1890ff',
+                    borderTop: 'none',
+                    borderBottom: 'none',
+                    marginTop: '0'
+                },
+                footer: {
+                    background: '#ffffff',
+                    padding: '16px 24px',
+                    border: '2px solid #1890ff',
+                    borderTop: 'none',
+                    borderRadius: '0 0 8px 8px',
+                    marginTop: '0'
+                },
+                content: {
+                    padding: '0',
+                    overflow: 'hidden',
+                    borderRadius: '8px',
+                    border: 'none'
+                }
+            }}
+            closeIcon={
+                <span style={{ 
+                    color: 'white', 
+                    fontWeight: 'bold',
+                    fontSize: '16px'
+                }}>×</span>
+            }
         >
             <Form
                 layout="vertical"
                 form={form}
+                size="small"
                 initialValues={{
                     name: "",
                     companyId: "",
                 }}
+                style={{ marginTop: 16 }}
             >
                 <Form.Item
                     label="Name"
                     name="name"
                     rules={[{ required: true, message: "Please enter a name" }]}
+                    style={{ marginBottom: 12 }}
                 >
                     <Input placeholder="Recipient Set Name" />
                 </Form.Item>
@@ -181,6 +276,7 @@ const RecipientSetList: React.FC<RecipientSetListProps> = ({ alarmId }) => {
                     label="Company"
                     name="companyId"
                     rules={[{ required: true, message: "Please select a company" }]}
+                    style={{ marginBottom: 0 }}
                 >
                     <Select
                         showSearch
@@ -225,11 +321,43 @@ const RecipientSetList: React.FC<RecipientSetListProps> = ({ alarmId }) => {
         ? `Recipient Sets for Alarm ${alarmId}` 
         : "Recipient Sets";
 
+    // If no recipient sets and this is for a specific alarm, show a compact message
+    if (!loading && recipientSets.length === 0 && alarmId) {
+        return (
+            <div style={{ 
+                padding: "16px", 
+                textAlign: "center", 
+                backgroundColor: "#fafafa",
+                border: "1px solid #f0f0f0",
+                borderRadius: "4px",
+                margin: "8px 0"
+            }}>
+                <div style={{ 
+                    color: "#666",
+                    fontStyle: "italic",
+                    fontSize: "14px",
+                    marginBottom: "12px"
+                }}>
+                    No recipient sets configured for this alarm
+                </div>
+                <Button 
+                    type="primary" 
+                    size="small" 
+                    icon={<PlusOutlined />}
+                    onClick={handleAdd}
+                >
+                    Add Recipient Set
+                </Button>
+                <MainModal />
+            </div>
+        );
+    }
+
     return (
         <div style={{ 
             padding: alarmId ? "8px" : "12px 0 12px 30px" // Less padding when embedded
         }}>
-            {!alarmId && <MainModal />} {/* Only show modal for main view */}
+            <MainModal />
             <ExtendedAntDTable<RecipientSet>
                 data={recipientSets}
                 tableColumns={allColumnDefs}
@@ -237,8 +365,18 @@ const RecipientSetList: React.FC<RecipientSetListProps> = ({ alarmId }) => {
                 onAdd={alarmId ? undefined : handleAdd} // Disable add when filtering by alarm
                 onEdit={alarmId ? undefined : handleEdit} // Disable edit when filtering by alarm
                 onDelete={alarmId ? undefined : handleDelete} // Disable delete when filtering by alarm
+                customActions={customActions}
+                expandable={{
+                    expandedRowRender: getRecipientsTable,
+                    expandedRowKeys,
+                    onExpand: (_, record) => handleExpandRow(record),
+                    showExpandColumn: false,
+                    indentSize: 0
+                }}
                 columnMapper={columnMapper}
                 size={alarmId ? "small" : undefined} // Smaller table when embedded
+                loading={loading}
+                scroll={{ x: 'max-content' }}
             />
         </div>
     );

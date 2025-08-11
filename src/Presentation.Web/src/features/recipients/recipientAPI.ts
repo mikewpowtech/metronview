@@ -12,6 +12,13 @@ export interface Recipient {
     isEnabled: boolean;
 }
 
+export class RecipientNotFoundError extends Error {
+    constructor(message: string = "Recipient not found") {
+        super(message);
+        this.name = "RecipientNotFoundError";
+    }
+}
+
 // Fetch all recipients
 export async function fetchRecipients(token?: string): Promise<Recipient[]> {
     const response = await axios.get<Recipient[]>(`${BASE_URL}/api/recipient`, {
@@ -27,6 +34,10 @@ export const fetchRecipientsByRecipientSet = async (recipientSetId: number, toke
             'Content-Type': 'application/json',
         },
     });
+
+    if (response.status === 404) {
+        throw new RecipientNotFoundError(`Recipients not found for recipient set ${recipientSetId}`);
+    }
 
     if (!response.ok) {
         throw new Error(`Failed to fetch recipients for recipient set: ${response.statusText}`);

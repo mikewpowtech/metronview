@@ -67,6 +67,35 @@ export async function deleteRecipientSet(
     );
 }
 
+// Add recipient to recipient set
+export async function addRecipientToSet(
+    recipientSetId: number,
+    recipientId: number,
+    token?: string
+): Promise<void> {
+    await axios.post(
+        `${BASE_URL}/api/recipientset/${recipientSetId}/recipients/${recipientId}`,
+        {},
+        {
+            headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        }
+    );
+}
+
+// Remove recipient from recipient set
+export async function removeRecipientFromSet(
+    recipientSetId: number,
+    recipientId: number,
+    token?: string
+): Promise<void> {
+    await axios.delete(
+        `${BASE_URL}/api/recipientset/${recipientSetId}/recipients/${recipientId}`,
+        {
+            headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        }
+    );
+}
+
 // Fetch recipient sets by alarm
 export const fetchRecipientSetByAlarm = async (alarmId: number, token: string | undefined): Promise<RecipientSet[]> => {
     const response = await fetch(`/api/alarms/${alarmId}/recipientset`, {
