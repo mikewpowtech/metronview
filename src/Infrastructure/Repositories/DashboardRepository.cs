@@ -26,6 +26,7 @@ namespace Infrastructure.Repositories
                 return await context.Units
                     .Include(u => u.Company)
                     .Include(u => u.UnitType)
+                    //.Include(u => u.Status)
                     .Select(u => new UnitSummary
                     {
                         Id = u.Id,
@@ -33,7 +34,7 @@ namespace Infrastructure.Repositories
                         UnitType = u.UnitType.Name ?? "Unknown",
                         Company = u.Company.Name ?? "Unknown",
                         CompanyId = u.CompanyId,
-                        SensorCount = u.Sensors.Count(),
+                        SensorCount = u.Sensors.Count()
                         // Add other properties as needed with simpler logic
                     })
                     .AsNoTracking()
