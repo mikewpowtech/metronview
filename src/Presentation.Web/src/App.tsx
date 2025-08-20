@@ -23,6 +23,7 @@ import ConfigurationUploads from "./pages/ConfigurationUploads";
 import RecipientList from "./pages/RecipientList";
 import RecipientSetList from "./pages/RecipientSetList";
 import TriggerList from "./pages/TriggerList";
+import Visualization from "./pages/Visualisation";
 import { LoginPage } from "./pages/LoginPage";
 
 // Wrapper component for readings with sensor parameter
@@ -107,6 +108,7 @@ const App = () => {
                             <Route path="/alarminstructions" element={<AlarmInstructions />} />
                             <Route path="/alarms" element={<AlarmList />} />
                             <Route path="/triggers" element={<TriggerList />} />
+                            <Route path="/visualisation" element={<Visualization />} />
                             <Route path="/recipients" element={<RecipientList />} />
                             <Route path="/recipientsets" element={<RecipientSetList />} />
                             <Route path="/configurationuploads/:unitId" element={<ConfigurationUploads />} />

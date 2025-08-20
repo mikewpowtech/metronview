@@ -52,7 +52,10 @@ export const UserLayout = ({ UserName }: iUser) => {
         {
             key: "/dashboard",
             label: "Home",
-            items: [],
+            items: [{
+                key: "/visualisation",
+                label: <span onClick={() => handleClick("/visualisation")}>Visualisation</span>,
+            }],
         },
         {
             key: "/units",
