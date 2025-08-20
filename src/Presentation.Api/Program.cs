@@ -1,8 +1,11 @@
 using Application;
 using Infrastructure;
+using Infrastructure.Identity;
+using Infrastructure.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -72,6 +75,26 @@ namespace Api
             //adds the database and identity setup
             builder.Services.AddInfrastructureDependencyInjection(builder.Configuration);
 
+            // Configure additional Identity options AFTER adding infrastructure
+            builder.Services.Configure<IdentityOptions>(options =>
+            {
+                // Configure password requirements
+                options.Password.RequireDigit = true;
+                options.Password.RequiredLength = 8;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireLowercase = true;
+
+                // Configure lockout
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.AllowedForNewUsers = true;
+
+                // Configure token lifespan
+                options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultProvider;
+                options.Tokens.EmailConfirmationTokenProvider = TokenOptions.DefaultProvider;
+            });
+
             builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
             {
                 options.TokenLifespan = TimeSpan.FromSeconds(tokenSettings.RefreshTokenExpireSeconds);
@@ -113,6 +136,29 @@ namespace Api
                     .WithOrigins(allowedOrigins ?? Array.Empty<string>())
                     .AllowCredentials();
                 });
+            });
+
+            // Configure Redis cache (or in-memory cache for development)
+            //if (builder.Environment.IsDevelopment())
+            //{
+            //    builder.Services.AddMemoryCache();
+            //    builder.Services.AddSingleton<IDistributedCache, MemoryDistributedCache>();
+            //}
+            //else
+            //{
+                builder.Services.AddStackExchangeRedisCache(options =>
+                {
+                    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+                });
+            //}
+
+            // Register token cache service
+            builder.Services.AddScoped<ITokenCacheService, TokenCacheService>();
+
+            // Configure token lifespan
+            builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+            {
+                options.TokenLifespan = TimeSpan.FromHours(1);
             });
 
             var startup = new Startup(builder.Configuration, builder.Environment);
@@ -157,6 +203,9 @@ namespace Api
                 await initialiser.InitialiseAsync();
                 await initialiser.SeedAsync();
             }
+
+            // Use the extension method
+            app.UseTokenValidation();
 
             app.UseCors("webAppRequests");
             app.UseAuthentication();

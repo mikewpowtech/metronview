@@ -5,12 +5,20 @@ using MapsterMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using System.Text;
+using System.Security.Cryptography;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Identity
 {
     public class UserRepository(UserManager<ApplicationUserDb> userManager,
         SignInManager<ApplicationUserDb> signInManager,
-        ApplicationDbContext applicationDbContext, IMapper mapper, TokenSettings tokenSettings) : IUserRepository
+        ApplicationDbContext applicationDbContext, 
+        IMapper mapper, 
+        TokenSettings tokenSettings,
+        ITokenCacheService tokenCache,
+        ILogger<UserRepository> logger) : IUserRepository
     {
         public async Task<List<Claim>> GetUserClaimsAsync(string userId)
         {
@@ -41,21 +49,6 @@ namespace Infrastructure.Identity
             return claimsResult;
         }
 
-        public async Task<bool> UserLogoutAsync(string username)
-        {
-            var appUser = applicationDbContext.Users.First(x => x.UserName == username);
-            if (appUser != null) { await userManager.UpdateSecurityStampAsync(appUser); }
-            return true;
-        }
-
-        /// <summary>
-        /// user login
-        /// find the user by email, check password, if successful generate token and refresh token
-        /// </summary>
-        /// <param name="email"></param>
-        /// <param name="password"></param>
-        /// <param name="lockoutOnFailure"></param>
-        /// <returns></returns>
         public async Task<(SignInResult signinResult, string token, string refreshToken)> UserLoginAsync(string email, string password, bool lockoutOnFailure=false)
         {
             var dbUser = await userManager.FindByEmailAsync(email);
@@ -78,38 +71,92 @@ namespace Infrastructure.Identity
             return result;
         }
 
-        public async Task<(bool isSuccessful,string token, string refreshToken)> UserRefreshTokenAsync(string username, string refreshToken)
+        private async Task<(string token, string refreshToken)> GenerateUserTokenAsync(ApplicationUserDb dbUser)
         {
-            var dbUser = await userManager.FindByNameAsync(username);
-            if (dbUser == null) 
+            try
+            {
+                var claims = await GetUserClaimsAsync(dbUser.Id);
+                
+                // Remove any existing refresh token from cache
+                await tokenCache.RemoveRefreshTokenAsync(dbUser.Id);
+                
+                // Generate JWT token
+                var token = TokenUtil.GetToken(tokenSettings, dbUser.Id, dbUser?.UserName ?? "", claims);
+                
+                // Generate refresh token
+                var refreshToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+                
+                // Store refresh token in cache with expiration
+                var refreshTokenExpiration = TimeSpan.FromDays(7); // Configure as needed
+                await tokenCache.SetRefreshTokenAsync(dbUser.Id, refreshToken, refreshTokenExpiration);
+                
+                logger.LogInformation("Generated new tokens for user {UserId}", dbUser.Id);
+                
+                return (token, refreshToken);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to generate tokens for user {UserId}", dbUser.Id);
+                throw;
+            }
+        }
+
+        public async Task<(bool isSuccessful, string token, string refreshToken)> UserRefreshTokenAsync(string username, string refreshToken)
+        {
+            try
+            {
+                var dbUser = await userManager.FindByNameAsync(username);
+                if (dbUser == null)
+                {
+                    logger.LogWarning("Refresh token attempt for non-existent user: {Username}", username);
+                    return (false, null, null);
+                }
+
+                // Validate refresh token from cache instead of database
+                if (!await tokenCache.ValidateRefreshTokenAsync(dbUser.Id, refreshToken))
+                {
+                    logger.LogWarning("Invalid refresh token for user {UserId}", dbUser.Id);
+                    return (false, null, null);
+                }
+
+                var tokens = await GenerateUserTokenAsync(dbUser);
+                return (true, tokens.token, tokens.refreshToken);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error refreshing token for user {Username}", username);
                 return (false, null, null);
+            }
+        }
 
-            if (!await userManager.VerifyUserTokenAsync(dbUser, "REFRESHTOKENPROVIDER", "RefreshToken", refreshToken))
-                return (false, null, null);
-
-            var tokens= await GenerateUserTokenAsync(dbUser);
-
-            return (true, tokens.token, tokens.refreshToken);
+        public async Task<bool> UserLogoutAsync(string username)
+        {
+            try
+            {
+                var appUser = await applicationDbContext.Users.FirstOrDefaultAsync(x => x.UserName == username);
+                if (appUser != null)
+                {
+                    // Remove refresh token from cache
+                    await tokenCache.RemoveRefreshTokenAsync(appUser.Id);
+                    
+                    // Update security stamp to invalidate existing tokens
+                    await userManager.UpdateSecurityStampAsync(appUser);
+                    
+                    logger.LogInformation("User {Username} logged out successfully", username);
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error during logout for user {Username}", username);
+                return false;
+            }
         }
 
         public async Task<List<ApplicationUser>> GetAllUsersAsync()
         {
             var response=mapper.Map<List<ApplicationUser>>(await applicationDbContext.Users.ToListAsync());
             return response;
-        }
-
-        private async Task<(string token, string refreshToken)> GenerateUserTokenAsync(ApplicationUserDb dbUser)
-        {
-            var claims = await GetUserClaimsAsync(dbUser.Id);
-            await userManager.RemoveAuthenticationTokenAsync(dbUser, "REFRESHTOKENPROVIDER", "RefreshToken");
-            await userManager.UpdateAsync(dbUser);
-
-            var token = TokenUtil.GetToken(tokenSettings, dbUser.Id, dbUser?.UserName ?? "", claims);
-            var refreshToken = await userManager.GenerateUserTokenAsync(dbUser, "REFRESHTOKENPROVIDER", "RefreshToken");
-
-            await userManager.SetAuthenticationTokenAsync(dbUser, "REFRESHTOKENPROVIDER", "RefreshToken", refreshToken);
-
-            return (token, refreshToken);
         }
     }
 }
