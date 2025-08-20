@@ -16,6 +16,7 @@ import SystemStatus from "./pages/SystemStatus";
 import AlarmInstructions from "./pages/AlarmInstructions";
 import CompanyList from "./pages/CompanyList";
 import SensorList from "./pages/SensorList";
+import SensorManagement from "./pages/SensorManagement";
 import ReadingsList from "./pages/ReadingsList";
 import UnitModelList from "./pages/UnitModelList";
 import Dashboard from "./pages/Dashboard";
@@ -103,7 +104,7 @@ const App = () => {
                             <Route path="/system-status" element={<SystemStatus />} />
                             <Route path="/edit-profile" element={<EditProfile />} />
                             <Route path="/companies" element={<CompanyList />} />
-                            <Route path="/sensors" element={<SensorList />} />
+                            <Route path="/sensors" element={<SensorManagement />} />
                             <Route path="/unitmodels" element={<UnitModelList />} />
                             <Route path="/alarminstructions" element={<AlarmInstructions />} />
                             <Route path="/alarms" element={<AlarmList />} />
