@@ -3,7 +3,7 @@ import { Modal, Form, Input, Alert, FormInstance } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import type { UnitModel } from './unitModelAPI';
 
-interface UnitModelModalProps {
+export interface UnitModelModalProps {
     showModal: boolean;
     isEdit: boolean;
     modalLoading: boolean;
@@ -152,7 +152,7 @@ export const UnitModelModal: React.FC<UnitModelModalProps> = ({
                     color: 'white',
                     fontWeight: 'bold',
                     fontSize: '16px'
-                }}>x</span>
+                }}>×</span>
             }
         >
             {/* Display form validation errors */}

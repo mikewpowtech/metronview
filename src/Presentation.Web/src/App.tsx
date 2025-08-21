@@ -24,7 +24,7 @@ import ConfigurationUploads from "./pages/ConfigurationUploads";
 import RecipientList from "./pages/RecipientList";
 import RecipientSetList from "./pages/RecipientSetList";
 import TriggerList from "./pages/TriggerList";
-import Visualization from "./pages/Visualisation";
+import Visualization from "./pages/Visualization";
 import { LoginPage } from "./pages/LoginPage";
 
 // Wrapper component for readings with sensor parameter
