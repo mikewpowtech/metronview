@@ -109,7 +109,7 @@ const App = () => {
                             <Route path="/alarminstructions" element={<AlarmInstructions />} />
                             <Route path="/alarms" element={<AlarmList />} />
                             <Route path="/triggers" element={<TriggerList />} />
-                            <Route path="/visualisation" element={<Visualization />} />
+                            <Route path="/visualization" element={<Visualization />} />
                             <Route path="/recipients" element={<RecipientList />} />
                             <Route path="/recipientsets" element={<RecipientSetList />} />
                             <Route path="/configurationuploads/:unitId" element={<ConfigurationUploads />} />
