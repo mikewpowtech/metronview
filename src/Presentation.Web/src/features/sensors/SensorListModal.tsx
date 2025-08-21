@@ -102,7 +102,7 @@ export const SensorListModal: React.FC<SensorListModalProps> = ({
         }
     };
 
-    // Enhanced validation rules
+    // Enhanced validation rules - Fixed type issues
     const getValidationRules = () => ({
         name: [
             { required: true, message: 'Please enter a sensor name' },
@@ -115,24 +115,24 @@ export const SensorListModal: React.FC<SensorListModalProps> = ({
         ],
         channel: [
             { required: true, message: 'Please enter a channel number' },
-            { type: 'number', min: 0, message: 'Channel must be 0 or greater' },
+            { type: 'number' as const, min: 0, message: 'Channel must be 0 or greater' },
             { validator: validateChannelUniqueness }
         ],
         channelType: [
-            { type: 'number', min: 0, message: 'Channel type must be 0 or greater' }
+            { type: 'number' as const, min: 0, message: 'Channel type must be 0 or greater' }
         ],
         lowValue: [
-            { type: 'number', message: 'Low value must be a number' }
+            { type: 'number' as const, message: 'Low value must be a number' }
         ],
         highValue: [
-            { type: 'number', message: 'High value must be a number' }
+            { type: 'number' as const, message: 'High value must be a number' }
         ],
         engineeringUnits: [
             { max: 50, message: 'Engineering units cannot exceed 50 characters' }
         ],
         unitId: [
             { required: true, message: 'Please enter a unit ID' },
-            { type: 'number', min: 1, message: 'Unit ID must be greater than 0' }
+            { type: 'number' as const, min: 1, message: 'Unit ID must be greater than 0' }
         ],
         companyId: [
             { required: true, message: 'Please select a company' }
@@ -219,7 +219,7 @@ export const SensorListModal: React.FC<SensorListModalProps> = ({
                     color: 'white',
                     fontWeight: 'bold',
                     fontSize: '16px'
-                }}>×</span>
+                }}>Ã—</span>
             }
         >
             {/* Display form validation errors */}
@@ -305,7 +305,7 @@ export const SensorListModal: React.FC<SensorListModalProps> = ({
                             min={0} 
                             max={99}
                             style={{ width: "100%" }} 
-                            placeholder="Channel number" 
+                            placeholder="Channel number"
                         />
                     </Form.Item>
                     <Form.Item 
@@ -385,7 +385,7 @@ export const SensorListModal: React.FC<SensorListModalProps> = ({
                         style={{ marginBottom: 0 }}
                     >
                         <Input 
-                            placeholder="e.g., °C, PSI, RPM" 
+                            placeholder="e.g., Â°C, PSI, RPM" 
                             maxLength={50}
                             showCount
                         />
