@@ -60,7 +60,7 @@ export async function fetchCommunicationModeById(
 export interface Trigger {
     id: number;
     alarmId: number;
-    triggerTypeCode: string;
+    triggerTypeId: number; // Changed from triggerTypeCode to triggerTypeId to match backend
     triggerValue: number;
     communicationModeId: number;
     subject: string;
@@ -161,7 +161,7 @@ export async function fetchEnabledTriggers(token?: string): Promise<Trigger[]> {
 // Interface for creating/updating triggers (without navigation properties)
 export interface TriggerRequest {
     alarmId: number;
-    triggerTypeId: number;
+    triggerTypeId: number; // Changed from triggerTypeCode to triggerTypeId to match backend
     triggerValue: number;
     communicationModeId: number;
     subject: string;

@@ -89,7 +89,7 @@ export const UnitListModal: React.FC<UnitListModalProps> = ({
                     color: 'white', 
                     fontWeight: 'bold',
                     fontSize: '16px'
-                }}>×</span>
+                }}>x</span>
             }
         >
             <Form

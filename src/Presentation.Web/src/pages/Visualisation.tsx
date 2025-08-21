@@ -81,7 +81,7 @@ const Visualization: React.FC = () => {
     };
 
     // Load data from APIs
-    const loadData = useCallback(async () => {
+    const loadData = async () => {
         if (!auth.accessToken) return;
 
         setLoading(true);
@@ -105,7 +105,7 @@ const Visualization: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    }, [auth.accessToken]);
+    };
 
     // Generate nodes from data
     const generateVisualizationNodes = (
@@ -114,6 +114,8 @@ const Visualization: React.FC = () => {
         alarmsData: Alarm[],
         triggersData: Trigger[]
     ) => {
+        console.log('Generating visualization nodes...');
+        
         const newNodes: VisualizationNode[] = [];
         const newConnections: NodeConnection[] = [];
 
@@ -338,7 +340,7 @@ const Visualization: React.FC = () => {
         ctx.setLineDash([]); // Reset line dash
     };
 
-    const drawCanvas = useCallback(() => {
+    const drawCanvas = () => {
         const canvas = canvasRef.current;
         if (!canvas) return;
 
@@ -372,10 +374,10 @@ const Visualization: React.FC = () => {
 
         // Draw nodes
         nodes.forEach(node => drawNode(ctx, node));
-    }, [nodes, connections, zoom, pan]);
+    };
 
     // Mouse event handlers
-    const getMousePos = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const getMousePos = (e: React.MouseEvent<HTMLCanvasElement> | MouseEvent) => {
         const canvas = canvasRef.current;
         if (!canvas) return { x: 0, y: 0 };
 
@@ -399,8 +401,12 @@ const Visualization: React.FC = () => {
     };
 
     const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+        e.preventDefault();
+        
         const mousePos = getMousePos(e);
         const clickedNode = getNodeAtPosition(mousePos.x, mousePos.y);
+
+        console.log('Mouse down:', { mousePos, clickedNode: clickedNode?.id });
 
         if (clickedNode) {
             setSelectedNodeId(clickedNode.id);
@@ -420,10 +426,12 @@ const Visualization: React.FC = () => {
             );
         } else {
             setSelectedNodeId(null);
+            setIsDragging(false);
             setNodes(prevNodes =>
                 prevNodes.map(node => ({
                     ...node,
-                    isSelected: false
+                    isSelected: false,
+                    isDragging: false
                 }))
             );
         }
@@ -432,15 +440,19 @@ const Visualization: React.FC = () => {
     const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
         if (!isDragging || !selectedNodeId) return;
 
+        e.preventDefault();
+        
         const mousePos = getMousePos(e);
+        const newX = mousePos.x - dragOffset.x;
+        const newY = mousePos.y - dragOffset.y;
 
         setNodes(prevNodes =>
             prevNodes.map(node => {
                 if (node.id === selectedNodeId) {
                     return {
                         ...node,
-                        x: mousePos.x - dragOffset.x,
-                        y: mousePos.y - dragOffset.y
+                        x: newX,
+                        y: newY
                     };
                 }
                 return node;
@@ -449,6 +461,8 @@ const Visualization: React.FC = () => {
     };
 
     const handleMouseUp = () => {
+        console.log('Mouse up:', { isDragging, selectedNodeId });
+        
         setIsDragging(false);
         setNodes(prevNodes =>
             prevNodes.map(node => ({
@@ -500,28 +514,88 @@ const Visualization: React.FC = () => {
     // Effects
     useEffect(() => {
         loadData();
-    }, [loadData, selectedCompany]);
+    }, [auth.accessToken, selectedCompany]);
 
     useEffect(() => {
         drawCanvas();
-    }, [drawCanvas]);
+    }, [nodes, connections, zoom, pan]);
 
     useEffect(() => {
         const handleResize = () => {
             if (containerRef.current) {
-                const { offsetWidth, offsetHeight } = containerRef.current;
-                setCanvasSize({
-                    width: offsetWidth - 20,
-                    height: offsetHeight - 100
-                });
+                const container = containerRef.current;
+                
+                // Calculate available space within the canvas container
+                const canvasContainer = container.querySelector('.visualization-canvas-container') as HTMLElement;
+                if (canvasContainer) {
+                    const containerRect = canvasContainer.getBoundingClientRect();
+                    
+                    setCanvasSize({
+                        width: Math.max(800, containerRect.width - 40),
+                        height: Math.max(400, containerRect.height - 20)
+                    });
+                }
             }
         };
 
-        window.addEventListener('resize', handleResize);
-        handleResize();
+        const resizeObserver = new ResizeObserver(handleResize);
+        if (containerRef.current) {
+            resizeObserver.observe(containerRef.current);
+        }
 
-        return () => window.removeEventListener('resize', handleResize);
+        setTimeout(handleResize, 100);
+
+        return () => {
+            resizeObserver.disconnect();
+        };
     }, []);
+
+    // Global mouse event handling for smooth dragging
+    useEffect(() => {
+        const handleGlobalMouseMove = (e: MouseEvent) => {
+            if (!isDragging || !selectedNodeId || !canvasRef.current) return;
+            
+            const mousePos = getMousePos(e);
+            const newX = mousePos.x - dragOffset.x;
+            const newY = mousePos.y - dragOffset.y;
+
+            setNodes(prevNodes =>
+                prevNodes.map(node => {
+                    if (node.id === selectedNodeId) {
+                        return {
+                            ...node,
+                            x: newX,
+                            y: newY
+                        };
+                    }
+                    return node;
+                })
+            );
+        };
+
+        const handleGlobalMouseUp = () => {
+            if (isDragging) {
+                console.log('Global mouse up - ending drag');
+                setIsDragging(false);
+                setNodes(prevNodes =>
+                    prevNodes.map(node => ({
+                        ...node,
+                        isDragging: false
+                    }))
+                );
+            }
+        };
+
+        if (isDragging) {
+            document.addEventListener('mousemove', handleGlobalMouseMove);
+            document.addEventListener('mouseup', handleGlobalMouseUp);
+        }
+
+        return () => {
+            document.removeEventListener('mousemove', handleGlobalMouseMove);
+            document.removeEventListener('mouseup', handleGlobalMouseUp);
+        };
+    }, [isDragging, selectedNodeId, dragOffset]);
 
     // Statistics
     const stats = {
@@ -615,7 +689,11 @@ const Visualization: React.FC = () => {
                         onMouseUp={handleMouseUp}
                         onMouseLeave={handleMouseUp}
                         onWheel={handleWheel}
-                        style={{ border: '1px solid #d9d9d9', cursor: isDragging ? 'grabbing' : 'grab' }}
+                        style={{ 
+                            border: '1px solid #d9d9d9', 
+                            cursor: isDragging ? 'grabbing' : 'grab',
+                            userSelect: 'none'
+                        }}
                     />
                 </div>
 

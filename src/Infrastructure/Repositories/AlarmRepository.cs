@@ -88,7 +88,7 @@ namespace Infrastructure.Repositories
                 var existingTrigger = db.Triggers.FirstOrDefault(t => t.Id == trigger.Id);
                 if (existingTrigger != null)
                 {
-                    // Update existing trigger
+                    // Update existing trigger - use TriggerTypeId directly
                     existingTrigger.TriggerTypeId = trigger.TriggerTypeId;
                     existingTrigger.TriggerValue = trigger.TriggerValue;
                     existingTrigger.CommunicationModeId = trigger.CommunicationModeId;
@@ -99,7 +99,7 @@ namespace Infrastructure.Repositories
                 }
                 else
                 {
-                    // Add new trigger
+                    // Add new trigger - use TriggerTypeId directly
                     var newTrigger = new TriggerDb
                     {
                         AlarmId = db.Id,

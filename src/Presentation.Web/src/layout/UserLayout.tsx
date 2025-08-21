@@ -75,11 +75,11 @@ export const UserLayout = ({ UserName }: iUser) => {
                 },
                 {
                     key: "/unitmodels",
-                    label: <span onClick={() => handleClick("/unitmodels")}>Models</span>,
+                    label: <span onClick={() => handleClick("/unitmodels")}>Unit Types</span>,
                 },
                 {
                     key: "/unitmodelconfigs",
-                    label: <span onClick={() => handleClick("/unitmodels")}>Model Configurations</span>,
+                    label: <span onClick={() => handleClick("/unitmodels")}>Unit Type Configurations</span>,
                 },
             ],
         },

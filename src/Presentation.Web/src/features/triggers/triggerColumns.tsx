@@ -3,6 +3,26 @@ import { Tag, Tooltip } from "antd";
 import type { Trigger, TriggerType, CommunicationMode } from "./triggerAPI";
 import type { Alarm } from "../alarms/alarmAPI";
 
+// Helper function to convert trigger code to ASCII character
+const convertToAsciiChar = (code: string | number): string => {
+    if (typeof code === 'string') {
+        // If it's already a string, check if it's a single character
+        if (code.length === 1) {
+            return code; // Already an ASCII character
+        }
+        // If it's a string representation of a number, convert it
+        const numCode = parseInt(code, 10);
+        if (!isNaN(numCode)) {
+            return String.fromCharCode(numCode);
+        }
+        return code; // Return as-is if we can't convert
+    } else if (typeof code === 'number') {
+        // Convert numeric ASCII code to character
+        return String.fromCharCode(code);
+    }
+    return String(code); // Fallback to string conversion
+};
+
 export function getColumns(
     triggerTypes: TriggerType[] = [],
     communicationModes: CommunicationMode[] = [],
@@ -29,16 +49,45 @@ export function getColumns(
         },
         {
             title: "Trigger Type",
-            dataIndex: "triggerTypeCode",
-            key: "triggerTypeCode",
-            width: 150,
-            render: (triggerTypeCode) => {
-                const triggerType = triggerTypes.find(tt => tt.code === triggerTypeCode);
+            dataIndex: "triggerTypeId",
+            key: "triggerTypeId", 
+            width: 180,
+            render: (triggerTypeId, record) => {
+                // First try to find by navigation property if available
+                if (record.triggerType) {
+                    const asciiCode = convertToAsciiChar(record.triggerType.code);
+                    return (
+                        <Tag color="blue">
+                            {asciiCode} - {record.triggerType.name}
+                        </Tag>
+                    );
+                }
+                
+                // Fallback to lookup by ID in the triggerTypes array and display code + name
+                const triggerType = triggerTypes.find(tt => tt.id === triggerTypeId);
+                if (triggerType) {
+                    const asciiCode = convertToAsciiChar(triggerType.code);
+                    return (
+                        <Tag color="blue">
+                            {asciiCode} - {triggerType.name}
+                        </Tag>
+                    );
+                }
+                
+                // If no triggerType found, just show the ID
                 return (
                     <Tag color="blue">
-                        {triggerType ? triggerType.name : `Type ${triggerTypeCode}`}
+                        Type {triggerTypeId}
                     </Tag>
                 );
+            },
+            sorter: (a, b) => {
+                // Sort by trigger type code for consistency
+                const aType = a.triggerType || triggerTypes.find(tt => tt.id === a.triggerTypeId);
+                const bType = b.triggerType || triggerTypes.find(tt => tt.id === b.triggerTypeId);
+                const aCode = aType ? convertToAsciiChar(aType.code) : '';
+                const bCode = bType ? convertToAsciiChar(bType.code) : '';
+                return aCode.localeCompare(bCode);
             },
         },
         {
@@ -53,13 +102,40 @@ export function getColumns(
             dataIndex: "communicationModeId",
             key: "communicationModeId",
             width: 180,
-            render: (communicationModeId) => {
+            render: (communicationModeId, record) => {
+                // First try to find by navigation property if available
+                if (record.communicationMode) {
+                    return (
+                        <Tag color="green">
+                            {record.communicationMode.code} - {record.communicationMode.name}
+                        </Tag>
+                    );
+                }
+                
+                // Fallback to lookup by ID in the communicationModes array
                 const mode = communicationModes.find(cm => cm.id === communicationModeId);
+                if (mode) {
+                    return (
+                        <Tag color="green">
+                            {mode.code} - {mode.name}
+                        </Tag>
+                    );
+                }
+                
+                // If no mode found, just show the ID
                 return (
                     <Tag color="green">
-                        {mode ? mode.code : `Mode ${communicationModeId}`}
+                        Mode {communicationModeId}
                     </Tag>
                 );
+            },
+            sorter: (a, b) => {
+                // Sort by communication mode code for consistency
+                const aMode = a.communicationMode || communicationModes.find(cm => cm.id === a.communicationModeId);
+                const bMode = b.communicationMode || communicationModes.find(cm => cm.id === b.communicationModeId);
+                const aCode = aMode ? aMode.code : '';
+                const bCode = bMode ? bMode.code : '';
+                return aCode.localeCompare(bCode);
             },
         },
         {
