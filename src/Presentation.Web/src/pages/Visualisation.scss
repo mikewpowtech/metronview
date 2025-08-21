@@ -64,19 +64,20 @@
 .visualization-canvas-container {
     flex: 1;
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
+    justify-content: stretch; // Changed from center to stretch
+    align-items: stretch; // Changed from flex-start to stretch
     overflow: hidden;
     position: relative;
     min-height: 0; // Allow container to shrink below content size
+    width: 100%; // Ensure full width
 
     canvas {
         display: block;
         background: #ffffff;
         border-radius: 4px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        max-width: 100%; // Prevent canvas from exceeding container width
-        max-height: 100%; // Prevent canvas from exceeding container height
+        width: 100%; // Make canvas fill full width
+        height: 100%; // Make canvas fill full height
         object-fit: contain; // Maintain aspect ratio within bounds
 
         &:focus {
@@ -88,7 +89,7 @@
 
 .visualization-node-info {
     position: absolute;
-    top: 20px;
+    top: 60px; // Changed from 20px to 60px to move it lower
     right: 20px;
     width: 300px;
     max-height: 400px;
@@ -157,7 +158,7 @@
 
         .visualization-node-info {
             position: fixed;
-            top: 10px;
+            top: 60px; // Also updated for mobile
             right: 10px;
             left: 10px;
             width: auto;

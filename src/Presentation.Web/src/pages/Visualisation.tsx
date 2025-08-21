@@ -1,4 +1,4 @@
-﻿import React, { useRef, useEffect, useState, useCallback } from 'react';
+﻿import React, { useRef, useEffect, useState } from 'react';
 import { Card, Select, Button, Space, Tooltip, Badge, message } from 'antd';
 import {
     HomeOutlined,
@@ -70,7 +70,7 @@ const Visualization: React.FC = () => {
     const [zoom, setZoom] = useState(1);
     const [pan, setPan] = useState({ x: 0, y: 0 });
     const [selectedCompany, setSelectedCompany] = useState<number | null>(null);
-    const [canvasSize, setCanvasSize] = useState({ width: 1200, height: 800 });
+    const [canvasSize, setCanvasSize] = useState({ width: 1200, height: 600 });
 
     // Node colors by type
     const nodeColors = {
@@ -114,8 +114,6 @@ const Visualization: React.FC = () => {
         alarmsData: Alarm[],
         triggersData: Trigger[]
     ) => {
-        console.log('Generating visualization nodes...');
-        
         const newNodes: VisualizationNode[] = [];
         const newConnections: NodeConnection[] = [];
 
@@ -376,6 +374,26 @@ const Visualization: React.FC = () => {
         nodes.forEach(node => drawNode(ctx, node));
     };
 
+    // Calculate canvas size
+    const calculateCanvasSize = () => {
+        if (!containerRef.current) return;
+
+        const container = containerRef.current;
+        const canvasContainer = container.querySelector('.visualization-canvas-container') as HTMLElement;
+        
+        if (canvasContainer) {
+            const rect = canvasContainer.getBoundingClientRect();
+            // Use the full width and height of the container, minus just a small margin for borders
+            const newWidth = Math.max(800, rect.width - 4); // Only subtract 4px for borders
+            const newHeight = Math.max(400, rect.height - 4); // Only subtract 4px for borders
+            
+            setCanvasSize({
+                width: newWidth,
+                height: newHeight
+            });
+        }
+    };
+
     // Mouse event handlers
     const getMousePos = (e: React.MouseEvent<HTMLCanvasElement> | MouseEvent) => {
         const canvas = canvasRef.current;
@@ -389,7 +407,6 @@ const Visualization: React.FC = () => {
     };
 
     const getNodeAtPosition = (x: number, y: number): VisualizationNode | null => {
-        // Check nodes in reverse order (top to bottom)
         for (let i = nodes.length - 1; i >= 0; i--) {
             const node = nodes[i];
             if (x >= node.x && x <= node.x + node.width &&
@@ -406,8 +423,6 @@ const Visualization: React.FC = () => {
         const mousePos = getMousePos(e);
         const clickedNode = getNodeAtPosition(mousePos.x, mousePos.y);
 
-        console.log('Mouse down:', { mousePos, clickedNode: clickedNode?.id });
-
         if (clickedNode) {
             setSelectedNodeId(clickedNode.id);
             setIsDragging(true);
@@ -416,7 +431,6 @@ const Visualization: React.FC = () => {
                 y: mousePos.y - clickedNode.y
             });
 
-            // Update node selection
             setNodes(prevNodes =>
                 prevNodes.map(node => ({
                     ...node,
@@ -439,7 +453,6 @@ const Visualization: React.FC = () => {
 
     const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
         if (!isDragging || !selectedNodeId) return;
-
         e.preventDefault();
         
         const mousePos = getMousePos(e);
@@ -449,11 +462,7 @@ const Visualization: React.FC = () => {
         setNodes(prevNodes =>
             prevNodes.map(node => {
                 if (node.id === selectedNodeId) {
-                    return {
-                        ...node,
-                        x: newX,
-                        y: newY
-                    };
+                    return { ...node, x: newX, y: newY };
                 }
                 return node;
             })
@@ -461,8 +470,6 @@ const Visualization: React.FC = () => {
     };
 
     const handleMouseUp = () => {
-        console.log('Mouse up:', { isDragging, selectedNodeId });
-        
         setIsDragging(false);
         setNodes(prevNodes =>
             prevNodes.map(node => ({
@@ -489,14 +496,9 @@ const Visualization: React.FC = () => {
 
     const handleSaveLayout = () => {
         const layout = {
-            nodes: nodes.map(node => ({
-                id: node.id,
-                x: node.x,
-                y: node.y
-            })),
+            nodes: nodes.map(node => ({ id: node.id, x: node.x, y: node.y })),
             timestamp: new Date().toISOString()
         };
-
         localStorage.setItem('visualization-layout', JSON.stringify(layout));
         message.success('Layout saved successfully');
     };
@@ -518,42 +520,52 @@ const Visualization: React.FC = () => {
 
     useEffect(() => {
         drawCanvas();
-    }, [nodes, connections, zoom, pan]);
+    }, [nodes, connections, zoom, pan, canvasSize]);
 
     useEffect(() => {
-        const handleResize = () => {
-            if (containerRef.current) {
-                const container = containerRef.current;
-                
-                // Calculate available space within the canvas container
-                const canvasContainer = container.querySelector('.visualization-canvas-container') as HTMLElement;
-                if (canvasContainer) {
-                    const containerRect = canvasContainer.getBoundingClientRect();
-                    
-                    setCanvasSize({
-                        width: Math.max(800, containerRect.width - 40),
-                        height: Math.max(400, containerRect.height - 20)
-                    });
-                }
-            }
-        };
+        // Multiple timing attempts to ensure layout is settled
+        const timers = [50, 100, 200, 500].map(delay =>
+            setTimeout(calculateCanvasSize, delay)
+        );
 
-        const resizeObserver = new ResizeObserver(handleResize);
+        const resizeObserver = new ResizeObserver(() => {
+            calculateCanvasSize();
+        });
+
         if (containerRef.current) {
             resizeObserver.observe(containerRef.current);
         }
 
-        setTimeout(handleResize, 100);
-
         return () => {
+            timers.forEach(clearTimeout);
             resizeObserver.disconnect();
         };
     }, []);
 
-    // Global mouse event handling for smooth dragging
+    // Canvas sizing effect - simplified
+    useEffect(() => {
+        // Initial sizing
+        const timer = setTimeout(calculateCanvasSize, 100);
+        
+        // Resize observer for container changes
+        const resizeObserver = new ResizeObserver(() => {
+            calculateCanvasSize();
+        });
+        
+        if (containerRef.current) {
+            resizeObserver.observe(containerRef.current);
+        }
+
+        return () => {
+            clearTimeout(timer);
+            resizeObserver.disconnect();
+        };
+    }, []);
+
+    // Global mouse handling for smooth dragging
     useEffect(() => {
         const handleGlobalMouseMove = (e: MouseEvent) => {
-            if (!isDragging || !selectedNodeId || !canvasRef.current) return;
+            if (!isDragging || !selectedNodeId) return;
             
             const mousePos = getMousePos(e);
             const newX = mousePos.x - dragOffset.x;
@@ -562,11 +574,7 @@ const Visualization: React.FC = () => {
             setNodes(prevNodes =>
                 prevNodes.map(node => {
                     if (node.id === selectedNodeId) {
-                        return {
-                            ...node,
-                            x: newX,
-                            y: newY
-                        };
+                        return { ...node, x: newX, y: newY };
                     }
                     return node;
                 })
@@ -575,13 +583,9 @@ const Visualization: React.FC = () => {
 
         const handleGlobalMouseUp = () => {
             if (isDragging) {
-                console.log('Global mouse up - ending drag');
                 setIsDragging(false);
                 setNodes(prevNodes =>
-                    prevNodes.map(node => ({
-                        ...node,
-                        isDragging: false
-                    }))
+                    prevNodes.map(node => ({ ...node, isDragging: false }))
                 );
             }
         };
@@ -692,7 +696,10 @@ const Visualization: React.FC = () => {
                         style={{ 
                             border: '1px solid #d9d9d9', 
                             cursor: isDragging ? 'grabbing' : 'grab',
-                            userSelect: 'none'
+                            userSelect: 'none',
+                            borderRadius: '4px',
+                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+                            // Removed maxWidth and height auto to let CSS handle sizing
                         }}
                     />
                 </div>

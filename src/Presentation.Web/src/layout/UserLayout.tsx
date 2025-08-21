@@ -53,6 +53,9 @@ export const UserLayout = ({ UserName }: iUser) => {
             key: "/dashboard",
             label: "Home",
             items: [{
+                key: "/dashboard",
+                label: <span onClick={() => handleClick("/dashboard")}>Dashboard</span>,
+            },{
                 key: "/visualisation",
                 label: <span onClick={() => handleClick("/visualisation")}>Visualisation</span>,
             }],
@@ -73,14 +76,7 @@ export const UserLayout = ({ UserName }: iUser) => {
                     key: "/sensors",
                     label: <span onClick={() => handleClick("/sensors")}>Sensors</span>,
                 },
-                {
-                    key: "/unitmodels",
-                    label: <span onClick={() => handleClick("/unitmodels")}>Unit Types</span>,
-                },
-                {
-                    key: "/unitmodelconfigs",
-                    label: <span onClick={() => handleClick("/unitmodels")}>Unit Type Configurations</span>,
-                },
+
             ],
         },
         {
@@ -92,8 +88,8 @@ export const UserLayout = ({ UserName }: iUser) => {
                     label: <span onClick={() => handleClick("/alarms")}>Alarms</span>,
                 },
                 {
-                    key: "/recipientsets",
-                    label: <span onClick={() => handleClick("/recipientsets")}>Recipient Sets</span>,
+                    key: "/triggers",
+                    label: <span onClick={() => handleClick("/triggers")}>Triggers</span>,
                 },
                 {
                     key: "/senderoptions",
@@ -106,14 +102,58 @@ export const UserLayout = ({ UserName }: iUser) => {
             ],
         },
         {
+            key: "/unitmodels",
+            label: "Config",
+            items: [
+                {
+                    key: "/unitmodels",
+                    label: <span onClick={() => handleClick("/unitmodels")}>Sensor Types</span>,
+                },
+                {
+                    key: "/unitmodelconfigs",
+                    label: <span onClick={() => handleClick("/unitmodels")}>Sensor Templates</span>,
+                },
+                {
+                    key: "/unitmodels",
+                    label: <span onClick={() => handleClick("/unitmodels")}>Unit Types</span>,
+                },
+                {
+                    key: "/unitmodelconfigs",
+                    label: <span onClick={() => handleClick("/unitmodels")}>Unit Templates</span>,
+                },
+            ],
+        },
+        {
             key: "/companies",
             label: "Companies",
-            items: [],
+            items: [
+                {
+                    key: "/companies",
+                    label: <span onClick={() => handleClick("/companies")}>Companies</span>,
+                },
+                {
+                    key: "/companies",
+                    label: <span onClick={() => handleClick("/companies")}>Contacts</span>,
+                },
+                {
+                    key: "/recipientsets",
+                    label: <span onClick={() => handleClick("/recipientsets")}>Contact Groups</span>,
+                },
+            ],
         },
         {
             key: "/users",
-            label: "Logins",
-            items: [],
+            label: "Admin",
+            items: [
+                {
+                    key: "/users",
+                    label: <span onClick={() => handleClick("/users")}>Users</span>,
+                },
+                {
+                    key: "/users",
+                    label: <span onClick={() => handleClick("/users")}>System</span>,
+                },
+            ],
         },
     ];
 
