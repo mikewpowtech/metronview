@@ -1,16 +1,5 @@
-﻿import React, { useRef, useEffect, useState } from 'react';
-import { Card, Select, Button, Space, Tooltip, Badge, message, Form } from 'antd';
-import {
-    HomeOutlined,
-    DatabaseOutlined,
-    AlertOutlined,
-    ThunderboltOutlined,
-    ZoomInOutlined,
-    ZoomOutOutlined,
-    ReloadOutlined,
-    SaveOutlined,
-    FullscreenOutlined
-} from '@ant-design/icons';
+import React, { useRef, useEffect, useState } from 'react';
+import { Card, Select, Space, message, Form } from 'antd';
 import { useAppSelector } from '../app/hooks';
 import { selectAuth } from '../app/store';
 import { fetchCompanies, Company, updateCompany } from '../features/companies/companyAPI';
@@ -22,39 +11,13 @@ import { CompanyModal } from '../features/companies/CompanyModal';
 import { UnitListModal } from '../features/units/UnitListModal';
 import { AlarmModal } from '../features/alarms/AlarmModal';
 import { TriggerModal } from '../features/triggers/TriggerModal';
-import './Visualisation.scss';
+import { VisualizationStats } from '../components/visualization/VisualizationStats';
+import { VisualizationControls } from '../components/visualization/VisualizationControls';
+import { NodeType, VisualizationNode, NodeConnection } from '../types/visualization';
+import './Visualization.scss';
 
-// Node types for the visualization
-export enum NodeType {
-    COMPANY = 'company',
-    UNIT = 'unit',
-    ALARM = 'alarm',
-    TRIGGER = 'trigger'
-}
-
-// Interface for visualization nodes
-export interface VisualizationNode {
-    id: string;
-    type: NodeType;
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    label: string;
-    data: Company | Unit | Alarm | Trigger;
-    connections: string[]; // IDs of connected nodes
-    color: string;
-    isSelected: boolean;
-    isDragging: boolean;
-}
-
-// Interface for connections between nodes
-export interface NodeConnection {
-    fromId: string;
-    toId: string;
-    color: string;
-    strokeWidth: number;
-}
+// Re-export types for backward compatibility
+export { NodeType, type VisualizationNode, type NodeConnection };
 
 const Visualization: React.FC = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -308,10 +271,10 @@ const Visualization: React.FC = () => {
 
         let icon = '';
         switch (type) {
-            case NodeType.COMPANY: icon = '🏢'; break;
-            case NodeType.UNIT: icon = '📟'; break;
-            case NodeType.ALARM: icon = '🚨'; break;
-            case NodeType.TRIGGER: icon = '⚡'; break;
+            case NodeType.COMPANY: icon = '??'; break;
+            case NodeType.UNIT: icon = '??'; break;
+            case NodeType.ALARM: icon = '??'; break;
+            case NodeType.TRIGGER: icon = '?'; break;
         }
 
         ctx.fillText(icon, iconX + iconSize / 2, iconY + iconSize);
@@ -735,20 +698,10 @@ const Visualization: React.FC = () => {
         };
     }, [isDragging, selectedNodeId, dragOffset]);
 
-    // Statistics
-    const stats = {
-        companies: nodes.filter(n => n.type === NodeType.COMPANY).length,
-        units: nodes.filter(n => n.type === NodeType.UNIT).length,
-        alarms: nodes.filter(n => n.type === NodeType.ALARM).length,
-        triggers: nodes.filter(n => n.type === NodeType.TRIGGER).length,
-        activeAlarms: nodes.filter(n => n.type === NodeType.ALARM && (n.data as Alarm).isActive).length,
-        enabledTriggers: nodes.filter(n => n.type === NodeType.TRIGGER && (n.data as Trigger).isEnabled).length
-    };
-
     return (
         <div className="visualization-container" ref={containerRef}>
             <Card
-                title="Metronview Designer"
+                title="Metronview Designer�"
                 loading={loading}
                 extra={
                     <Space>
@@ -768,53 +721,18 @@ const Visualization: React.FC = () => {
                     </Space>
                 }
             >
-                {/* Statistics Panel */}
-                <div className="visualization-stats">
-                    <Space size="large">
-                        <Badge count={stats.companies} color="#1890ff">
-                            <Tooltip title="Companies (Double-click to edit)">
-                                <HomeOutlined style={{ fontSize: 20 }} />
-                            </Tooltip>
-                        </Badge>
-                        <Badge count={stats.units} color="#52c41a">
-                            <Tooltip title="Units (Double-click to edit)">
-                                <DatabaseOutlined style={{ fontSize: 20 }} />
-                            </Tooltip>
-                        </Badge>
-                        <Badge count={`${stats.activeAlarms}/${stats.alarms}`} color="#fa541c">
-                            <Tooltip title="Active/Total Alarms (Double-click to edit)">
-                                <AlertOutlined style={{ fontSize: 20 }} />
-                            </Tooltip>
-                        </Badge>
-                        <Badge count={`${stats.enabledTriggers}/${stats.triggers}`} color="#722ed1">
-                            <Tooltip title="Enabled/Total Triggers (Double-click to edit)">
-                                <ThunderboltOutlined style={{ fontSize: 20 }} />
-                            </Tooltip>
-                        </Badge>
-                    </Space>
-                </div>
+                {/* Statistics Panel - now as separate component */}
+                <VisualizationStats nodes={nodes} />
 
-                {/* Control Panel */}
-                <div className="visualization-controls">
-                    <Space>
-                        <Tooltip title="Zoom In">
-                            <Button icon={<ZoomInOutlined />} onClick={handleZoomIn} />
-                        </Tooltip>
-                        <Tooltip title="Zoom Out">
-                            <Button icon={<ZoomOutOutlined />} onClick={handleZoomOut} />
-                        </Tooltip>
-                        <Tooltip title="Reset View">
-                            <Button icon={<ReloadOutlined />} onClick={handleResetView} />
-                        </Tooltip>
-                        <Tooltip title="Save Layout">
-                            <Button icon={<SaveOutlined />} onClick={handleSaveLayout} />
-                        </Tooltip>
-                        <Tooltip title="Fullscreen">
-                            <Button icon={<FullscreenOutlined />} onClick={handleFullscreen} />
-                        </Tooltip>
-                        <span>Zoom: {Math.round(zoom * 100)}% | Double-click nodes to edit</span>
-                    </Space>
-                </div>
+                {/* Control Panel - now as separate component */}
+                <VisualizationControls
+                    zoom={zoom}
+                    onZoomIn={handleZoomIn}
+                    onZoomOut={handleZoomOut}
+                    onResetView={handleResetView}
+                    onSaveLayout={handleSaveLayout}
+                    onFullscreen={handleFullscreen}
+                />
 
                 {/* Canvas */}
                 <div className="visualization-canvas-container">

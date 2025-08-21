@@ -56,8 +56,8 @@ export const UserLayout = ({ UserName }: iUser) => {
                 key: "/dashboard",
                 label: <span onClick={() => handleClick("/dashboard")}>Dashboard</span>,
             },{
-                key: "/visualisation",
-                label: <span onClick={() => handleClick("/visualisation")}>Visualisation</span>,
+                key: "/visualization", // Changed from "/visualisation"
+                label: <span onClick={() => handleClick("/visualization")}>Metronview Designer{'\u2122'}</span>,
             }],
         },
         {
