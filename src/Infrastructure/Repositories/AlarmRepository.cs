@@ -71,50 +71,57 @@ namespace Infrastructure.Repositories
             db.RecipientSetId = alarm.RecipientSetId;
             db.IsActive = alarm.IsActive;
 
-            // Handle triggers separately to avoid circular reference issues
-            // Remove triggers that are not in the update
-            var existingTriggerIds = db.Triggers.Select(t => t.Id).ToList();
-            var newTriggerIds = alarm.Triggers.Select(t => t.Id).ToList();
-            var triggersToRemove = db.Triggers.Where(t => !newTriggerIds.Contains(t.Id)).ToList();
-            
-            foreach (var triggerToRemove in triggersToRemove)
+            // Only handle triggers if they are provided in the alarm object
+            // This allows for basic alarm updates without trigger management
+            if (alarm.Triggers != null && alarm.Triggers.Any())
             {
-                db.Triggers.Remove(triggerToRemove);
-            }
+                // Handle triggers separately to avoid circular reference issues
+                // Remove triggers that are not in the update
+                var existingTriggerIds = db.Triggers.Select(t => t.Id).ToList();
+                var newTriggerIds = alarm.Triggers.Select(t => t.Id).ToList();
+                var triggersToRemove = db.Triggers.Where(t => !newTriggerIds.Contains(t.Id)).ToList();
+                
+                foreach (var triggerToRemove in triggersToRemove)
+                {
+                    db.Triggers.Remove(triggerToRemove);
+                }
 
-            // Update or add triggers
-            foreach (var trigger in alarm.Triggers)
-            {
-                var existingTrigger = db.Triggers.FirstOrDefault(t => t.Id == trigger.Id);
-                if (existingTrigger != null)
+                // Update or add triggers
+                foreach (var trigger in alarm.Triggers)
                 {
-                    // Update existing trigger - use TriggerTypeId directly
-                    existingTrigger.TriggerTypeId = trigger.TriggerTypeId;
-                    existingTrigger.TriggerValue = trigger.TriggerValue;
-                    existingTrigger.CommunicationModeId = trigger.CommunicationModeId;
-                    existingTrigger.Subject = trigger.Subject;
-                    existingTrigger.Body = trigger.Body;
-                    existingTrigger.MinimumSendIntervalMinutes = trigger.MinimumSendIntervalMinutes;
-                    existingTrigger.IsEnabled = trigger.IsEnabled;
-                }
-                else
-                {
-                    // Add new trigger - use TriggerTypeId directly
-                    var newTrigger = new TriggerDb
+                    var existingTrigger = db.Triggers.FirstOrDefault(t => t.Id == trigger.Id);
+                    if (existingTrigger != null)
                     {
-                        AlarmId = db.Id,
-                        TriggerTypeId = trigger.TriggerTypeId,
-                        TriggerValue = trigger.TriggerValue,
-                        CommunicationModeId = trigger.CommunicationModeId,
-                        Subject = trigger.Subject,
-                        Body = trigger.Body,
-                        MinimumSendIntervalMinutes = trigger.MinimumSendIntervalMinutes,
-                        IsEnabled = trigger.IsEnabled,
-                        Alarm = db
-                    };
-                    db.Triggers.Add(newTrigger);
+                        // Update existing trigger - use TriggerTypeId directly
+                        existingTrigger.TriggerTypeId = trigger.TriggerTypeId;
+                        existingTrigger.TriggerValue = trigger.TriggerValue;
+                        existingTrigger.CommunicationModeId = trigger.CommunicationModeId;
+                        existingTrigger.Subject = trigger.Subject;
+                        existingTrigger.Body = trigger.Body;
+                        existingTrigger.MinimumSendIntervalMinutes = trigger.MinimumSendIntervalMinutes;
+                        existingTrigger.IsEnabled = trigger.IsEnabled;
+                    }
+                    else
+                    {
+                        // Add new trigger - use TriggerTypeId directly
+                        var newTrigger = new TriggerDb
+                        {
+                            AlarmId = db.Id,
+                            TriggerTypeId = trigger.TriggerTypeId,
+                            TriggerValue = trigger.TriggerValue,
+                            CommunicationModeId = trigger.CommunicationModeId,
+                            Subject = trigger.Subject,
+                            Body = trigger.Body,
+                            MinimumSendIntervalMinutes = trigger.MinimumSendIntervalMinutes,
+                            IsEnabled = trigger.IsEnabled,
+                            Alarm = db
+                        };
+                        db.Triggers.Add(newTrigger);
+                    }
                 }
             }
+            // If no triggers are provided, we leave existing triggers unchanged
+            // This allows for basic alarm property updates without affecting triggers
 
             await context.SaveChangesAsync();
             return true;
