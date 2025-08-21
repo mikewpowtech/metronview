@@ -238,6 +238,103 @@ const Visualization: React.FC = () => {
         setConnections(newConnections);
     };
 
+    // Helper function to draw simple geometric icons instead of emojis
+    const drawGeometricIcon = (ctx: CanvasRenderingContext2D, type: NodeType, x: number, y: number, size: number) => {
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+
+        const centerX = x + size / 2;
+        const centerY = y + size / 2;
+        const radius = size * 0.3;
+
+        switch (type) {
+            case NodeType.COMPANY:
+                // Draw a bigger building shape
+                const buildingWidth = size * 0.8; // Increased from 0.6 to 0.8
+                const buildingHeight = size * 0.9; // Increased from 0.7 to 0.9
+                const buildingX = centerX - buildingWidth / 2;
+                const buildingY = centerY - buildingHeight / 2;
+                
+                ctx.fillRect(buildingX, buildingY, buildingWidth, buildingHeight);
+                // Add windows
+                ctx.fillStyle = nodeColors[NodeType.COMPANY];
+                const windowSize = buildingWidth * 0.15;
+                for (let i = 0; i < 2; i++) {
+                    for (let j = 0; j < 3; j++) {
+                        ctx.fillRect(
+                            buildingX + (i + 0.5) * (buildingWidth / 3),
+                            buildingY + (j + 0.5) * (buildingHeight / 4),
+                            windowSize,
+                            windowSize
+                        );
+                    }
+                }
+                break;
+
+            case NodeType.UNIT:
+                // Draw a bigger device shape (rectangle with rounded corners)
+                const deviceWidth = size * 0.9; // Increased from 0.7 to 0.9
+                const deviceHeight = size * 0.7; // Increased from 0.5 to 0.7
+                const deviceX = centerX - deviceWidth / 2;
+                const deviceY = centerY - deviceHeight / 2;
+                
+                ctx.beginPath();
+                ctx.roundRect(deviceX, deviceY, deviceWidth, deviceHeight, size * 0.1);
+                ctx.fill();
+                
+                // Add a small screen indicator
+                ctx.fillStyle = nodeColors[NodeType.UNIT];
+                ctx.fillRect(deviceX + deviceWidth * 0.2, deviceY + deviceHeight * 0.2, deviceWidth * 0.6, deviceHeight * 0.3);
+                break;
+
+            case NodeType.ALARM:
+                // Draw a bigger warning triangle
+                const alarmRadius = size * 0.75; // Increased from 0.3 to 0.45 (50% bigger)
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY - alarmRadius);
+                ctx.lineTo(centerX - alarmRadius * 0.866, centerY + alarmRadius * 0.5);
+                ctx.lineTo(centerX + alarmRadius * 0.866, centerY + alarmRadius * 0.5);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Add bigger exclamation mark
+                ctx.fillStyle = nodeColors[NodeType.ALARM];
+                ctx.fillRect(centerX - size * 0.07, centerY - size * 0.25, size * 0.14, size * 0.35); // Made wider and taller
+                ctx.beginPath();
+                ctx.arc(centerX, centerY + size * 0.2, size * 0.07, 0, Math.PI * 2); // Made bigger
+                ctx.fill();
+                break;
+
+            case NodeType.TRIGGER:
+                // Draw a much better trigger symbol - a clean lightning bolt
+                const triggerRadius = size * 0.4;
+
+                // Create a more defined lightning bolt shape
+                ctx.beginPath();
+                // Start at top
+                ctx.moveTo(centerX - triggerRadius * 0.2, centerY - triggerRadius);
+                // Top right edge
+                ctx.lineTo(centerX + triggerRadius * 0.4, centerY - triggerRadius);
+                // Inner notch (top)
+                ctx.lineTo(centerX + triggerRadius * 0.1, centerY - triggerRadius * 0.1);
+                // Right side to middle
+                ctx.lineTo(centerX + triggerRadius * 0.6, centerY - triggerRadius * 0.1);
+                // Bottom point
+                ctx.lineTo(centerX + triggerRadius * 0.2, centerY + triggerRadius);
+                // Bottom left edge
+                ctx.lineTo(centerX - triggerRadius * 0.4, centerY + triggerRadius);
+                // Inner notch (bottom)
+                ctx.lineTo(centerX - triggerRadius * 0.1, centerY + triggerRadius * 0.1);
+                // Left side to middle
+                ctx.lineTo(centerX - triggerRadius * 0.6, centerY + triggerRadius * 0.1);
+                // Close the path back to start
+                ctx.closePath();
+                ctx.fill();
+                break;
+        }
+    };
+
     // Canvas drawing functions
     const drawNode = (ctx: CanvasRenderingContext2D, node: VisualizationNode) => {
         const { x, y, width, height, label, color, isSelected, type } = node;
@@ -260,24 +357,12 @@ const Visualization: React.FC = () => {
         ctx.fill();
         ctx.stroke();
 
-        // Draw icon
+        // Draw geometric icon instead of emoji
         const iconSize = 20 * zoom;
         const iconX = transformedX + (transformedWidth - iconSize) / 2;
         const iconY = transformedY + 10 * zoom;
 
-        ctx.fillStyle = '#ffffff';
-        ctx.font = `${iconSize}px "Segoe UI", sans-serif`;
-        ctx.textAlign = 'center';
-
-        let icon = '';
-        switch (type) {
-            case NodeType.COMPANY: icon = '??'; break;
-            case NodeType.UNIT: icon = '??'; break;
-            case NodeType.ALARM: icon = '??'; break;
-            case NodeType.TRIGGER: icon = '?'; break;
-        }
-
-        ctx.fillText(icon, iconX + iconSize / 2, iconY + iconSize);
+        drawGeometricIcon(ctx, type, iconX, iconY, iconSize);
 
         // Draw label
         ctx.fillStyle = '#ffffff';
