@@ -1,5 +1,5 @@
 ﻿import React, { useRef, useEffect, useState } from 'react';
-import { Card, Select, Button, Space, Tooltip, Badge, message } from 'antd';
+import { Card, Select, Button, Space, Tooltip, Badge, message, Form } from 'antd';
 import {
     HomeOutlined,
     DatabaseOutlined,
@@ -13,10 +13,15 @@ import {
 } from '@ant-design/icons';
 import { useAppSelector } from '../app/hooks';
 import { selectAuth } from '../app/store';
-import { fetchCompanies, Company } from '../features/companies/companyAPI';
-import { fetchUnits, Unit } from '../features/units/unitsAPI';
-import { fetchAlarms, Alarm } from '../features/alarms/alarmAPI';
-import { fetchTriggers, Trigger } from '../features/triggers/triggerAPI';
+import { fetchCompanies, Company, updateCompany } from '../features/companies/companyAPI';
+import { fetchUnits, Unit, updateUnit } from '../features/units/unitsAPI';
+import { fetchAlarms, Alarm, updateAlarm } from '../features/alarms/alarmAPI';
+import { fetchTriggers, Trigger, updateTrigger } from '../features/triggers/triggerAPI';
+import { fetchUnitModels, UnitModel } from '../features/unitmodels/unitModelAPI';
+import { CompanyModal } from '../features/companies/CompanyModal';
+import { UnitListModal } from '../features/units/UnitListModal';
+import { AlarmModal } from '../features/alarms/AlarmModal';
+import { TriggerModal } from '../features/triggers/TriggerModal';
 import './Visualisation.scss';
 
 // Node types for the visualization
@@ -63,6 +68,7 @@ const Visualization: React.FC = () => {
     const [units, setUnits] = useState<Unit[]>([]);
     const [alarms, setAlarms] = useState<Alarm[]>([]);
     const [triggers, setTriggers] = useState<Trigger[]>([]);
+    const [unitModels, setUnitModels] = useState<UnitModel[]>([]);
     const [loading, setLoading] = useState(false);
     const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
     const [isDragging, setIsDragging] = useState(false);
@@ -71,6 +77,18 @@ const Visualization: React.FC = () => {
     const [pan, setPan] = useState({ x: 0, y: 0 });
     const [selectedCompany, setSelectedCompany] = useState<number | null>(null);
     const [canvasSize, setCanvasSize] = useState({ width: 1200, height: 600 });
+
+    // Modal state management
+    const [editModalOpen, setEditModalOpen] = useState(false);
+    const [editingNode, setEditingNode] = useState<VisualizationNode | null>(null);
+    const [modalLoading, setModalLoading] = useState(false);
+    const [clickTimeout, setClickTimeout] = useState<NodeJS.Timeout | null>(null);
+
+    // Form instances for each modal type
+    const [companyForm] = Form.useForm();
+    const [unitForm] = Form.useForm();
+    const [alarmForm] = Form.useForm();
+    const [triggerForm] = Form.useForm();
 
     // Node colors by type
     const nodeColors = {
@@ -86,17 +104,19 @@ const Visualization: React.FC = () => {
 
         setLoading(true);
         try {
-            const [companiesData, unitsData, alarmsData, triggersData] = await Promise.all([
+            const [companiesData, unitsData, alarmsData, triggersData, unitModelsData] = await Promise.all([
                 fetchCompanies(auth.accessToken),
                 fetchUnits(auth.accessToken),
                 fetchAlarms(auth.accessToken),
-                fetchTriggers(auth.accessToken)
+                fetchTriggers(auth.accessToken),
+                fetchUnitModels(auth.accessToken)
             ]);
 
             setCompanies(companiesData);
             setUnits(unitsData);
             setAlarms(alarmsData);
             setTriggers(triggersData);
+            setUnitModels(unitModelsData);
 
             generateVisualizationNodes(companiesData, unitsData, alarmsData, triggersData);
         } catch (error) {
@@ -383,9 +403,8 @@ const Visualization: React.FC = () => {
         
         if (canvasContainer) {
             const rect = canvasContainer.getBoundingClientRect();
-            // Use the full width and height of the container, minus just a small margin for borders
-            const newWidth = Math.max(800, rect.width - 4); // Only subtract 4px for borders
-            const newHeight = Math.max(400, rect.height - 4); // Only subtract 4px for borders
+            const newWidth = Math.max(800, rect.width - 4);
+            const newHeight = Math.max(400, rect.height - 4);
             
             setCanvasSize({
                 width: newWidth,
@@ -417,6 +436,63 @@ const Visualization: React.FC = () => {
         return null;
     };
 
+    // Double-click handler for opening edit modals
+    const handleNodeDoubleClick = (node: VisualizationNode) => {
+        setEditingNode(node);
+        
+        // Set form values based on node type
+        const nodeData = node.data;
+        
+        switch (node.type) {
+            case NodeType.COMPANY:
+                const company = nodeData as Company;
+                companyForm.setFieldsValue({
+                    name: company.name,
+                    parentCompanyId: company.parentCompanyId
+                });
+                break;
+            case NodeType.UNIT:
+                const unit = nodeData as Unit;
+                unitForm.setFieldsValue({
+                    manufacturerCode: unit.manufacturerCode,
+                    unitTypeId: unit.unitTypeId?.toString(),
+                    companyID: unit.companyId,
+                    phoneNumber: unit.phoneNumber,
+                    pin: unit.pin,
+                    unitCode: unit.unitCode,
+                    secret: unit.secret,
+                    status: unit.status,
+                    daysBeforeNotReported: unit.daysBeforeNotReported,
+                    customFieldValues: unit.customFieldValues
+                });
+                break;
+            case NodeType.ALARM:
+                const alarm = nodeData as Alarm;
+                alarmForm.setFieldsValue({
+                    name: alarm.name,
+                    companyId: alarm.companyId,
+                    recipientSetId: alarm.recipientSetId,
+                    isActive: alarm.isActive
+                });
+                break;
+            case NodeType.TRIGGER:
+                const trigger = nodeData as Trigger;
+                triggerForm.setFieldsValue({
+                    alarmId: trigger.alarmId,
+                    triggerTypeId: trigger.triggerTypeId,
+                    triggerValue: trigger.triggerValue,
+                    communicationModeId: trigger.communicationModeId,
+                    subject: trigger.subject,
+                    body: trigger.body,
+                    minimumSendIntervalMinutes: trigger.minimumSendIntervalMinutes,
+                    isEnabled: trigger.isEnabled
+                });
+                break;
+        }
+        
+        setEditModalOpen(true);
+    };
+
     const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
         e.preventDefault();
         
@@ -424,20 +500,36 @@ const Visualization: React.FC = () => {
         const clickedNode = getNodeAtPosition(mousePos.x, mousePos.y);
 
         if (clickedNode) {
-            setSelectedNodeId(clickedNode.id);
-            setIsDragging(true);
-            setDragOffset({
-                x: mousePos.x - clickedNode.x,
-                y: mousePos.y - clickedNode.y
-            });
+            // Clear any existing timeout
+            if (clickTimeout) {
+                clearTimeout(clickTimeout);
+                setClickTimeout(null);
+                // This is a double-click
+                handleNodeDoubleClick(clickedNode);
+                return;
+            }
 
-            setNodes(prevNodes =>
-                prevNodes.map(node => ({
-                    ...node,
-                    isSelected: node.id === clickedNode.id,
-                    isDragging: node.id === clickedNode.id
-                }))
-            );
+            // Set timeout for single click
+            const timeout = setTimeout(() => {
+                // Single click logic
+                setSelectedNodeId(clickedNode.id);
+                setIsDragging(true);
+                setDragOffset({
+                    x: mousePos.x - clickedNode.x,
+                    y: mousePos.y - clickedNode.y
+                });
+
+                setNodes(prevNodes =>
+                    prevNodes.map(node => ({
+                        ...node,
+                        isSelected: node.id === clickedNode.id,
+                        isDragging: node.id === clickedNode.id
+                    }))
+                );
+                setClickTimeout(null);
+            }, 300); // 300ms timeout for double-click detection
+
+            setClickTimeout(timeout);
         } else {
             setSelectedNodeId(null);
             setIsDragging(false);
@@ -486,6 +578,69 @@ const Visualization: React.FC = () => {
         setZoom(newZoom);
     };
 
+    // Modal handlers
+    const handleModalCancel = () => {
+        setEditModalOpen(false);
+        setEditingNode(null);
+        companyForm.resetFields();
+        unitForm.resetFields();
+        alarmForm.resetFields();
+        triggerForm.resetFields();
+    };
+
+    const handleModalOk = async () => {
+        if (!editingNode || !auth.accessToken) return;
+
+        setModalLoading(true);
+        try {
+            const nodeData = editingNode.data;
+            
+            switch (editingNode.type) {
+                case NodeType.COMPANY:
+                    const companyValues = await companyForm.validateFields();
+                    await updateCompany(nodeData.id, { 
+                        id: nodeData.id, 
+                        ...companyValues 
+                    }, auth.accessToken);
+                    message.success('Company updated successfully');
+                    break;
+                case NodeType.UNIT:
+                    const unitValues = await unitForm.validateFields();
+                    await updateUnit(nodeData.id, { 
+                        id: nodeData.id, 
+                        ...unitValues 
+                    }, auth.accessToken);
+                    message.success('Unit updated successfully');
+                    break;
+                case NodeType.ALARM:
+                    const alarmValues = await alarmForm.validateFields();
+                    await updateAlarm(nodeData.id, { 
+                        id: nodeData.id, 
+                        ...alarmValues 
+                    }, auth.accessToken);
+                    message.success('Alarm updated successfully');
+                    break;
+                case NodeType.TRIGGER:
+                    const triggerValues = await triggerForm.validateFields();
+                    await updateTrigger(nodeData.id, { 
+                        id: nodeData.id, 
+                        ...triggerValues 
+                    }, auth.accessToken);
+                    message.success('Trigger updated successfully');
+                    break;
+            }
+            
+            // Reload data to reflect changes
+            await loadData();
+            handleModalCancel();
+        } catch (error: any) {
+            if (error.errorFields) return; // Form validation error
+            message.error(error.message || 'Failed to update');
+        } finally {
+            setModalLoading(false);
+        }
+    };
+
     // Control functions
     const handleZoomIn = () => setZoom(prev => Math.min(prev * 1.2, 3));
     const handleZoomOut = () => setZoom(prev => Math.max(prev * 0.8, 0.1));
@@ -523,7 +678,6 @@ const Visualization: React.FC = () => {
     }, [nodes, connections, zoom, pan, canvasSize]);
 
     useEffect(() => {
-        // Multiple timing attempts to ensure layout is settled
         const timers = [50, 100, 200, 500].map(delay =>
             setTimeout(calculateCanvasSize, delay)
         );
@@ -538,26 +692,6 @@ const Visualization: React.FC = () => {
 
         return () => {
             timers.forEach(clearTimeout);
-            resizeObserver.disconnect();
-        };
-    }, []);
-
-    // Canvas sizing effect - simplified
-    useEffect(() => {
-        // Initial sizing
-        const timer = setTimeout(calculateCanvasSize, 100);
-        
-        // Resize observer for container changes
-        const resizeObserver = new ResizeObserver(() => {
-            calculateCanvasSize();
-        });
-        
-        if (containerRef.current) {
-            resizeObserver.observe(containerRef.current);
-        }
-
-        return () => {
-            clearTimeout(timer);
             resizeObserver.disconnect();
         };
     }, []);
@@ -638,22 +772,22 @@ const Visualization: React.FC = () => {
                 <div className="visualization-stats">
                     <Space size="large">
                         <Badge count={stats.companies} color="#1890ff">
-                            <Tooltip title="Companies">
+                            <Tooltip title="Companies (Double-click to edit)">
                                 <HomeOutlined style={{ fontSize: 20 }} />
                             </Tooltip>
                         </Badge>
                         <Badge count={stats.units} color="#52c41a">
-                            <Tooltip title="Units">
+                            <Tooltip title="Units (Double-click to edit)">
                                 <DatabaseOutlined style={{ fontSize: 20 }} />
                             </Tooltip>
                         </Badge>
                         <Badge count={`${stats.activeAlarms}/${stats.alarms}`} color="#fa541c">
-                            <Tooltip title="Active/Total Alarms">
+                            <Tooltip title="Active/Total Alarms (Double-click to edit)">
                                 <AlertOutlined style={{ fontSize: 20 }} />
                             </Tooltip>
                         </Badge>
                         <Badge count={`${stats.enabledTriggers}/${stats.triggers}`} color="#722ed1">
-                            <Tooltip title="Enabled/Total Triggers">
+                            <Tooltip title="Enabled/Total Triggers (Double-click to edit)">
                                 <ThunderboltOutlined style={{ fontSize: 20 }} />
                             </Tooltip>
                         </Badge>
@@ -678,7 +812,7 @@ const Visualization: React.FC = () => {
                         <Tooltip title="Fullscreen">
                             <Button icon={<FullscreenOutlined />} onClick={handleFullscreen} />
                         </Tooltip>
-                        <span>Zoom: {Math.round(zoom * 100)}%</span>
+                        <span>Zoom: {Math.round(zoom * 100)}% | Double-click nodes to edit</span>
                     </Space>
                 </div>
 
@@ -699,7 +833,6 @@ const Visualization: React.FC = () => {
                             userSelect: 'none',
                             borderRadius: '4px',
                             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
-                            // Removed maxWidth and height auto to let CSS handle sizing
                         }}
                     />
                 </div>
@@ -712,7 +845,15 @@ const Visualization: React.FC = () => {
                             if (!selectedNode) return null;
 
                             return (
-                                <Card size="small" title={`${selectedNode.type.toUpperCase()}: ${selectedNode.label}`}>
+                                <Card 
+                                    size="small" 
+                                    title={`${selectedNode.type.toUpperCase()}: ${selectedNode.label}`}
+                                    extra={
+                                        <small style={{ color: '#666' }}>
+                                            Double-click to edit
+                                        </small>
+                                    }
+                                >
                                     <pre>{JSON.stringify(selectedNode.data, null, 2)}</pre>
                                 </Card>
                             );
@@ -720,6 +861,58 @@ const Visualization: React.FC = () => {
                     </div>
                 )}
             </Card>
+
+            {/* Edit Modals */}
+            {editingNode?.type === NodeType.COMPANY && (
+                <CompanyModal
+                    showModal={editModalOpen}
+                    isEdit={true}
+                    modalLoading={modalLoading}
+                    form={companyForm}
+                    companies={companies}
+                    onOk={handleModalOk}
+                    onCancel={handleModalCancel}
+                />
+            )}
+
+            {editingNode?.type === NodeType.UNIT && (
+                <UnitListModal
+                    showModal={editModalOpen}
+                    isEdit={true}
+                    modalLoading={modalLoading}
+                    form={unitForm}
+                    companies={companies}
+                    unitModels={unitModels}
+                    onOk={handleModalOk}
+                    onCancel={handleModalCancel}
+                />
+            )}
+
+            {editingNode?.type === NodeType.ALARM && (
+                <AlarmModal
+                    showModal={editModalOpen}
+                    isEdit={true}
+                    modalLoading={modalLoading}
+                    form={alarmForm}
+                    companies={companies}
+                    onOk={handleModalOk}
+                    onCancel={handleModalCancel}
+                />
+            )}
+
+            {editingNode?.type === NodeType.TRIGGER && (
+                <TriggerModal
+                    showModal={editModalOpen}
+                    isEdit={true}
+                    modalLoading={modalLoading}
+                    form={triggerForm}
+                    alarms={alarms}
+                    triggerTypes={[]} // You'll need to add trigger types data
+                    communicationModes={[]} // You'll need to add communication modes data
+                    onOk={handleModalOk}
+                    onCancel={handleModalCancel}
+                />
+            )}
         </div>
     );
 };
