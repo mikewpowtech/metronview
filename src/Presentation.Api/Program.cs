@@ -141,15 +141,15 @@ namespace Api
             // Configure Redis cache (or in-memory cache for development)
             //if (builder.Environment.IsDevelopment())
             //{
-            //    builder.Services.AddMemoryCache();
-            //    builder.Services.AddSingleton<IDistributedCache, MemoryDistributedCache>();
+            builder.Services.AddMemoryCache();
+            builder.Services.AddSingleton<IDistributedCache, MemoryDistributedCache>();
             //}
             //else
             //{
-                builder.Services.AddStackExchangeRedisCache(options =>
-                {
-                    options.Configuration = builder.Configuration.GetConnectionString("Redis");
-                });
+            //builder.Services.AddStackExchangeRedisCache(options =>
+            //{
+            //    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+            //});
             //}
 
             // Register token cache service
