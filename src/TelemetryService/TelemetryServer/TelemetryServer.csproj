@@ -16,17 +16,17 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Antlr4BuildTasks" Version="12.10.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.8" />
     <PackageReference Include="MinVer" Version="6.0.0" IncludeAssets="All" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.2" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.4" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="9.0.4" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="9.0.8" />
     <PackageReference Include="MSBuild.Microsoft.VisualStudio.Web.targets" Version="14.0.0.3" />
-    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.11.1" />
-    <PackageReference Include="Sentry" Version="5.0.1" />
-    <PackageReference Include="Sentry.Extensions.Logging" Version="5.0.1" />
-    <PackageReference Include="Sentry.OpenTelemetry" Version="5.0.1" />
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="9.0.1" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.12.0" />
+    <PackageReference Include="Sentry" Version="5.14.1" />
+    <PackageReference Include="Sentry.Extensions.Logging" Version="5.14.1" />
+    <PackageReference Include="Sentry.OpenTelemetry" Version="5.14.1" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="9.0.8" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../Infrastructure/Infrastructure.csproj" />
