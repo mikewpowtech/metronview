@@ -51,49 +51,60 @@ export const UserLayout = ({ UserName }: iUser) => {
     const menuDropdowns = [
         {
             key: "/dashboard",
-            label: "Home",
-            items: [{
-                key: "/dashboard",
-                label: <span onClick={() => handleClick("/dashboard")}>Dashboard</span>,
-            },{
-                key: "/visualization", // Changed from "/visualisation"
-                label: <span onClick={() => handleClick("/visualization")}>Metronview Designer{'\u2122'}</span>,
-            }],
-        },
-        {
-            key: "/units",
-            label: "Units",
+            label: "Dashboard",
             items: [
-                {
-                    key: "/units",
-                    label: <span onClick={() => handleClick("/units")}>Units</span>,
-                },
-                {
-                    key: "/readings",
-                    label: <span onClick={() => handleClick("/readings")}>Readings</span>,
-                },
-                {
-                    key: "/sensors",
-                    label: <span onClick={() => handleClick("/sensors")}>Sensors</span>,
-                },
-
             ],
         },
         {
-            key: "/alarms",
+            key: "/units",
+            label: "Manage Devices",
+            items: [
+                // {
+                //     key: "/readings",
+                //     label: <span onClick={() => handleClick("/readings")}>Readings</span>,
+                // },
+                // {
+                //     key: "/sensors",
+                //     label: <span onClick={() => handleClick("/sensors")}>Sensors</span>,
+                // },
+            ],
+        },
+        {
+            key: "/users",
+            label: "Manage Logins",
+            items: [
+                // {
+                //     key: "/users",
+                //     label: <span onClick={() => handleClick("/users")}>System</span>,
+                // },
+            ],
+        },
+        {
             label: "Alarms",
             items: [
                 {
-                    key: "/alarms",
-                    label: <span onClick={() => handleClick("/alarms")}>Alarms</span>,
+                    key: "/recipients",
+                    label: <span onClick={() => handleClick("/recipients")}>Manage Recipients</span>,
                 },
                 {
-                    key: "/triggers",
-                    label: <span onClick={() => handleClick("/triggers")}>Triggers</span>,
+                    key: "/recipientsets",
+                    label: <span onClick={() => handleClick("/recipientsets")}>Manage Recipient Sets</span>,
                 },
+                {
+                    key: "/alarms",
+                    label: <span onClick={() => handleClick("/alarms")}>Manage Alarm Sets</span>,
+                },
+                // {
+                //     key: "/triggers",
+                //     label: <span onClick={() => handleClick("/triggers")}>Triggers</span>,
+                // },
                 {
                     key: "/senderoptions",
                     label: <span onClick={() => handleClick("/senderoptions")}>Sender Options</span>,
+                },
+                {
+                    key: "/alarmhistory",
+                    label: <span onClick={() => handleClick("/alarmhistory")}>History</span>,
                 },
                 {
                     key: "/alarminstructions",
@@ -102,57 +113,47 @@ export const UserLayout = ({ UserName }: iUser) => {
             ],
         },
         {
-            key: "/unitmodels",
-            label: "Config",
-            items: [
-                {
-                    key: "/unitmodels",
-                    label: <span onClick={() => handleClick("/unitmodels")}>Sensor Types</span>,
-                },
-                {
-                    key: "/unitmodelconfigs",
-                    label: <span onClick={() => handleClick("/unitmodels")}>Sensor Templates</span>,
-                },
-                {
-                    key: "/unitmodels",
-                    label: <span onClick={() => handleClick("/unitmodels")}>Unit Types</span>,
-                },
-                {
-                    key: "/unitmodelconfigs",
-                    label: <span onClick={() => handleClick("/unitmodels")}>Unit Templates</span>,
-                },
-            ],
-        },
-        {
             key: "/companies",
-            label: "Companies",
+            label: "Manage Companies",
+            items: [
+                // {
+                //     key: "/companies",
+                //     label: <span onClick={() => handleClick("/companies")}>Contacts</span>,
+                // },
+                // {
+                //     key: "/recipientsets",
+                //     label: <span onClick={() => handleClick("/recipientsets")}>Contact Groups</span>,
+                // },
+            ],
+        },
+        {
+            label: "Unit types",
             items: [
                 {
-                    key: "/companies",
-                    label: <span onClick={() => handleClick("/companies")}>Companies</span>,
+                    key: "/unitmodels",
+                    label: <span onClick={() => handleClick("/unitmodels")}>Manage unit types</span>,
                 },
                 {
-                    key: "/companies",
-                    label: <span onClick={() => handleClick("/companies")}>Contacts</span>,
-                },
-                {
-                    key: "/recipientsets",
-                    label: <span onClick={() => handleClick("/recipientsets")}>Contact Groups</span>,
+                    key: "/unitmodelconfigs",
+                    label: <span onClick={() => handleClick("/unitmodelconfigs")}>Manage unit preconfigurations</span>,
                 },
             ],
         },
         {
-            key: "/users",
-            label: "Admin",
+            label: "New Features",
             items: [
                 {
-                    key: "/users",
-                    label: <span onClick={() => handleClick("/users")}>Users</span>,
+                    key: "/sensortypes",
+                    label: <span onClick={() => handleClick("/sensortypes")}>Sensor Types</span>,
                 },
                 {
-                    key: "/users",
-                    label: <span onClick={() => handleClick("/users")}>System</span>,
+                    key: "/sensortemplates",
+                    label: <span onClick={() => handleClick("/sensortemplates")}>Sensor Templates</span>,
                 },
+                {
+                    key: "/visualization",
+                    label: <span onClick={() => handleClick("/visualization")}>Metronview Designer</span>,
+                }
             ],
         },
     ];

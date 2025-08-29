@@ -27,6 +27,8 @@ var host = Host.CreateDefaultBuilder(args)
         services.Configure<WorkerOptions>(configuration.GetSection("WorkerOptions"));
         // Register SpiderScopeApiOptions
         services.Configure<SpiderScopeApiOptions>(configuration.GetSection("SpiderScopeApiOptions"));
+        // Register Azure Email Options
+        services.Configure<AzureEmailOptions>(configuration.GetSection("AzureEmail"));
         // Add services to the container.
         services.AddHttpClient<ISpiderScopeApi, SpiderScopeApi>();
 
@@ -59,7 +61,7 @@ var host = Host.CreateDefaultBuilder(args)
         services.AddTransient<IConfigurationUploadService, ConfigurationUploadService>();
         services.AddTransient<ICustomFieldRepository, CustomFieldRepository>();
         services.AddTransient<IConfigurationUploadRepository, ConfigurationUploadRepository>();
-        services.AddTransient<IMessengerService, MessengerService>();
+        services.AddTransient<IMessengerService, AzureEmailService>();
         services.AddTransient<IAlarmRepository, AlarmRepository>();
         services.AddTransient<ITriggerRepository, TriggerRepository>();
         services.AddTransient<IAlarmService, AlarmService>();

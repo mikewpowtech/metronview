@@ -204,5 +204,45 @@ namespace Infrastructure.Repositories
             logger.LogDebug("No previous alarm, so not quenched");
             return false;
         }
+
+        /// <summary>
+        /// Adds or updates a record in the MostRecentAlarms table to track when an alarm was last sent
+        /// for a specific sensor and alarm combination.
+        /// </summary>
+        /// <param name="sensorId">The sensor ID for which the alarm was sent</param>
+        /// <param name="alarmId">The alarm ID that was triggered</param>
+        /// <param name="sentUtc">The UTC timestamp when the alarm was sent</param>
+        public async Task AddOrUpdateMostRecentAlarmAsync(int sensorId, int alarmId, DateTime sentUtc)
+        {
+            logger.LogDebug("Adding/updating MostRecentAlarm for SensorId: {SensorId}, AlarmId: {AlarmId}, SentUtc: {SentUtc}", 
+                sensorId, alarmId, sentUtc);
+
+            // Try to find existing record
+            var existingRecord = await context.MostRecentAlarms
+                .FirstOrDefaultAsync(mra => mra.SensorId == sensorId && mra.AlarmId == alarmId);
+
+            if (existingRecord != null)
+            {
+                // Update existing record
+                existingRecord.MostRecentSendUtc = sentUtc;
+                logger.LogDebug("Updated existing MostRecentAlarm record");
+            }
+            else
+            {
+                // Create new record
+                var newRecord = new MostRecentAlarmDb
+                {
+                    SensorId = sensorId,
+                    AlarmId = alarmId,
+                    MostRecentSendUtc = sentUtc
+                };
+                
+                context.MostRecentAlarms.Add(newRecord);
+                logger.LogDebug("Created new MostRecentAlarm record");
+            }
+
+            await context.SaveChangesAsync();
+            logger.LogDebug("Successfully saved MostRecentAlarm record to database");
+        }
     }
 }

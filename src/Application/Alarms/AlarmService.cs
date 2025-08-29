@@ -104,7 +104,7 @@ namespace Application.Alarms
             return false;
         }
 
-        public async void SendAlarm(BreachedTriggerDto trigger)
+        public async Task SendAlarm(BreachedTriggerDto trigger)
         {
             switch (CommunicationModeExtensions.ToAlarmRecipientType(trigger.CommunicationMode))
             {
@@ -115,8 +115,8 @@ namespace Application.Alarms
                     await SendEmailAsync(trigger);
                     break;
                 case AlarmRecipientType.WebService:
-                    SendWebService();
-                    break;
+                    //SendWebService();
+                    //break;
                 case AlarmRecipientType.Unknown:
                 default:
                     break;

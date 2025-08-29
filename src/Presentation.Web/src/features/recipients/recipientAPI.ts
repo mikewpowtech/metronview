@@ -28,7 +28,7 @@ export async function fetchRecipients(token?: string): Promise<Recipient[]> {
 }
 
 export const fetchRecipientsByRecipientSet = async (recipientSetId: number, token: string | undefined): Promise<Recipient[]> => {
-    const response = await fetch(`/api/recipientsets/${recipientSetId}/recipients`, {
+    const response = await fetch(`/api/recipientset/${recipientSetId}/recipients`, {
         headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',

@@ -38,7 +38,16 @@ public class AlarmWorkerService : AlarmBackgroundServiceBase
                     _logger.LogInformation("got {0} units", resp.Count);
 
                     // Use the inherited ProcessAlarmsAsync method
-                    await ProcessAlarmsAsync(await triggerService.GetNotReportedBreachesAsync());
+                    var triggers = await triggerService.GetNotReportedBreachesAsync();
+                    if (triggers.Count == 0)
+                    {
+                        _logger.LogInformation("No triggers to process");
+                    }
+                    else
+                    {
+                        _logger.LogInformation("got {0} triggers to process", triggers.Count);
+                        await ProcessAlarmsAsync(triggers);
+                    }
 
                     await Task.Delay(_workerOptions.AlarmPollerInterval, stoppingToken);
                 }

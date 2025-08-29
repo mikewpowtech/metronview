@@ -26,6 +26,11 @@ import RecipientSetList from "./pages/RecipientSetList";
 import TriggerList from "./pages/TriggerList";
 import Visualization from "./pages/Visualization";
 import { LoginPage } from "./pages/LoginPage";
+import SenderOptions from "./pages/SenderOptions";
+import AlarmHistory from "./pages/AlarmHistory";
+import UnitModelConfigs from "./pages/UnitModelConfigs";
+import SensorTypes from "./pages/SensorTypes";
+import SensorTemplates from "./pages/SensorTemplates";
 
 // Wrapper component for readings with sensor parameter
 const ReadingsWithSensor = () => {
@@ -106,12 +111,17 @@ const App = () => {
                             <Route path="/companies" element={<CompanyList />} />
                             <Route path="/sensors" element={<SensorManagement />} />
                             <Route path="/unitmodels" element={<UnitModelList />} />
+                            <Route path="/unitmodelconfigs" element={<UnitModelConfigs />} />
                             <Route path="/alarminstructions" element={<AlarmInstructions />} />
                             <Route path="/alarms" element={<AlarmList />} />
                             <Route path="/triggers" element={<TriggerList />} />
                             <Route path="/visualization" element={<Visualization />} />
                             <Route path="/recipients" element={<RecipientList />} />
                             <Route path="/recipientsets" element={<RecipientSetList />} />
+                            <Route path="/senderoptions" element={<SenderOptions />} />
+                            <Route path="/alarmhistory" element={<AlarmHistory />} />
+                            <Route path="/sensortypes" element={<SensorTypes />} />
+                            <Route path="/sensortemplates" element={<SensorTemplates />} />
                             <Route path="/configurationuploads/:unitId" element={<ConfigurationUploads />} />
                             <Route path="*" element={<NotFoundPage />} />
                         </Route>

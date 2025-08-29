@@ -39,10 +39,10 @@ public abstract class AlarmBackgroundServiceBase : BackgroundService
                     if (!isQuenched)
                     {
                         _logger.LogTrace("Sending alarm via {@RecipientMode}", trigger.CommunicationMode);
-                        alarmService.SendAlarm(trigger);
+                        await alarmService.SendAlarm(trigger);
                     }
 
-                    triggerService.NoteAlarmTrigger(trigger, !isQuenched);
+                    await triggerService.NoteAlarmTriggerAsync(trigger, !isQuenched);
                     break;
                 case SendAlarmAction.DoNotSend:
                     triggerService.NoteAlarmNotTriggered(trigger);
@@ -51,7 +51,7 @@ public abstract class AlarmBackgroundServiceBase : BackgroundService
                     break;
             }
 
-            if (trigger.PendingAlarmTriggerId != int.MinValue)
+            if (trigger.PendingAlarmTriggerId.HasValue && trigger.PendingAlarmTriggerId.Value != int.MinValue)
             {
                 triggerService.AcknowledgeProcessing(trigger.PendingAlarmTriggerId.Value);
             }

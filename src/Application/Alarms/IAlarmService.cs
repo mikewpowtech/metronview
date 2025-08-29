@@ -13,7 +13,7 @@ namespace Application.Alarms
         Task<bool> DeleteAsync(int id);
         AlarmSendingResult ShouldSendAlarmUnlessQuenched(BreachedTriggerDto alarm);
         Task<List<BreachedTriggerDto>> GetNotReportedBreachesAsync();
-        void SendAlarm(BreachedTriggerDto alarm);
+        Task SendAlarm(BreachedTriggerDto alarm);
         Task<RecipientSet> GetRecipientSetByAlarmIdAsync(int alarmId);
         Task<List<Alarm>> GetAlarmsByRecipientSetIdAsync(int recipientSetId);
     }

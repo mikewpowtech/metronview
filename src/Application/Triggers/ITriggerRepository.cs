@@ -16,5 +16,6 @@ namespace Application.Triggers
         Task<List<Trigger>> GetEnabledTriggersAsync();
         Task<List<BreachedTriggerDto>> GetNotReportedBreachesAsync();
         Task<bool> IsQuenchedAsync(BreachedTriggerDto trigger);
+        Task AddOrUpdateMostRecentAlarmAsync(int sensorId, int alarmId, DateTime sentUtc);
     }
 }

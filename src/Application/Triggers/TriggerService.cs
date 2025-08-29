@@ -1,15 +1,18 @@
 using Domain;
 using Domain.Enums;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Triggers
 {
     public class TriggerService : ITriggerService
     {
         private readonly ITriggerRepository repository;
+        private readonly ILogger<TriggerService> logger;
 
-        public TriggerService(ITriggerRepository repository)
+        public TriggerService(ITriggerRepository repository, ILogger<TriggerService> logger)
         {
             this.repository = repository;
+            this.logger = logger;
         }
 
         public Task<Trigger?> GetByIdAsync(int id) => repository.GetByIdAsync(id);
@@ -42,17 +45,27 @@ namespace Application.Triggers
             return repository.GetNotReportedBreachesAsync();
         }
 
-        public void NoteAlarmTrigger(BreachedTriggerDto alarm, bool triggered)
+        public async Task NoteAlarmTriggerAsync(BreachedTriggerDto alarm, bool triggered)
         {
-            // This method would typically:
-            // 1. Log the alarm trigger event
-            // 2. Update the MostRecentAlarms table with the trigger timestamp
-            // 3. Possibly create an audit record
-            
-            // For now, implementing basic functionality
-            // You might want to add this to the repository interface if it needs database operations
-            
-            throw new NotImplementedException("NoteAlarmTrigger method needs to be implemented with proper database operations");
+            logger.LogDebug("Noting alarm trigger for SensorId: {SensorId}, AlarmId: {AlarmSetId}, Triggered: {Triggered}", 
+                alarm.SensorId, alarm.AlarmSetId, triggered);
+
+            if (triggered)
+            {
+                // Update the MostRecentAlarms table with the current timestamp
+                await repository.AddOrUpdateMostRecentAlarmAsync(
+                    alarm.SensorId, 
+                    alarm.AlarmSetId, 
+                    DateTime.UtcNow);
+
+                logger.LogInformation("Alarm triggered and recorded for SensorId: {SensorId}, AlarmId: {AlarmSetId}", 
+                    alarm.SensorId, alarm.AlarmSetId);
+            }
+            else
+            {
+                logger.LogDebug("Alarm was evaluated but not triggered for SensorId: {SensorId}, AlarmId: {AlarmSetId}", 
+                    alarm.SensorId, alarm.AlarmSetId);
+            }
         }
 
         public void NoteAlarmNotTriggered(BreachedTriggerDto alarm)
@@ -62,7 +75,8 @@ namespace Application.Triggers
             // 2. Possibly update statistics or audit logs
             // 3. Clear any pending alarm states if needed
             
-            throw new NotImplementedException("NoteAlarmNotTriggered method needs to be implemented with proper logging/audit operations");
+            logger.LogDebug("Alarm not triggered for SensorId: {SensorId}, AlarmId: {AlarmSetId}", 
+                alarm.SensorId, alarm.AlarmSetId);
         }
 
         public void AcknowledgeProcessing(int alarmTriggerId)
@@ -72,7 +86,7 @@ namespace Application.Triggers
             // 2. Update the database to reflect the acknowledgment
             // 3. Possibly send notifications about the acknowledgment
             
-            throw new NotImplementedException("AcknowledgeProcessing method needs to be implemented with proper database operations");
+            logger.LogDebug("Acknowledging processing for AlarmTriggerId: {AlarmTriggerId}", alarmTriggerId);
         }
     }
 }
