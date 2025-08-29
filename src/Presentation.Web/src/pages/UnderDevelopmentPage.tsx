@@ -20,7 +20,7 @@ interface UnderDevelopmentPageProps {
 
 export const UnderDevelopmentPage: React.FC<UnderDevelopmentPageProps> = ({
     pageName = "This Amazing Feature",
-    estimatedCompletion = "Soon™",
+    estimatedCompletion = "Soonï¿½",
     features = ["Mind-blowing functionality", "Revolutionary UX", "Coffee-powered algorithms"]
 }) => {
     const [progress, setProgress] = useState(0);
@@ -179,7 +179,6 @@ export const UnderDevelopmentPage: React.FC<UnderDevelopmentPageProps> = ({
                                 </Tooltip>
                                 
                                 <Button 
-                                    type="ghost" 
                                     icon={<ThunderboltOutlined />}
                                     onClick={() => setProgress(100)}
                                 >
