@@ -28,22 +28,20 @@ export async function fetchRecipients(token?: string): Promise<Recipient[]> {
 }
 
 export const fetchRecipientsByRecipientSet = async (recipientSetId: number, token: string | undefined): Promise<Recipient[]> => {
-    const response = await fetch(`/api/recipientset/${recipientSetId}/recipients`, {
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-        },
-    });
-
-    if (response.status === 404) {
-        throw new RecipientNotFoundError(`Recipients not found for recipient set ${recipientSetId}`);
+    try {
+        const response = await axios.get<Recipient[]>(`${BASE_URL}/api/recipientsets/${recipientSetId}/recipients`, {
+            headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        });
+        return response.data;
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            if (error.response?.status === 404) {
+                throw new RecipientNotFoundError(`Recipients not found for recipient set ${recipientSetId}`);
+            }
+            throw new Error(`Failed to fetch recipients for recipient set: ${error.response?.statusText || error.message}`);
+        }
+        throw error;
     }
-
-    if (!response.ok) {
-        throw new Error(`Failed to fetch recipients for recipient set: ${response.statusText}`);
-    }
-
-    return response.json();
 };
 
 // Add a new recipient

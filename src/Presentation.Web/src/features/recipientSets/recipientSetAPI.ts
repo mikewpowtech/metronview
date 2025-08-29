@@ -98,16 +98,8 @@ export async function removeRecipientFromSet(
 
 // Fetch recipient sets by alarm
 export const fetchRecipientSetByAlarm = async (alarmId: number, token: string | undefined): Promise<RecipientSet[]> => {
-    const response = await fetch(`/api/alarms/${alarmId}/recipientset`, {
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-        },
+    const response = await axios.get<RecipientSet[]>(`${BASE_URL}/api/alarms/${alarmId}/recipientset`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     });
-
-    if (!response.ok) {
-        throw new Error(`Failed to fetch recipient sets for alarm: ${response.statusText}`);
-    }
-
-    return response.json();
+    return response.data;
 };
