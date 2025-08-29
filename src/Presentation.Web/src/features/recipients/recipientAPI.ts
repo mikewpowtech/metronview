@@ -29,7 +29,7 @@ export async function fetchRecipients(token?: string): Promise<Recipient[]> {
 
 export const fetchRecipientsByRecipientSet = async (recipientSetId: number, token: string | undefined): Promise<Recipient[]> => {
     try {
-        const response = await axios.get<Recipient[]>(`${BASE_URL}/api/recipientsets/${recipientSetId}/recipients`, {
+        const response = await axios.get<Recipient[]>(`${BASE_URL}/api/recipientset/${recipientSetId}/recipients`, {
             headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         });
         return response.data;
