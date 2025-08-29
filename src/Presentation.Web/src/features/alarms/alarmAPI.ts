@@ -36,7 +36,7 @@ export async function fetchAlarms(token?: string, recipientSetId?: number): Prom
 
 // Fetch alarms by recipient set ID (alternative endpoint approach)
 export async function fetchAlarmsByRecipientSet(recipientSetId: number, token?: string): Promise<Alarm[]> {
-    const response = await axios.get<Alarm[]>(`${BASE_URL}/api/recipientsets/${recipientSetId}/alarms`, {
+    const response = await axios.get<Alarm[]>(`${BASE_URL}/api/recipientset/${recipientSetId}/alarms`, {
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     });
     return response.data;
