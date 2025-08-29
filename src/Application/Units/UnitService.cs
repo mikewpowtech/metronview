@@ -2,22 +2,15 @@ using Domain;
 
 namespace Application.Units;
 
-public class UnitService : IUnitService
+public class UnitService(IUnitRepository unitRepository) : IUnitService
 {
-    private readonly IUnitRepository _unitRepository;
+    public Task<Unit?> GetByIdAsync(int id) => unitRepository.GetByIdAsync(id);
 
-    public UnitService(IUnitRepository unitRepository)
-    {
-        _unitRepository = unitRepository;
-    }
+    public Task<List<Unit>> GetAllAsync() => unitRepository.GetAllAsync();
 
-    public Task<Unit?> GetByIdAsync(int id) => _unitRepository.GetByIdAsync(id);
+    public Task<Unit> AddAsync(Unit unit) => unitRepository.AddAsync(unit);
 
-    public Task<List<Unit>> GetAllAsync() => _unitRepository.GetAllAsync();
+    public Task<bool> UpdateAsync(Unit unit) => unitRepository.UpdateAsync(unit);
 
-    public Task<Unit> AddAsync(Unit unit) => _unitRepository.AddAsync(unit);
-
-    public Task<bool> UpdateAsync(Unit unit) => _unitRepository.UpdateAsync(unit);
-
-    public Task<bool> DeleteAsync(int id) => _unitRepository.DeleteAsync(id);
+    public Task<bool> DeleteAsync(int id) => unitRepository.DeleteAsync(id);
 }

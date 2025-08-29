@@ -15,6 +15,7 @@ public class WorkerOptions
     ///     example the database server is down.
     /// </summary>
     public int ErrorPauseInterval { get; set; } = 10000;
+    public int DefaultPauseInterval { get; set; } = 60000;
     [Required]
     public string TelemetryDatabaseConnectionString { get; set; }
     public int MaximumDaysToLookBack { get; set; } = 7;

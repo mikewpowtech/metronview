@@ -13,7 +13,9 @@ import { AlarmModal } from '../features/alarms/AlarmModal';
 import { TriggerModal } from '../features/triggers/TriggerModal';
 import { VisualizationStats } from '../components/visualization/VisualizationStats';
 import { VisualizationControls } from '../components/visualization/VisualizationControls';
+import { drawGeometricIcon } from '../components/visualization/icons';
 import { NodeType, VisualizationNode, NodeConnection } from '../types/visualization';
+import { LayoutEngine, LayoutType, ForceDirectedConfig, DEFAULT_FORCE_CONFIG } from '../components/visualization/layout';
 import './Visualization.scss';
 
 // Re-export types for backward compatibility
@@ -40,6 +42,10 @@ const Visualization: React.FC = () => {
     const [pan, setPan] = useState({ x: 0, y: 0 });
     const [selectedCompany, setSelectedCompany] = useState<number | null>(null);
     const [canvasSize, setCanvasSize] = useState({ width: 1200, height: 600 });
+    const [layoutType, setLayoutType] = useState<LayoutType>(LayoutType.GRID);
+    const [layoutEngine, setLayoutEngine] = useState<LayoutEngine | null>(null);
+    const [isAnimating, setIsAnimating] = useState(false);
+    const [animationProgress, setAnimationProgress] = useState(0);
 
     // Modal state management
     const [editModalOpen, setEditModalOpen] = useState(false);
@@ -97,245 +103,39 @@ const Visualization: React.FC = () => {
         alarmsData: Alarm[],
         triggersData: Trigger[]
     ) => {
-        const newNodes: VisualizationNode[] = [];
-        const newConnections: NodeConnection[] = [];
-
-        // Filter data by selected company if applicable
-        const filteredCompanies = selectedCompany
-            ? companiesData.filter(c => c.id === selectedCompany)
-            : companiesData.slice(0, 10); // Limit for performance
-
-        const filteredUnits = selectedCompany
-            ? unitsData.filter(u => u.companyId === selectedCompany)
-            : unitsData.slice(0, 20);
-
-        const filteredAlarms = selectedCompany
-            ? alarmsData.filter(a => a.companyId === selectedCompany)
-            : alarmsData.slice(0, 15);
-
-        // Create company nodes
-        filteredCompanies.forEach((company, index) => {
-            const node: VisualizationNode = {
-                id: `company-${company.id}`,
-                type: NodeType.COMPANY,
-                x: 100 + (index % 4) * 300,
-                y: 100 + Math.floor(index / 4) * 200,
-                width: 120,
-                height: 80,
-                label: company.name,
-                data: company,
-                connections: [],
-                color: nodeColors[NodeType.COMPANY],
-                isSelected: false,
-                isDragging: false
-            };
-            newNodes.push(node);
-        });
-
-        // Create unit nodes and connections to companies
-        filteredUnits.forEach((unit, index) => {
-            const node: VisualizationNode = {
-                id: `unit-${unit.id}`,
-                type: NodeType.UNIT,
-                x: 400 + (index % 5) * 180,
-                y: 300 + Math.floor(index / 5) * 150,
-                width: 100,
-                height: 60,
-                label: unit.unitCode || `Unit ${unit.id}`,
-                data: unit,
-                connections: [],
-                color: nodeColors[NodeType.UNIT],
-                isSelected: false,
-                isDragging: false
-            };
-            newNodes.push(node);
-
-            // Connect to company if exists
-            if (unit.companyId) {
-                const companyNodeId = `company-${unit.companyId}`;
-                if (newNodes.find(n => n.id === companyNodeId)) {
-                    newConnections.push({
-                        fromId: companyNodeId,
-                        toId: node.id,
-                        color: '#d9d9d9',
-                        strokeWidth: 2
-                    });
-                    node.connections.push(companyNodeId);
-                }
-            }
-        });
-
-        // Create alarm nodes and connections
-        filteredAlarms.forEach((alarm, index) => {
-            const node: VisualizationNode = {
-                id: `alarm-${alarm.id}`,
-                type: NodeType.ALARM,
-                x: 200 + (index % 3) * 250,
-                y: 500 + Math.floor(index / 3) * 120,
-                width: 110,
-                height: 70,
-                label: alarm.name,
-                data: alarm,
-                connections: [],
-                color: alarm.isActive ? nodeColors[NodeType.ALARM] : '#bfbfbf',
-                isSelected: false,
-                isDragging: false
-            };
-            newNodes.push(node);
-
-            // Connect to company
-            const companyNodeId = `company-${alarm.companyId}`;
-            if (newNodes.find(n => n.id === companyNodeId)) {
-                newConnections.push({
-                    fromId: companyNodeId,
-                    toId: node.id,
-                    color: '#ffa940',
-                    strokeWidth: 2
-                });
-                node.connections.push(companyNodeId);
-            }
-        });
-
-        // Create trigger nodes and connections
-        const alarmTriggers = selectedCompany
-            ? triggersData.filter(t => {
-                const alarm = alarmsData.find(a => a.id === t.alarmId);
-                return alarm && alarm.companyId === selectedCompany;
-            })
-            : triggersData.slice(0, 20);
-
-        alarmTriggers.forEach((trigger, index) => {
-            const node: VisualizationNode = {
-                id: `trigger-${trigger.id}`,
-                type: NodeType.TRIGGER,
-                x: 600 + (index % 4) * 150,
-                y: 650 + Math.floor(index / 4) * 100,
-                width: 90,
-                height: 50,
-                label: `Trigger ${trigger.id}`,
-                data: trigger,
-                connections: [],
-                color: trigger.isEnabled ? nodeColors[NodeType.TRIGGER] : '#bfbfbf',
-                isSelected: false,
-                isDragging: false
-            };
-            newNodes.push(node);
-
-            // Connect to alarm
-            const alarmNodeId = `alarm-${trigger.alarmId}`;
-            if (newNodes.find(n => n.id === alarmNodeId)) {
-                newConnections.push({
-                    fromId: alarmNodeId,
-                    toId: node.id,
-                    color: '#b37feb',
-                    strokeWidth: 2
-                });
-                node.connections.push(alarmNodeId);
-            }
+        const engine = new LayoutEngine();
+        setLayoutEngine(engine);
+        
+        const forceConfig: ForceDirectedConfig = {
+            ...DEFAULT_FORCE_CONFIG,
+            width: canvasSize.width,
+            height: canvasSize.height,
+            iterations: 200 // Reduce for better performance
+        };
+        
+        const { nodes: newNodes, connections: newConnections } = engine.generateLayout({
+            companiesData,
+            unitsData,
+            alarmsData,
+            triggersData,
+            selectedCompany,
+            nodeColors,
+            layoutType,
+            forceConfig,
+            canvasSize
         });
 
         setNodes(newNodes);
         setConnections(newConnections);
-    };
 
-    // Helper function to draw simple geometric icons instead of emojis
-    const drawGeometricIcon = (ctx: CanvasRenderingContext2D, type: NodeType, x: number, y: number, size: number) => {
-        ctx.fillStyle = '#ffffff';
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 2;
-
-        const centerX = x + size / 2;
-        const centerY = y + size / 2;
-        const radius = size * 0.3;
-
-        switch (type) {
-            case NodeType.COMPANY:
-                // Draw a bigger building shape
-                const buildingWidth = size * 0.8; // Increased from 0.6 to 0.8
-                const buildingHeight = size * 0.9; // Increased from 0.7 to 0.9
-                const buildingX = centerX - buildingWidth / 2;
-                const buildingY = centerY - buildingHeight / 2;
-                
-                ctx.fillRect(buildingX, buildingY, buildingWidth, buildingHeight);
-                // Add windows
-                ctx.fillStyle = nodeColors[NodeType.COMPANY];
-                const windowSize = buildingWidth * 0.15;
-                for (let i = 0; i < 2; i++) {
-                    for (let j = 0; j < 3; j++) {
-                        ctx.fillRect(
-                            buildingX + (i + 0.5) * (buildingWidth / 3),
-                            buildingY + (j + 0.5) * (buildingHeight / 4),
-                            windowSize,
-                            windowSize
-                        );
-                    }
-                }
-                break;
-
-            case NodeType.UNIT:
-                // Draw a bigger device shape (rectangle with rounded corners)
-                const deviceWidth = size * 0.9; // Increased from 0.7 to 0.9
-                const deviceHeight = size * 0.7; // Increased from 0.5 to 0.7
-                const deviceX = centerX - deviceWidth / 2;
-                const deviceY = centerY - deviceHeight / 2;
-                
-                ctx.beginPath();
-                ctx.roundRect(deviceX, deviceY, deviceWidth, deviceHeight, size * 0.1);
-                ctx.fill();
-                
-                // Add a small screen indicator
-                ctx.fillStyle = nodeColors[NodeType.UNIT];
-                ctx.fillRect(deviceX + deviceWidth * 0.2, deviceY + deviceHeight * 0.2, deviceWidth * 0.6, deviceHeight * 0.3);
-                break;
-
-            case NodeType.ALARM:
-                // Draw a bigger warning triangle
-                const alarmRadius = size * 0.75; // Increased from 0.3 to 0.45 (50% bigger)
-                ctx.beginPath();
-                ctx.moveTo(centerX, centerY - alarmRadius);
-                ctx.lineTo(centerX - alarmRadius * 0.866, centerY + alarmRadius * 0.5);
-                ctx.lineTo(centerX + alarmRadius * 0.866, centerY + alarmRadius * 0.5);
-                ctx.closePath();
-                ctx.fill();
-                
-                // Add bigger exclamation mark
-                ctx.fillStyle = nodeColors[NodeType.ALARM];
-                ctx.fillRect(centerX - size * 0.07, centerY - size * 0.25, size * 0.14, size * 0.35); // Made wider and taller
-                ctx.beginPath();
-                ctx.arc(centerX, centerY + size * 0.2, size * 0.07, 0, Math.PI * 2); // Made bigger
-                ctx.fill();
-                break;
-
-            case NodeType.TRIGGER:
-                // Draw a much better trigger symbol - a clean lightning bolt
-                const triggerRadius = size * 0.4;
-
-                // Create a more defined lightning bolt shape
-                ctx.beginPath();
-                // Start at top
-                ctx.moveTo(centerX - triggerRadius * 0.2, centerY - triggerRadius);
-                // Top right edge
-                ctx.lineTo(centerX + triggerRadius * 0.4, centerY - triggerRadius);
-                // Inner notch (top)
-                ctx.lineTo(centerX + triggerRadius * 0.1, centerY - triggerRadius * 0.1);
-                // Right side to middle
-                ctx.lineTo(centerX + triggerRadius * 0.6, centerY - triggerRadius * 0.1);
-                // Bottom point
-                ctx.lineTo(centerX + triggerRadius * 0.2, centerY + triggerRadius);
-                // Bottom left edge
-                ctx.lineTo(centerX - triggerRadius * 0.4, centerY + triggerRadius);
-                // Inner notch (bottom)
-                ctx.lineTo(centerX - triggerRadius * 0.1, centerY + triggerRadius * 0.1);
-                // Left side to middle
-                ctx.lineTo(centerX - triggerRadius * 0.6, centerY + triggerRadius * 0.1);
-                // Close the path back to start
-                ctx.closePath();
-                ctx.fill();
-                break;
+        // Start animation for force-directed layout
+        if (layoutType === LayoutType.FORCE_DIRECTED) {
+            setIsAnimating(true);
+            setAnimationProgress(0);
         }
     };
 
-    // Canvas drawing functions
+    // Canvas drawing functions - updated to use the new modular icon system
     const drawNode = (ctx: CanvasRenderingContext2D, node: VisualizationNode) => {
         const { x, y, width, height, label, color, isSelected, type } = node;
 
@@ -357,12 +157,12 @@ const Visualization: React.FC = () => {
         ctx.fill();
         ctx.stroke();
 
-        // Draw geometric icon instead of emoji
+        // Draw geometric icon using the new modular system
         const iconSize = 20 * zoom;
         const iconX = transformedX + (transformedWidth - iconSize) / 2;
         const iconY = transformedY + 10 * zoom;
 
-        drawGeometricIcon(ctx, type, iconX, iconY, iconSize);
+        drawGeometricIcon(ctx, type, iconX, iconY, iconSize, nodeColors);
 
         // Draw label
         ctx.fillStyle = '#ffffff';
@@ -744,6 +544,29 @@ const Visualization: React.FC = () => {
         };
     }, []);
 
+    // Animation effect for force-directed layout
+    useEffect(() => {
+        if (!isAnimating || !layoutEngine || layoutType !== LayoutType.FORCE_DIRECTED) return;
+
+        const animationFrame = () => {
+            if (layoutEngine.isForceSimulationComplete()) {
+                setIsAnimating(false);
+                setAnimationProgress(1);
+                return;
+            }
+
+            layoutEngine.simulateForceStep();
+            const progress = layoutEngine.getForceSimulationProgress();
+            setAnimationProgress(progress);
+
+            // Continue animation
+            requestAnimationFrame(animationFrame);
+        };
+
+        const animationId = requestAnimationFrame(animationFrame);
+        return () => cancelAnimationFrame(animationId);
+    }, [isAnimating, layoutEngine, layoutType]);
+
     // Global mouse handling for smooth dragging
     useEffect(() => {
         const handleGlobalMouseMove = (e: MouseEvent) => {
@@ -791,6 +614,21 @@ const Visualization: React.FC = () => {
                 extra={
                     <Space>
                         <Select
+                            style={{ width: 150 }}
+                            placeholder="Layout"
+                            value={layoutType}
+                            onChange={(value: LayoutType) => {
+                                setLayoutType(value);
+                                // Regenerate layout with new type
+                                generateVisualizationNodes(companies, units, alarms, triggers);
+                            }}
+                        >
+                            <Select.Option value={LayoutType.GRID}>Grid</Select.Option>
+                            <Select.Option value={LayoutType.HIERARCHICAL}>Hierarchical</Select.Option>
+                            <Select.Option value={LayoutType.CLUSTERED}>Clustered</Select.Option>
+                            <Select.Option value={LayoutType.FORCE_DIRECTED}>Force-Directed</Select.Option>
+                        </Select>
+                        <Select
                             style={{ width: 200 }}
                             placeholder="Filter by company"
                             allowClear
@@ -803,6 +641,11 @@ const Visualization: React.FC = () => {
                                 </Select.Option>
                             ))}
                         </Select>
+                        {isAnimating && (
+                            <span style={{ color: '#1890ff' }}>
+                                Animating... {Math.round(animationProgress * 100)}%
+                            </span>
+                        )}
                     </Space>
                 }
             >
